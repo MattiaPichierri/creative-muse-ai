@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  creative-muse-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: sleep infinity
+    environment:
+      - PYTHONPATH=/workspace
+      - ENVIRONMENT=development
+      - DEBUG=true
+    ports:
+      - "8000:8000"
+      - "3000:3000"
+      - "5000:5000"
+    networks:
+      - creative-muse-network
+
+  # SQLite database is file-based, so no separate container needed
+  # But we can add other services here if needed in the future
+  
+networks:
+  creative-muse-network:
+    driver: bridge
+
+volumes:
+  python-cache:
+  node-cache:
