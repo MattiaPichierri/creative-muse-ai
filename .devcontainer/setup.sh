@@ -120,6 +120,7 @@ alias db-shell='sqlite3 /workspace/database/creative_muse.db'
 alias init-database='bash /workspace/.devcontainer/init-database.sh'
 alias setup-hosts='bash /workspace/.devcontainer/setup-hosts.sh'
 alias traefik-status='docker ps | grep traefik'
+alias restart-traefik='bash /workspace/.devcontainer/restart-traefik.sh'
 
 # Quick navigation
 alias backend='cd /workspace/ai_core'

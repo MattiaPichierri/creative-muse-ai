@@ -48,7 +48,8 @@
         "ms-vscode.live-server",
         "formulahendry.auto-rename-tag",
         "christian-kohler.path-intellisense",
-        "ms-vscode.vscode-typescript-next"
+        "ms-vscode.vscode-typescript-next",
+        "rooveterinaryinc.roo-cline"
       ]
     }
   },

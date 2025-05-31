@@ -156,8 +156,19 @@ sudo nginx -s stop  # Falls Nginx läuft
 ### Problem: Services nicht im Dashboard sichtbar
 **Lösung:**
 1. Container-Labels prüfen: `docker inspect <container-name>`
-2. Netzwerk-Verbindung prüfen: `docker network inspect devcontainer_creative-muse-network`
-3. Traefik-Konfiguration neu laden: `docker restart creative-muse-traefik`
+2. Netzwerk-Verbindung prüfen: `docker network inspect creativemuseai_devcontainer_creative-muse-network`
+3. Traefik neu starten: `restart-traefik`
+
+### Problem: Netzwerk-Warnungen in Traefik-Logs
+**Symptom:**
+```
+Could not find network named "creative-muse-network"
+```
+**Lösung:** ✅ Bereits behoben - Netzwerk-Name in traefik.yml korrigiert
+```bash
+# Traefik mit korrigierter Konfiguration neu starten:
+restart-traefik
+```
 
 ## 🎨 Erweiterte Konfiguration
 
