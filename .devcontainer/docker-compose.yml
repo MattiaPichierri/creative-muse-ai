@@ -1,4 +1,25 @@
 services:
+  traefik:
+    image: traefik:v3.0
+    container_name: creative-muse-traefik
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - traefik-certificates:/letsencrypt
+    networks:
+      - creative-muse-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.creative-muse.local`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=web"
+
   creative-muse-ai:
     build:
       context: ..
@@ -11,16 +32,30 @@ services:
       - PYTHONPATH=/workspace
       - ENVIRONMENT=development
       - DEBUG=true
-    ports:
-      - "8000:8000"
-      - "3000:3000"
-      - "5001:5000"
+    expose:
+      - "8000"
+      - "3000"
+      - "5000"
     networks:
       - creative-muse-network
+    labels:
+      - "traefik.enable=true"
+      # Backend API
+      - "traefik.http.routers.backend.rule=Host(`api.creative-muse.local`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.service=backend"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      # Frontend
+      - "traefik.http.routers.frontend.rule=Host(`creative-muse.local`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.service=frontend"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      # Additional Services
+      - "traefik.http.routers.services.rule=Host(`services.creative-muse.local`)"
+      - "traefik.http.routers.services.entrypoints=web"
+      - "traefik.http.routers.services.service=services"
+      - "traefik.http.services.services.loadbalancer.server.port=5000"
 
-  # SQLite database is file-based, so no separate container needed
-  # But we can add other services here if needed in the future
-  
 networks:
   creative-muse-network:
     driver: bridge
@@ -28,3 +63,4 @@ networks:
 volumes:
   python-cache:
   node-cache:
+  traefik-certificates:

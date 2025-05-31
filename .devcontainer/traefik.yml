@@ -1,0 +1,39 @@
+# Traefik Configuration for Creative Muse AI DevContainer
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: creative-muse-network
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: dev@creative-muse-ai.local
+      storage: /letsencrypt/acme.json
+      httpChallenge:
+        entryPoint: web
+
+# Global redirect to https
+http:
+  redirections:
+    entryPoint:
+      to: websecure
+      scheme: https
+      permanent: true
+
+# Enable access logs
+accessLog: {}
+
+# Enable API and Dashboard
+log:
+  level: INFO

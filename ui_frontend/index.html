@@ -339,18 +339,27 @@
     </div>
 
     <script>
-        // Automatische API-URL-Erkennung für DevContainer und lokale Entwicklung
+        // Automatische API-URL-Erkennung für DevContainer, Traefik und lokale Entwicklung
         const getApiBase = () => {
             const hostname = window.location.hostname;
+            
+            // Traefik Domain-Setup
+            if (hostname === 'creative-muse.local') {
+                return 'http://api.creative-muse.local/api/v1';
+            }
+            
+            // Localhost Development
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
                 return 'http://localhost:8000/api/v1';
             }
-            // Für DevContainer oder andere Umgebungen
+            
+            // DevContainer oder andere Umgebungen
             return `http://${hostname}:8000/api/v1`;
         };
         
         const API_BASE = getApiBase();
         console.log('Using API Base:', API_BASE);
+        console.log('Current hostname:', window.location.hostname);
         
         // DOM Elemente
         const ideaForm = document.getElementById('ideaForm');

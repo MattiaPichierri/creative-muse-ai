@@ -1,17 +1,61 @@
 # 🚀 Creative Muse AI - DevContainer Schnellstart
 
-## Nach dem DevContainer-Start
+## 🌐 Mit Traefik (Domain-basiert) - EMPFOHLEN
 
-### 1. Backend starten (Terminal 1)
+### 1. Hosts-Datei konfigurieren (EINMALIG, außerhalb DevContainer)
+```bash
+# Automatisch:
+bash .devcontainer/setup-hosts.sh
+
+# Oder manuell /etc/hosts erweitern:
+# 127.0.0.1 creative-muse.local
+# 127.0.0.1 api.creative-muse.local
+# 127.0.0.1 traefik.creative-muse.local
+```
+
+### 2. DevContainer starten
+```bash
+# VS Code: Ctrl+Shift+P → "Dev Containers: Reopen in Container"
+# Traefik startet automatisch
+```
+
+### 3. Services starten
+```bash
+# Terminal 1: Database (falls nötig)
+init-database
+
+# Terminal 2: Backend
+start-backend
+
+# Terminal 3: Frontend
+start-frontend
+```
+
+### 4. System testen (Domain-basiert)
+- **🌐 Frontend:** http://creative-muse.local
+- **🔌 Backend:** http://api.creative-muse.local/health
+- **📊 Traefik:** http://traefik.creative-muse.local
+
+## 🔧 Klassisch (Port-basiert)
+
+### Nach dem DevContainer-Start
+
+### 1. Database initialisieren (falls nötig)
 ```bash
 # Neues Terminal öffnen: Ctrl+Shift+`
+# Falls Backend "database not_found" zeigt:
+init-database
+```
+
+### 2. Backend starten (Terminal 1)
+```bash
 start-backend
 
 # Warten bis Sie sehen:
 # "Uvicorn running on http://0.0.0.0:8000"
 ```
 
-### 2. Frontend starten (Terminal 2)
+### 3. Frontend starten (Terminal 2)
 ```bash
 # Weiteres Terminal öffnen: Ctrl+Shift+`
 start-frontend
@@ -20,7 +64,7 @@ start-frontend
 # "Serving at http://localhost:3000"
 ```
 
-### 3. System testen
+### 4. System testen (Port-basiert)
 - **Frontend öffnen:** http://localhost:3000
 - **Backend testen:** http://localhost:8000/health
 - **Idee generieren:** Prompt eingeben und "Idee generieren" klicken

@@ -87,16 +87,17 @@ pip install -r ai_core/requirements.txt
 python ai_core/main_simple.py
 ```
 
-#### Problem: Database-Fehler
+#### Problem: Database-Fehler ("database not_found")
 **Lösung:**
 ```bash
-# Database neu initialisieren:
-cd /workspace/database
-sqlite3 creative_muse.db < schema.sql
+# Database initialisieren:
+init-database
+
+# Oder manuell:
+bash /workspace/.devcontainer/init-database.sh
 
 # Backend neu starten:
-cd /workspace
-python ai_core/main_simple.py
+start-backend
 ```
 
 ### 🎯 Automatischer Start (Optional)

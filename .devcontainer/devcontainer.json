@@ -54,11 +54,23 @@
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally
-  "forwardPorts": [8000, 3000, 5001],
+  "forwardPorts": [80, 443, 8000, 8080, 3000, 5001],
   "portsAttributes": {
+    "80": {
+      "label": "Traefik HTTP",
+      "onAutoForward": "notify"
+    },
+    "443": {
+      "label": "Traefik HTTPS",
+      "onAutoForward": "silent"
+    },
     "8000": {
       "label": "Creative Muse AI Backend",
-      "onAutoForward": "notify"
+      "onAutoForward": "silent"
+    },
+    "8080": {
+      "label": "Traefik Dashboard",
+      "onAutoForward": "silent"
     },
     "3000": {
       "label": "Frontend Development Server",
