@@ -54,7 +54,7 @@
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally
-  "forwardPorts": [8000, 3000, 5000],
+  "forwardPorts": [8000, 3000, 5001],
   "portsAttributes": {
     "8000": {
       "label": "Creative Muse AI Backend",
@@ -64,7 +64,7 @@
       "label": "Frontend Development Server",
       "onAutoForward": "silent"
     },
-    "5000": {
+    "5001": {
       "label": "Additional Services",
       "onAutoForward": "silent"
     }

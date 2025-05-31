@@ -90,7 +90,7 @@ Der DevContainer leitet automatisch folgende Ports weiter:
 
 - **8000**: Creative Muse AI Backend (FastAPI)
 - **3000**: Frontend Development Server
-- **5000**: Zusätzliche Services
+- **5001**: Zusätzliche Services (Port 5000 → 5001 wegen macOS AirPlay)
 
 ## 📁 Verzeichnisstruktur
 

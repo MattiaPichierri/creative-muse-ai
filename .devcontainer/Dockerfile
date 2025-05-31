@@ -43,7 +43,8 @@ RUN npm install -g \
 WORKDIR /workspace
 
 # Copy requirements first for better Docker layer caching
-COPY ../ai_core/requirements.txt /tmp/requirements.txt
+# Note: Build context is from parent directory, so path is relative to workspace root
+COPY ai_core/requirements.txt /tmp/requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
