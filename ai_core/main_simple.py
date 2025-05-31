@@ -46,6 +46,7 @@ class IdeaRequest(BaseModel):
     prompt: str
     category: Optional[str] = "general"
     creativity_level: Optional[int] = 5
+    language: Optional[str] = "de"  # de, en, it
 
 
 class IdeaResponse(BaseModel):
@@ -96,12 +97,13 @@ def init_simple_db():
 
 
 def generate_creative_idea(
-    prompt: str, category: str = "general", creativity_level: int = 5
+    prompt: str, category: str = "general", creativity_level: int = 5, language: str = "de"
 ) -> dict:
     """Generiere kreative Idee (Mock-Implementation)"""
 
-    # Mock-Ideen basierend auf Kategorien
+    # Mock-Ideen basierend auf Kategorien und Sprachen
     mock_ideas = {
+        "de": {
         "business": [
             "Eine App, die lokale Künstler mit Kunden verbindet",
             "Nachhaltiger Lieferservice mit Elektrofahrrädern",
@@ -183,44 +185,255 @@ def generate_creative_idea(
             "Intergenerationelle Lernprogramme",
             "Kreative Problemlösung durch Gamification",
         ],
+        },
+        "en": {
+            "business": [
+                "An app that connects local artists with customers",
+                "Sustainable delivery service with electric bikes",
+                "Virtual Reality workspace for remote teams",
+                "AI-powered recruitment consulting for startups",
+                "Blockchain-based loyalty programs",
+                "Subscription box for sustainable products",
+                "Peer-to-peer learning platform for skills",
+            ],
+            "technology": [
+                "Augmented Reality for interior design",
+                "IoT sensors for smart gardening",
+                "Machine Learning for music composition",
+                "Quantum computing for weather forecasting",
+                "Biometric security for smart homes",
+                "AI assistant for creativity processes",
+                "Blockchain for transparent supply chains",
+            ],
+            "art": [
+                "Interactive light installations in parks",
+                "Digital graffiti with projectors",
+                "Composing music from environmental sounds",
+                "3D-printed sculptures from recycled materials",
+                "Collaborative murals via app",
+                "VR art galleries for immersive experiences",
+                "Generative art with AI algorithms",
+            ],
+            "scifi": [
+                "Time travel paradox in a quantum world",
+                "AI consciousness awakens in smart city",
+                "Interstellar colony with terraforming technology",
+                "Cyborg society and human identity",
+                "Parallel universes through dimension portals",
+                "Genetically modified humans in space",
+                "Digital immortality and consciousness upload",
+            ],
+            "music": [
+                "Ambient soundscapes for meditation",
+                "Collaborative music composition via app",
+                "AI-generated melodies from emotions",
+                "Interactive concerts with audience participation",
+                "Music therapy for mental health",
+                "Fusion of classical and electronic elements",
+                "Soundtracks for Virtual Reality experiences",
+            ],
+            "wellness": [
+                "Mindfulness app with personalized exercises",
+                "Biofeedback devices for stress management",
+                "Community-based fitness challenges",
+                "Nutrition tracker with AI recommendations",
+                "Sleep optimization through smart home integration",
+                "Mental health through creativity therapy",
+                "Digital detox programs for work-life balance",
+            ],
+            "apps": [
+                "MindFlow - Organize thoughts",
+                "EcoTracker - Measure sustainability",
+                "SkillSwap - Exchange abilities",
+                "ZenSpace - Meditation and peace",
+                "CreativeBoost - Find inspiration",
+                "LocalConnect - Connect neighborhoods",
+                "TimeWise - Increase productivity",
+            ],
+            "solutions": [
+                "Smart waste sorting with AI recognition",
+                "Carpooling app for commuters",
+                "Digital household planner for families",
+                "Automatic plant watering system",
+                "Energy-saving assistant for home",
+                "Food sharing against waste",
+                "Noise reduction in big cities",
+            ],
+            "general": [
+                "Community garden with exchange platform",
+                "Time capsule service for families",
+                "Neighborhood skill-sharing platform",
+                "Upcycling workshops for children",
+                "Meditation with nature sounds",
+                "Intergenerational learning programs",
+                "Creative problem solving through gamification",
+            ],
+        },
+        "it": {
+            "business": [
+                "Un'app che collega artisti locali con clienti",
+                "Servizio di consegna sostenibile con bici elettriche",
+                "Spazio di lavoro in Realtà Virtuale per team remoti",
+                "Consulenza di reclutamento basata su IA per startup",
+                "Programmi fedeltà basati su blockchain",
+                "Subscription box per prodotti sostenibili",
+                "Piattaforma peer-to-peer per scambio competenze",
+            ],
+            "technology": [
+                "Realtà Aumentata per design d'interni",
+                "Sensori IoT per giardinaggio intelligente",
+                "Machine Learning per composizione musicale",
+                "Quantum computing per previsioni meteo",
+                "Sicurezza biometrica per case intelligenti",
+                "Assistente IA per processi creativi",
+                "Blockchain per catene di fornitura trasparenti",
+            ],
+            "art": [
+                "Installazioni luminose interattive nei parchi",
+                "Graffiti digitali con proiettori",
+                "Comporre musica da suoni ambientali",
+                "Sculture stampate in 3D da materiali riciclati",
+                "Murales collaborativi tramite app",
+                "Gallerie d'arte VR per esperienze immersive",
+                "Arte generativa con algoritmi IA",
+            ],
+            "scifi": [
+                "Paradosso del viaggio nel tempo in mondo quantico",
+                "Coscienza IA si risveglia in città intelligente",
+                "Colonia interstellare con tecnologia terraforming",
+                "Società cyborg e identità umana",
+                "Universi paralleli attraverso portali dimensionali",
+                "Umani geneticamente modificati nello spazio",
+                "Immortalità digitale e upload della coscienza",
+            ],
+            "music": [
+                "Paesaggi sonori ambient per meditazione",
+                "Composizione musicale collaborativa tramite app",
+                "Melodie generate da IA dalle emozioni",
+                "Concerti interattivi con partecipazione del pubblico",
+                "Musicoterapia per salute mentale",
+                "Fusione di elementi classici ed elettronici",
+                "Colonne sonore per esperienze di Realtà Virtuale",
+            ],
+            "wellness": [
+                "App mindfulness con esercizi personalizzati",
+                "Dispositivi biofeedback per gestione stress",
+                "Sfide fitness basate sulla comunità",
+                "Tracker nutrizionale con raccomandazioni IA",
+                "Ottimizzazione del sonno tramite integrazione casa intelligente",
+                "Salute mentale attraverso terapia della creatività",
+                "Programmi detox digitale per equilibrio vita-lavoro",
+            ],
+            "apps": [
+                "MindFlow - Organizza pensieri",
+                "EcoTracker - Misura sostenibilità",
+                "SkillSwap - Scambia abilità",
+                "ZenSpace - Meditazione e pace",
+                "CreativeBoost - Trova ispirazione",
+                "LocalConnect - Connetti quartieri",
+                "TimeWise - Aumenta produttività",
+            ],
+            "solutions": [
+                "Smistamento rifiuti intelligente con riconoscimento IA",
+                "App carpooling per pendolari",
+                "Pianificatore domestico digitale per famiglie",
+                "Sistema automatico irrigazione piante",
+                "Assistente risparmio energetico per casa",
+                "Condivisione cibo contro spreco",
+                "Riduzione rumore nelle grandi città",
+            ],
+            "general": [
+                "Giardino comunitario con piattaforma scambio",
+                "Servizio capsula del tempo per famiglie",
+                "Piattaforma condivisione competenze di quartiere",
+                "Workshop upcycling per bambini",
+                "Meditazione con suoni della natura",
+                "Programmi apprendimento intergenerazionale",
+                "Risoluzione problemi creativa attraverso gamification",
+            ],
+        },
     }
 
     import random
 
-    # Wähle passende Kategorie
-    if category not in mock_ideas:
+    # Wähle passende Sprache und Kategorie
+    if language not in mock_ideas:
+        language = "de"
+    
+    if category not in mock_ideas[language]:
         category = "general"
 
     # Generiere Titel basierend auf Prompt und Kategorie
-    base_ideas = mock_ideas[category]
+    base_ideas = mock_ideas[language][category]
     selected_idea = random.choice(base_ideas)
 
     # Erweitere Idee basierend auf Prompt
     if prompt.lower():
-        title = f"{selected_idea} - inspiriert von '{prompt[:50]}...'"
+        if language == "de":
+            title = f"{selected_idea} - inspiriert von '{prompt[:50]}...'"
+        elif language == "en":
+            title = f"{selected_idea} - inspired by '{prompt[:50]}...'"
+        else:  # it
+            title = f"{selected_idea} - ispirato da '{prompt[:50]}...'"
     else:
         title = selected_idea
 
-    # Generiere detaillierten Inhalt
-    content_templates = [
-        f"Diese innovative Idee kombiniert {category} mit modernen Technologien. "
-        f"Der Ansatz '{prompt}' könnte revolutionär sein, da er bestehende Probleme "
-        f"auf eine völlig neue Art löst. Durch die Integration von KI und "
-        f"benutzerfreundlichem Design entsteht eine Lösung, die sowohl praktisch "
-        f"als auch inspirierend ist.",
-        f"Basierend auf dem Konzept '{prompt}' entwickelt sich eine Idee, die "
-        f"den {category}-Bereich transformieren könnte. Die Kombination aus "
-        f"Innovation und Nachhaltigkeit macht diesen Ansatz besonders wertvoll. "
-        f"Mit einem Kreativitätslevel von {creativity_level} entstehen völlig "
-        f"neue Möglichkeiten für die Zukunft.",
-        f"Die Inspiration '{prompt}' führt zu einer bahnbrechenden Idee im "
-        f"{category}-Sektor. Durch die Verbindung von traditionellen Methoden "
-        f"mit cutting-edge Technologie entsteht etwas völlig Neues. Diese "
-        f"Lösung adressiert reale Bedürfnisse und schafft gleichzeitig neue "
-        f"Möglichkeiten für Kreativität und Innovation.",
-    ]
+    # Generiere detaillierten Inhalt basierend auf Sprache
+    content_templates = {
+        "de": [
+            f"Diese innovative Idee kombiniert {category} mit modernen Technologien. "
+            f"Der Ansatz '{prompt}' könnte revolutionär sein, da er bestehende Probleme "
+            f"auf eine völlig neue Art löst. Durch die Integration von KI und "
+            f"benutzerfreundlichem Design entsteht eine Lösung, die sowohl praktisch "
+            f"als auch inspirierend ist.",
+            f"Basierend auf dem Konzept '{prompt}' entwickelt sich eine Idee, die "
+            f"den {category}-Bereich transformieren könnte. Die Kombination aus "
+            f"Innovation und Nachhaltigkeit macht diesen Ansatz besonders wertvoll. "
+            f"Mit einem Kreativitätslevel von {creativity_level} entstehen völlig "
+            f"neue Möglichkeiten für die Zukunft.",
+            f"Die Inspiration '{prompt}' führt zu einer bahnbrechenden Idee im "
+            f"{category}-Sektor. Durch die Verbindung von traditionellen Methoden "
+            f"mit cutting-edge Technologie entsteht etwas völlig Neues. Diese "
+            f"Lösung adressiert reale Bedürfnisse und schafft gleichzeitig neue "
+            f"Möglichkeiten für Kreativität und Innovation.",
+        ],
+        "en": [
+            f"This innovative idea combines {category} with modern technologies. "
+            f"The approach '{prompt}' could be revolutionary as it solves existing problems "
+            f"in a completely new way. Through the integration of AI and "
+            f"user-friendly design, a solution emerges that is both practical "
+            f"and inspiring.",
+            f"Based on the concept '{prompt}', an idea develops that "
+            f"could transform the {category} field. The combination of "
+            f"innovation and sustainability makes this approach particularly valuable. "
+            f"With a creativity level of {creativity_level}, completely "
+            f"new possibilities for the future emerge.",
+            f"The inspiration '{prompt}' leads to a groundbreaking idea in the "
+            f"{category} sector. By connecting traditional methods "
+            f"with cutting-edge technology, something completely new emerges. This "
+            f"solution addresses real needs while creating new "
+            f"opportunities for creativity and innovation.",
+        ],
+        "it": [
+            f"Questa idea innovativa combina {category} con tecnologie moderne. "
+            f"L'approccio '{prompt}' potrebbe essere rivoluzionario poiché risolve problemi esistenti "
+            f"in un modo completamente nuovo. Attraverso l'integrazione di IA e "
+            f"design user-friendly, emerge una soluzione che è sia pratica "
+            f"che ispiratrice.",
+            f"Basandosi sul concetto '{prompt}', si sviluppa un'idea che "
+            f"potrebbe trasformare il campo {category}. La combinazione di "
+            f"innovazione e sostenibilità rende questo approccio particolarmente prezioso. "
+            f"Con un livello di creatività di {creativity_level}, emergono "
+            f"nuove possibilità completamente per il futuro.",
+            f"L'ispirazione '{prompt}' porta a un'idea rivoluzionaria nel "
+            f"settore {category}. Collegando metodi tradizionali "
+            f"con tecnologia all'avanguardia, emerge qualcosa di completamente nuovo. Questa "
+            f"soluzione affronta bisogni reali creando al contempo nuove "
+            f"opportunità per creatività e innovazione.",
+        ]
+    }
 
-    content = random.choice(content_templates)
+    content = random.choice(content_templates[language])
 
     return {
         "title": title,
@@ -263,7 +476,7 @@ async def generate_idea(request: IdeaRequest):
 
         # Generiere Idee
         idea_data = generate_creative_idea(
-            request.prompt, request.category, request.creativity_level
+            request.prompt, request.category, request.creativity_level, request.language
         )
 
         # Erstelle Idee-Objekt

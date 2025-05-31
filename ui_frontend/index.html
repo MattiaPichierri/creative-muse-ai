@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -385,17 +385,20 @@
         <div class="header">
             <div class="header-content">
                 <div class="title-section">
-                    <h1>🎨 Creative Muse AI</h1>
-                    <p>Lass deine Kreativität durch KI-gestützte Ideengenerierung fließen</p>
+                    <h1 data-i18n="app.title">🎨 Creative Muse AI</h1>
+                    <p data-i18n="app.subtitle">Lass deine Kreativität durch KI-gestützte Ideengenerierung fließen</p>
                 </div>
                 <div class="header-controls">
-                    <button id="darkModeToggle" class="control-btn" title="Dark Mode umschalten">
+                    <button id="languageToggle" class="control-btn" title="Sprache wechseln">
+                        🌐
+                    </button>
+                    <button id="darkModeToggle" class="control-btn" data-i18n-title="controls.darkMode">
                         🌙
                     </button>
-                    <button id="exportBtn" class="control-btn" title="Ideen exportieren">
+                    <button id="exportBtn" class="control-btn" data-i18n-title="controls.export">
                         📥
                     </button>
-                    <button id="saveBtn" class="control-btn" title="Alle Ideen speichern">
+                    <button id="saveBtn" class="control-btn" data-i18n-title="controls.save">
                         💾
                     </button>
                 </div>
@@ -404,49 +407,50 @@
 
         <div class="main-content">
             <div class="input-section">
-                <h2>💡 Neue Idee generieren</h2>
+                <h2 data-i18n="form.title">💡 Neue Idee generieren</h2>
                 <form id="ideaForm">
                     <div class="form-group">
-                        <label for="prompt">Dein Prompt oder Inspiration:</label>
-                        <textarea 
-                            id="prompt" 
-                            name="prompt" 
+                        <label for="prompt" data-i18n="form.prompt.label">Dein Prompt oder Inspiration:</label>
+                        <textarea
+                            id="prompt"
+                            name="prompt"
+                            data-i18n-placeholder="form.prompt.placeholder"
                             placeholder="Beschreibe deine Idee, dein Problem oder deine Inspiration..."
                             required
                         ></textarea>
                     </div>
                     
                     <div class="form-group">
-                        <label for="category">Kategorie:</label>
+                        <label for="category" data-i18n="form.category.label">Kategorie:</label>
                         <select id="category" name="category">
-                            <option value="general">Allgemein</option>
-                            <option value="business">Business & Startups</option>
-                            <option value="technology">Technologie</option>
-                            <option value="art">Kunst & Design</option>
-                            <option value="scifi">Sci-Fi Story</option>
-                            <option value="music">Musikprojekt</option>
-                            <option value="wellness">Wellness & Gesundheit</option>
-                            <option value="apps">App-Namen</option>
-                            <option value="solutions">Alltagslösungen</option>
+                            <option value="general" data-i18n="categories.general">Allgemein</option>
+                            <option value="business" data-i18n="categories.business">Business & Startups</option>
+                            <option value="technology" data-i18n="categories.technology">Technologie</option>
+                            <option value="art" data-i18n="categories.art">Kunst & Design</option>
+                            <option value="scifi" data-i18n="categories.scifi">Sci-Fi Story</option>
+                            <option value="music" data-i18n="categories.music">Musikprojekt</option>
+                            <option value="wellness" data-i18n="categories.wellness">Wellness & Gesundheit</option>
+                            <option value="apps" data-i18n="categories.apps">App-Namen</option>
+                            <option value="solutions" data-i18n="categories.solutions">Alltagslösungen</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label for="prompt-suggestions">Oder wähle einen Vorschlag:</label>
+                        <label for="prompt-suggestions" data-i18n="form.suggestions.label">Oder wähle einen Vorschlag:</label>
                         <select id="prompt-suggestions" onchange="fillPrompt(this.value)">
-                            <option value="">-- Prompt-Vorschläge --</option>
-                            <option value="Innovative Startup-Idee für nachhaltiges Leben">Nachhaltiges Startup</option>
-                            <option value="Sci-Fi Geschichte über KI und Menschlichkeit">Sci-Fi Story</option>
-                            <option value="Produktidee für ein Tech-Startup">Tech-Produkt</option>
-                            <option value="Musikprojekt für entspannende Atmosphäre">Musik-Konzept</option>
-                            <option value="Wellness-App für mentale Gesundheit">Wellness-App</option>
-                            <option value="Kreativer Name für eine Social Media App">App-Name</option>
-                            <option value="Lösung für ein alltägliches Problem">Alltagsproblem</option>
+                            <option value="" data-i18n="form.suggestions.placeholder">-- Prompt-Vorschläge --</option>
+                            <option value="startup" data-i18n="suggestions.startup">Nachhaltiges Startup</option>
+                            <option value="scifi" data-i18n="suggestions.scifi">Sci-Fi Story</option>
+                            <option value="tech" data-i18n="suggestions.tech">Tech-Produkt</option>
+                            <option value="music" data-i18n="suggestions.music">Musik-Konzept</option>
+                            <option value="wellness" data-i18n="suggestions.wellness">Wellness-App</option>
+                            <option value="app" data-i18n="suggestions.app">App-Name</option>
+                            <option value="solution" data-i18n="suggestions.solution">Alltagsproblem</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label for="creativity">Kreativitätslevel (1-10):</label>
+                        <label for="creativity" data-i18n="form.creativity.label">Kreativitätslevel (1-10):</label>
                         <input 
                             type="range" 
                             id="creativity" 
@@ -458,16 +462,16 @@
                         <span id="creativityValue">5</span>
                     </div>
                     
-                    <button type="submit" class="btn" id="generateBtn">
+                    <button type="submit" class="btn" id="generateBtn" data-i18n="form.generate">
                         🚀 Idee generieren
                     </button>
                 </form>
             </div>
 
             <div class="results-section">
-                <h2>✨ Generierte Ideen</h2>
+                <h2 data-i18n="results.title">✨ Generierte Ideen</h2>
                 <div id="results">
-                    <p style="text-align: center; color: #666; padding: 40px;">
+                    <p style="text-align: center; color: #666; padding: 40px;" data-i18n="results.empty">
                         Noch keine Ideen generiert. Starte mit deinem ersten Prompt!
                     </p>
                 </div>
@@ -480,6 +484,352 @@
     </div>
 
     <script>
+        // Internationalization (i18n) System
+        const translations = {
+            de: {
+                app: {
+                    title: "🎨 Creative Muse AI",
+                    subtitle: "Lass deine Kreativität durch KI-gestützte Ideengenerierung fließen"
+                },
+                controls: {
+                    language: "Sprache wechseln",
+                    darkMode: "Dark Mode umschalten",
+                    export: "Ideen exportieren",
+                    save: "Alle Ideen speichern"
+                },
+                form: {
+                    title: "💡 Neue Idee generieren",
+                    prompt: {
+                        label: "Dein Prompt oder Inspiration:",
+                        placeholder: "Beschreibe deine Idee, dein Problem oder deine Inspiration..."
+                    },
+                    category: {
+                        label: "Kategorie:"
+                    },
+                    suggestions: {
+                        label: "Oder wähle einen Vorschlag:",
+                        placeholder: "-- Prompt-Vorschläge --"
+                    },
+                    creativity: {
+                        label: "Kreativitätslevel (1-10):"
+                    },
+                    generate: "🚀 Idee generieren"
+                },
+                categories: {
+                    general: "Allgemein",
+                    business: "Business & Startups",
+                    technology: "Technologie",
+                    art: "Kunst & Design",
+                    scifi: "Sci-Fi Story",
+                    music: "Musikprojekt",
+                    wellness: "Wellness & Gesundheit",
+                    apps: "App-Namen",
+                    solutions: "Alltagslösungen"
+                },
+                suggestions: {
+                    startup: "Nachhaltiges Startup",
+                    scifi: "Sci-Fi Story",
+                    tech: "Tech-Produkt",
+                    music: "Musik-Konzept",
+                    wellness: "Wellness-App",
+                    app: "App-Name",
+                    solution: "Alltagsproblem"
+                },
+                results: {
+                    title: "✨ Generierte Ideen",
+                    empty: "Noch keine Ideen generiert. Starte mit deinem ersten Prompt!"
+                },
+                stats: {
+                    totalIdeas: "Generierte Ideen",
+                    recentIdeas: "Heute generiert",
+                    averageRating: "Durchschnittsbewertung",
+                    categories: "Kategorien"
+                },
+                messages: {
+                    generating: "Generiere...",
+                    ideaGenerated: "Idee erfolgreich generiert! 🎉",
+                    ratingError: "Fehler beim Speichern der Bewertung",
+                    ratingSaved: "Bewertung gespeichert: {rating}/5 ⭐",
+                    darkModeOn: "Dark Mode aktiviert 🌙",
+                    darkModeOff: "Light Mode aktiviert ☀️",
+                    noIdeasExport: "Keine Ideen zum Exportieren vorhanden",
+                    exportSuccess: "{count} Ideen erfolgreich exportiert! 📥",
+                    exportMarkdown: "Ideen als Markdown exportiert! 📝",
+                    saveSuccess: "{count} Ideen lokal gespeichert! 💾",
+                    loadSuccess: "{count} gespeicherte Ideen geladen! 📂",
+                    backendConnected: "Verbindung zum Backend hergestellt! ✅",
+                    backendError: "Backend nicht erreichbar. Stelle sicher, dass der Server läuft.",
+                    languageChanged: "Sprache geändert zu: {language}"
+                },
+                export: {
+                    json: "📄 Als JSON exportieren",
+                    markdown: "📝 Als Markdown exportieren"
+                },
+                promptSuggestions: {
+                    startup: "Innovative Startup-Idee für nachhaltiges Leben",
+                    scifi: "Sci-Fi Geschichte über KI und Menschlichkeit",
+                    tech: "Produktidee für ein Tech-Startup",
+                    music: "Musikprojekt für entspannende Atmosphäre",
+                    wellness: "Wellness-App für mentale Gesundheit",
+                    app: "Kreativer Name für eine Social Media App",
+                    solution: "Lösung für ein alltägliches Problem"
+                }
+            },
+            en: {
+                app: {
+                    title: "🎨 Creative Muse AI",
+                    subtitle: "Let your creativity flow through AI-powered idea generation"
+                },
+                controls: {
+                    language: "Switch language",
+                    darkMode: "Toggle dark mode",
+                    export: "Export ideas",
+                    save: "Save all ideas"
+                },
+                form: {
+                    title: "💡 Generate New Idea",
+                    prompt: {
+                        label: "Your prompt or inspiration:",
+                        placeholder: "Describe your idea, problem, or inspiration..."
+                    },
+                    category: {
+                        label: "Category:"
+                    },
+                    suggestions: {
+                        label: "Or choose a suggestion:",
+                        placeholder: "-- Prompt Suggestions --"
+                    },
+                    creativity: {
+                        label: "Creativity Level (1-10):"
+                    },
+                    generate: "🚀 Generate Idea"
+                },
+                categories: {
+                    general: "General",
+                    business: "Business & Startups",
+                    technology: "Technology",
+                    art: "Art & Design",
+                    scifi: "Sci-Fi Story",
+                    music: "Music Project",
+                    wellness: "Wellness & Health",
+                    apps: "App Names",
+                    solutions: "Daily Solutions"
+                },
+                suggestions: {
+                    startup: "Sustainable Startup",
+                    scifi: "Sci-Fi Story",
+                    tech: "Tech Product",
+                    music: "Music Concept",
+                    wellness: "Wellness App",
+                    app: "App Name",
+                    solution: "Daily Problem"
+                },
+                results: {
+                    title: "✨ Generated Ideas",
+                    empty: "No ideas generated yet. Start with your first prompt!"
+                },
+                stats: {
+                    totalIdeas: "Generated Ideas",
+                    recentIdeas: "Generated Today",
+                    averageRating: "Average Rating",
+                    categories: "Categories"
+                },
+                messages: {
+                    generating: "Generating...",
+                    ideaGenerated: "Idea successfully generated! 🎉",
+                    ratingError: "Error saving rating",
+                    ratingSaved: "Rating saved: {rating}/5 ⭐",
+                    darkModeOn: "Dark mode activated 🌙",
+                    darkModeOff: "Light mode activated ☀️",
+                    noIdeasExport: "No ideas available for export",
+                    exportSuccess: "{count} ideas successfully exported! 📥",
+                    exportMarkdown: "Ideas exported as Markdown! 📝",
+                    saveSuccess: "{count} ideas saved locally! 💾",
+                    loadSuccess: "{count} saved ideas loaded! 📂",
+                    backendConnected: "Backend connection established! ✅",
+                    backendError: "Backend not reachable. Make sure the server is running.",
+                    languageChanged: "Language changed to: {language}"
+                },
+                export: {
+                    json: "📄 Export as JSON",
+                    markdown: "📝 Export as Markdown"
+                },
+                promptSuggestions: {
+                    startup: "Innovative startup idea for sustainable living",
+                    scifi: "Sci-Fi story about AI and humanity",
+                    tech: "Product idea for a tech startup",
+                    music: "Music project for relaxing atmosphere",
+                    wellness: "Wellness app for mental health",
+                    app: "Creative name for a social media app",
+                    solution: "Solution for an everyday problem"
+                }
+            },
+            it: {
+                app: {
+                    title: "🎨 Creative Muse AI",
+                    subtitle: "Lascia fluire la tua creatività attraverso la generazione di idee basata sull'IA"
+                },
+                controls: {
+                    language: "Cambia lingua",
+                    darkMode: "Attiva/disattiva modalità scura",
+                    export: "Esporta idee",
+                    save: "Salva tutte le idee"
+                },
+                form: {
+                    title: "💡 Genera Nuova Idea",
+                    prompt: {
+                        label: "Il tuo prompt o ispirazione:",
+                        placeholder: "Descrivi la tua idea, problema o ispirazione..."
+                    },
+                    category: {
+                        label: "Categoria:"
+                    },
+                    suggestions: {
+                        label: "O scegli un suggerimento:",
+                        placeholder: "-- Suggerimenti Prompt --"
+                    },
+                    creativity: {
+                        label: "Livello di Creatività (1-10):"
+                    },
+                    generate: "🚀 Genera Idea"
+                },
+                categories: {
+                    general: "Generale",
+                    business: "Business & Startup",
+                    technology: "Tecnologia",
+                    art: "Arte & Design",
+                    scifi: "Storia Sci-Fi",
+                    music: "Progetto Musicale",
+                    wellness: "Benessere & Salute",
+                    apps: "Nomi App",
+                    solutions: "Soluzioni Quotidiane"
+                },
+                suggestions: {
+                    startup: "Startup Sostenibile",
+                    scifi: "Storia Sci-Fi",
+                    tech: "Prodotto Tech",
+                    music: "Concetto Musicale",
+                    wellness: "App Benessere",
+                    app: "Nome App",
+                    solution: "Problema Quotidiano"
+                },
+                results: {
+                    title: "✨ Idee Generate",
+                    empty: "Nessuna idea generata ancora. Inizia con il tuo primo prompt!"
+                },
+                stats: {
+                    totalIdeas: "Idee Generate",
+                    recentIdeas: "Generate Oggi",
+                    averageRating: "Valutazione Media",
+                    categories: "Categorie"
+                },
+                messages: {
+                    generating: "Generando...",
+                    ideaGenerated: "Idea generata con successo! 🎉",
+                    ratingError: "Errore nel salvare la valutazione",
+                    ratingSaved: "Valutazione salvata: {rating}/5 ⭐",
+                    darkModeOn: "Modalità scura attivata 🌙",
+                    darkModeOff: "Modalità chiara attivata ☀️",
+                    noIdeasExport: "Nessuna idea disponibile per l'esportazione",
+                    exportSuccess: "{count} idee esportate con successo! 📥",
+                    exportMarkdown: "Idee esportate come Markdown! 📝",
+                    saveSuccess: "{count} idee salvate localmente! 💾",
+                    loadSuccess: "{count} idee salvate caricate! 📂",
+                    backendConnected: "Connessione al backend stabilita! ✅",
+                    backendError: "Backend non raggiungibile. Assicurati che il server sia in esecuzione.",
+                    languageChanged: "Lingua cambiata in: {language}"
+                },
+                export: {
+                    json: "📄 Esporta come JSON",
+                    markdown: "📝 Esporta come Markdown"
+                },
+                promptSuggestions: {
+                    startup: "Idea innovativa di startup per la vita sostenibile",
+                    scifi: "Storia di fantascienza su IA e umanità",
+                    tech: "Idea di prodotto per una startup tecnologica",
+                    music: "Progetto musicale per atmosfera rilassante",
+                    wellness: "App per il benessere e la salute mentale",
+                    app: "Nome creativo per un'app di social media",
+                    solution: "Soluzione per un problema quotidiano"
+                }
+            }
+        };
+
+        // Current language state
+        let currentLanguage = localStorage.getItem('language') || 'de';
+        const supportedLanguages = ['de', 'en', 'it'];
+        const languageNames = { de: 'Deutsch', en: 'English', it: 'Italiano' };
+
+        // Translation function
+        function t(key, params = {}) {
+            const keys = key.split('.');
+            let value = translations[currentLanguage];
+            
+            for (const k of keys) {
+                value = value?.[k];
+            }
+            
+            if (!value) {
+                console.warn(`Translation missing for key: ${key} in language: ${currentLanguage}`);
+                return key;
+            }
+            
+            // Replace parameters
+            let result = value;
+            for (const [param, val] of Object.entries(params)) {
+                result = result.replace(`{${param}}`, val);
+            }
+            
+            return result;
+        }
+
+        // Update all translations in the DOM
+        function updateTranslations() {
+            // Update HTML lang attribute
+            document.getElementById('htmlRoot').lang = currentLanguage;
+            
+            // Update elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                element.textContent = t(key);
+            });
+            
+            // Update elements with data-i18n-placeholder attribute
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-i18n-placeholder');
+                element.placeholder = t(key);
+            });
+            
+            // Update elements with data-i18n-title attribute
+            document.querySelectorAll('[data-i18n-title]').forEach(element => {
+                const key = element.getAttribute('data-i18n-title');
+                element.title = t(key);
+            });
+            
+            // Update language toggle button title
+            const languageToggle = document.getElementById('languageToggle');
+            if (languageToggle) {
+                languageToggle.title = t('controls.language');
+            }
+        }
+
+        // Switch to next language
+        function switchLanguage() {
+            const currentIndex = supportedLanguages.indexOf(currentLanguage);
+            const nextIndex = (currentIndex + 1) % supportedLanguages.length;
+            currentLanguage = supportedLanguages[nextIndex];
+            
+            localStorage.setItem('language', currentLanguage);
+            updateTranslations();
+            
+            showSuccess(t('messages.languageChanged', { language: languageNames[currentLanguage] }));
+        }
+
+        // Get localized prompt suggestion
+        function getLocalizedPromptSuggestion(key) {
+            return t(`promptSuggestions.${key}`);
+        }
+
         // Automatische API-URL-Erkennung für DevContainer, Traefik und lokale Entwicklung
         const getApiBase = () => {
             const hostname = window.location.hostname;
@@ -530,7 +880,7 @@
 
             // UI Updates
             generateBtn.disabled = true;
-            generateBtn.innerHTML = '<div class="spinner"></div> Generiere...';
+            generateBtn.innerHTML = `<div class="spinner"></div> ${t('messages.generating')}`;
             
             showLoading();
 
@@ -543,7 +893,8 @@
                     body: JSON.stringify({
                         prompt: prompt,
                         category: category,
-                        creativity_level: creativity
+                        creativity_level: creativity,
+                        language: currentLanguage
                     })
                 });
 
@@ -553,7 +904,7 @@
 
                 const idea = await response.json();
                 displayIdea(idea);
-                showSuccess('Idee erfolgreich generiert! 🎉');
+                showSuccess(t('messages.ideaGenerated'));
                 
                 // Form zurücksetzen
                 ideaForm.reset();
@@ -564,10 +915,10 @@
 
             } catch (error) {
                 console.error('Fehler beim Generieren:', error);
-                showError(`Fehler beim Generieren der Idee: ${error.message}`);
+                showError(`${t('messages.ratingError')}: ${error.message}`);
             } finally {
                 generateBtn.disabled = false;
-                generateBtn.innerHTML = '🚀 Idee generieren';
+                generateBtn.innerHTML = t('form.generate');
             }
         }
 
@@ -623,11 +974,11 @@
                     star.classList.toggle('active', index < rating);
                 });
 
-                showSuccess(`Bewertung gespeichert: ${rating}/5 ⭐`);
+                showSuccess(t('messages.ratingSaved', { rating }));
 
             } catch (error) {
                 console.error('Fehler beim Bewerten:', error);
-                showError('Fehler beim Speichern der Bewertung');
+                showError(t('messages.ratingError'));
             }
         }
 
@@ -650,19 +1001,19 @@
             statsSection.innerHTML = `
                 <div class="stat-card">
                     <h3>${stats.total_ideas}</h3>
-                    <p>Generierte Ideen</p>
+                    <p>${t('stats.totalIdeas')}</p>
                 </div>
                 <div class="stat-card">
                     <h3>${stats.recent_ideas}</h3>
-                    <p>Heute generiert</p>
+                    <p>${t('stats.recentIdeas')}</p>
                 </div>
                 <div class="stat-card">
                     <h3>${stats.average_rating || 'N/A'}</h3>
-                    <p>Durchschnittsbewertung</p>
+                    <p>${t('stats.averageRating')}</p>
                 </div>
                 <div class="stat-card">
                     <h3>${Object.keys(stats.categories || {}).length}</h3>
-                    <p>Kategorien</p>
+                    <p>${t('stats.categories')}</p>
                 </div>
             `;
         }
@@ -672,7 +1023,7 @@
             resultsDiv.innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Generiere kreative Idee...</p>
+                    <p>${t('messages.generating')}</p>
                 </div>
             `;
         }
@@ -700,7 +1051,7 @@
         // Prompt-Vorschlag ausfüllen
         function fillPrompt(value) {
             if (value) {
-                document.getElementById('prompt').value = value;
+                document.getElementById('prompt').value = getLocalizedPromptSuggestion(value);
                 document.getElementById('prompt-suggestions').value = '';
             }
         }
@@ -714,7 +1065,7 @@
             const toggleBtn = document.getElementById('darkModeToggle');
             toggleBtn.textContent = isDark ? '🌞' : '🌙';
             
-            showSuccess(isDark ? 'Dark Mode aktiviert 🌙' : 'Light Mode aktiviert ☀️');
+            showSuccess(isDark ? t('messages.darkModeOn') : t('messages.darkModeOff'));
         }
 
         // Ideen exportieren
@@ -729,7 +1080,7 @@
             });
 
             if (ideas.length === 0) {
-                showError('Keine Ideen zum Exportieren vorhanden');
+                showError(t('messages.noIdeasExport'));
                 return;
             }
 
@@ -742,7 +1093,7 @@
             link.download = `creative-muse-ideas-${new Date().toISOString().split('T')[0]}.json`;
             link.click();
             
-            showSuccess(`${ideas.length} Ideen erfolgreich exportiert! 📥`);
+            showSuccess(t('messages.exportSuccess', { count: ideas.length }));
         }
 
         // Ideen als Markdown exportieren
@@ -753,15 +1104,19 @@
                 const category = card.querySelector('.category-tag').textContent;
                 const rating = '⭐'.repeat(card.querySelectorAll('.star.active').length);
                 
-                return `## ${title}\n\n**Kategorie:** ${category}\n**Bewertung:** ${rating}\n\n${content}\n\n---\n`;
+                const categoryLabel = currentLanguage === 'de' ? 'Kategorie:' : currentLanguage === 'it' ? 'Categoria:' : 'Category:';
+                const ratingLabel = currentLanguage === 'de' ? 'Bewertung:' : currentLanguage === 'it' ? 'Valutazione:' : 'Rating:';
+                return `## ${title}\n\n**${categoryLabel}** ${category}\n**${ratingLabel}** ${rating}\n\n${content}\n\n---\n`;
             }).join('\n');
 
             if (!ideas.trim()) {
-                showError('Keine Ideen zum Exportieren vorhanden');
+                showError(t('messages.noIdeasExport'));
                 return;
             }
 
-            const markdown = `# Creative Muse AI - Generierte Ideen\n\n*Exportiert am ${new Date().toLocaleDateString('de-DE')}*\n\n${ideas}`;
+            const dateFormat = currentLanguage === 'de' ? 'de-DE' : currentLanguage === 'it' ? 'it-IT' : 'en-US';
+            const exportedLabel = currentLanguage === 'de' ? 'Exportiert am' : currentLanguage === 'it' ? 'Esportato il' : 'Exported on';
+            const markdown = `# Creative Muse AI - ${t('results.title').replace('✨ ', '')}\n\n*${exportedLabel} ${new Date().toLocaleDateString(dateFormat)}*\n\n${ideas}`;
             
             const dataBlob = new Blob([markdown], { type: 'text/markdown' });
             const link = document.createElement('a');
@@ -769,7 +1124,7 @@
             link.download = `creative-muse-ideas-${new Date().toISOString().split('T')[0]}.md`;
             link.click();
             
-            showSuccess('Ideen als Markdown exportiert! 📝');
+            showSuccess(t('messages.exportMarkdown'));
         }
 
         // Alle Ideen im LocalStorage speichern
@@ -785,7 +1140,7 @@
             });
 
             localStorage.setItem('creativeMuseIdeas', JSON.stringify(ideas));
-            showSuccess(`${ideas.length} Ideen lokal gespeichert! 💾`);
+            showSuccess(t('messages.saveSuccess', { count: ideas.length }));
         }
 
         // Gespeicherte Ideen laden
@@ -796,7 +1151,7 @@
                 ideas.forEach(idea => {
                     displaySavedIdea(idea);
                 });
-                showSuccess(`${ideas.length} gespeicherte Ideen geladen! 📂`);
+                showSuccess(t('messages.loadSuccess', { count: ideas.length }));
             }
         }
 
@@ -812,7 +1167,7 @@
                     <div class="rating">
                         ${[1,2,3,4,5].map(i => `<span class="star ${i <= idea.rating ? 'active' : ''}" data-rating="${i}">⭐</span>`).join('')}
                     </div>
-                    <small style="color: #999;">Gespeichert: ${new Date(idea.timestamp).toLocaleDateString('de-DE')}</small>
+                    <small style="color: #999;">${currentLanguage === 'de' ? 'Gespeichert:' : currentLanguage === 'it' ? 'Salvato:' : 'Saved:'} ${new Date(idea.timestamp).toLocaleDateString(currentLanguage === 'de' ? 'de-DE' : currentLanguage === 'it' ? 'it-IT' : 'en-US')}</small>
                 </div>
             `;
 
@@ -824,6 +1179,13 @@
 
         // Event Listeners für neue Buttons
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialize translations
+            updateTranslations();
+            
+            // Language Toggle
+            const languageToggle = document.getElementById('languageToggle');
+            languageToggle.addEventListener('click', switchLanguage);
+            
             // Dark Mode
             const darkModeToggle = document.getElementById('darkModeToggle');
             darkModeToggle.addEventListener('click', toggleDarkMode);
@@ -855,10 +1217,10 @@
                 
                 menu.innerHTML = `
                     <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;" onclick="exportIdeas(); this.parentElement.remove();">
-                        📄 Als JSON exportieren
+                        ${t('export.json')}
                     </div>
                     <div style="padding: 10px; cursor: pointer;" onclick="exportAsMarkdown(); this.parentElement.remove();">
-                        📝 Als Markdown exportieren
+                        ${t('export.markdown')}
                     </div>
                 `;
                 
@@ -890,11 +1252,11 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log('Backend Status:', data);
-                    showSuccess('Verbindung zum Backend hergestellt! ✅');
+                    showSuccess(t('messages.backendConnected'));
                 })
                 .catch(error => {
                     console.error('Backend nicht erreichbar:', error);
-                    showError('Backend nicht erreichbar. Stelle sicher, dass der Server läuft.');
+                    showError(t('messages.backendError'));
                 });
         });
     </script>
