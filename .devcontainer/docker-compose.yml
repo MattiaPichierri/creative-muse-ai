@@ -34,17 +34,19 @@ services:
       - DEBUG=true
     expose:
       - "8000"
+      - "8001"
       - "3000"
       - "5000"
+      - "5173"
     networks:
       - creative-muse-network
     labels:
       - "traefik.enable=true"
-      # Backend API
+      # Backend API (LLM)
       - "traefik.http.routers.backend.rule=Host(`api.creative-muse.local`)"
       - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.routers.backend.service=backend"
-      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.services.backend.loadbalancer.server.port=8001"
       # Frontend
       - "traefik.http.routers.frontend.rule=Host(`creative-muse.local`)"
       - "traefik.http.routers.frontend.entrypoints=web"

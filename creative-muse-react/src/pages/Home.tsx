@@ -139,7 +139,33 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-purple-900 dark:to-gray-800 transition-colors duration-200">
+      {/* Hero Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 dark:from-purple-400/5 dark:to-blue-400/5"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="text-8xl mb-6 animate-bounce">🎨</div>
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6">
+              {t.app.title}
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
+              {t.app.subtitle}
+            </p>
+          </motion.div>
+        </div>
+      </motion.div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Notification */}
         {notification && (
@@ -147,7 +173,7 @@ const Home: React.FC = () => {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className={`mb-6 p-4 rounded-md ${
+            className={`mb-6 p-4 rounded-xl shadow-lg ${
               notification.type === 'success'
                 ? 'bg-green-100 border border-green-400 text-green-700 dark:bg-green-900 dark:border-green-600 dark:text-green-300'
                 : 'bg-red-100 border border-red-400 text-red-700 dark:bg-red-900 dark:border-red-600 dark:text-red-300'
@@ -169,12 +195,17 @@ const Home: React.FC = () => {
 
           {/* Right Column - Results */}
           <div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors duration-200">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20 transition-colors duration-200"
+            >
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-8">
                 {t.results.title}
               </h2>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Typing Animation */}
                 {showTyping && (
                   <TypingAnimation
@@ -185,29 +216,42 @@ const Home: React.FC = () => {
 
                 {/* Recent Ideas */}
                 {recentIdeas.length > 0 ? (
-                  recentIdeas.map((idea) => (
-                    <IdeaCard
+                  recentIdeas.map((idea, index) => (
+                    <motion.div
                       key={idea.id}
-                      idea={idea}
-                      onRatingChange={handleRatingChange}
-                    />
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <IdeaCard
+                        idea={idea}
+                        onRatingChange={handleRatingChange}
+                      />
+                    </motion.div>
                   ))
                 ) : !showTyping ? (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🎨</div>
-                    <p className="text-gray-500 dark:text-gray-400 text-lg">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-16"
+                  >
+                    <div className="text-8xl mb-6 animate-pulse">💡</div>
+                    <p className="text-gray-500 dark:text-gray-400 text-xl font-medium">
                       {t.results.empty}
                     </p>
-                  </div>
+                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+                      Starte mit der Ideengenerierung links!
+                    </p>
+                  </motion.div>
                 ) : null}
 
                 {/* Show more link */}
                 {recentIdeas.length >= 5 && (
-                  <div className="text-center pt-4">
+                  <div className="text-center pt-6">
                     <motion.a
                       href="/ideas"
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-purple-600 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-300 dark:hover:bg-purple-800 transition-colors duration-200"
-                      whileHover={{ scale: 1.05 }}
+                      className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-200"
+                      whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       {t.pages.ideaList.title} →
@@ -215,61 +259,60 @@ const Home: React.FC = () => {
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Welcome Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-12 text-center"
-        >
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
-            {t.app.title}
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            {t.app.subtitle}
-          </p>
-        </motion.div>
-
         {/* Features Grid */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8"
+          transition={{ delay: 0.6, duration: 0.8 }}
+          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8"
         >
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-colors duration-200">
-            <div className="text-4xl mb-4">🤖</div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              {t.form.useLLM}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Nutze echte KI-Modelle für authentische Ideengenerierung
-            </p>
-          </div>
-
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-colors duration-200">
-            <div className="text-4xl mb-4">⌨️</div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              {t.form.useTyping}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Erlebe immersive Typing-Animationen beim Generieren
-            </p>
-          </div>
-
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg transition-colors duration-200">
-            <div className="text-4xl mb-4">🎲</div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              {t.form.random}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Entdecke zufällige Ideen für kreative Inspiration
-            </p>
-          </div>
+          {[
+            {
+              icon: "🤖",
+              title: t.form.useLLM,
+              description: "Nutze echte KI-Modelle für authentische Ideengenerierung",
+              gradient: "from-blue-500 to-cyan-500"
+            },
+            {
+              icon: "⌨️",
+              title: t.form.useTyping,
+              description: "Erlebe immersive Typing-Animationen beim Generieren",
+              gradient: "from-purple-500 to-pink-500"
+            },
+            {
+              icon: "🎲",
+              title: t.form.random,
+              description: "Entdecke zufällige Ideen für kreative Inspiration",
+              gradient: "from-green-500 to-teal-500"
+            }
+          ].map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 + index * 0.1 }}
+              whileHover={{ y: -5, scale: 1.02 }}
+              className="group relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl blur-xl"
+                   style={{background: `linear-gradient(to right, var(--tw-gradient-stops))`}}></div>
+              <div className="relative text-center p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 transition-all duration-300 group-hover:shadow-2xl">
+                <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">
+                  {feature.icon}
+                </div>
+                <h3 className={`text-xl font-bold mb-4 bg-gradient-to-r ${feature.gradient} bg-clip-text text-transparent`}>
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </div>

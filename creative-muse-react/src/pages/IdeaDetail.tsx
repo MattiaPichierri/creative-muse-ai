@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, Tag, Brain, Shuffle, Code, Star, Share2, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag, Brain, Shuffle, Code, Star, Share2, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { translations } from '../i18n/translations';
 import { ideaService } from '../services/api';

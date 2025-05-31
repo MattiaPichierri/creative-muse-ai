@@ -45,17 +45,22 @@
         "bradlc.vscode-tailwindcss",
         "esbenp.prettier-vscode",
         "ms-vscode.makefile-tools",
-        "ms-vscode.live-server",
         "formulahendry.auto-rename-tag",
         "christian-kohler.path-intellisense",
         "ms-vscode.vscode-typescript-next",
+        "ms-vscode.vscode-eslint",
+        "ms-vscode.vscode-react-refactor",
+        "ms-vscode.vscode-typescript-hero",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-close-tag",
+        "ms-vscode.vscode-npm-script",
         "rooveterinaryinc.roo-cline"
       ]
     }
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally
-  "forwardPorts": [80, 443, 8000, 8080, 3000, 5001],
+  "forwardPorts": [80, 443, 8000, 8001, 8080, 3000, 5001, 5173],
   "portsAttributes": {
     "80": {
       "label": "Traefik HTTP",
@@ -66,7 +71,11 @@
       "onAutoForward": "silent"
     },
     "8000": {
-      "label": "Creative Muse AI Backend",
+      "label": "Creative Muse AI Backend (Legacy)",
+      "onAutoForward": "silent"
+    },
+    "8001": {
+      "label": "Creative Muse AI Backend (LLM)",
       "onAutoForward": "silent"
     },
     "8080": {
@@ -74,11 +83,15 @@
       "onAutoForward": "silent"
     },
     "3000": {
-      "label": "Frontend Development Server",
+      "label": "React Development Server",
       "onAutoForward": "silent"
     },
     "5001": {
       "label": "Additional Services",
+      "onAutoForward": "silent"
+    },
+    "5173": {
+      "label": "Vite Development Server",
       "onAutoForward": "silent"
     }
   },

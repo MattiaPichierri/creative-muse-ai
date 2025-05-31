@@ -1,83 +1,67 @@
-# Use the official Microsoft DevContainer Python image
+# Creative Muse AI Development Container
 FROM mcr.microsoft.com/devcontainers/python:1-3.11-bullseye
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    git \
-    sqlite3 \
-    libsqlite3-dev \
-    pkg-config \
-    libssl-dev \
-    libffi-dev \
-    python3-dev \
-    nodejs \
-    npm \
-    vim \
-    nano \
-    htop \
-    tree \
-    jq \
-    wget \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js LTS (if not already installed by base image)
+# Install Node.js 18
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
+# Install additional system dependencies
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends \
+        git \
+        curl \
+        wget \
+        unzip \
+        sqlite3 \
+        build-essential \
+        python3-dev \
+        python3-pip \
+        python3-venv \
+        lsof \
+        htop \
+        tree \
+        jq \
+        vim \
+        nano \
+    && apt-get autoremove -y && apt-get clean -y
+
 # Install global npm packages for development
 RUN npm install -g \
-    live-server \
-    http-server \
+    create-vite \
+    typescript \
+    eslint \
     prettier \
-    eslint
+    serve \
+    concurrently
 
 # Create workspace directory
 WORKDIR /workspace
 
-# Copy requirements first for better Docker layer caching
-# Note: Build context is from parent directory, so path is relative to workspace root
-COPY ai_core/requirements.txt /tmp/requirements.txt
+# Set up Python environment
+ENV PYTHONPATH=/workspace
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
-    && pip install --no-cache-dir -r /tmp/requirements.txt
+# Set up Node.js environment
+ENV NODE_ENV=development
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+ENV NPM_CONFIG_FUND=false
 
-# Install additional development tools
-RUN pip install --no-cache-dir \
-    black \
-    flake8 \
-    pylint \
-    mypy \
-    pytest \
-    pytest-cov \
-    ipython \
-    jupyter \
-    pre-commit \
-    bandit \
-    safety
+# Create logs directory
+RUN mkdir -p /workspace/logs
 
-# Create directories for logs and data
-RUN mkdir -p /workspace/logs /workspace/data /workspace/temp
+# Set proper permissions for vscode user
+RUN chown -R vscode:vscode /workspace
 
-# Set up git safe directory (for when workspace is mounted)
-RUN git config --global --add safe.directory /workspace
-
-# Create a non-root user (vscode user is already created by base image)
+# Switch to vscode user
 USER vscode
 
-# Set the default shell
-SHELL ["/bin/bash", "-c"]
+# Install Python development tools
+RUN pip install --user --upgrade pip setuptools wheel
 
-# Expose ports
-EXPOSE 8000 3000 5000
+# Set up shell environment
+RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+RUN echo 'export PYTHONPATH="/workspace:$PYTHONPATH"' >> ~/.bashrc
 
 # Default command
 CMD ["sleep", "infinity"]

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp, Brain, Shuffle, Code } from 'lucide-react';
+import { BarChart3, TrendingUp, Brain, Shuffle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { translations } from '../i18n/translations';
 import { ideaService } from '../services/api';
-import type { Stats as StatsType } from '../types';
 
 const Stats: React.FC = () => {
   const { language, stats, setStats } = useApp();
