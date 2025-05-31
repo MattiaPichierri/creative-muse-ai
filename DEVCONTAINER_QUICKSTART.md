@@ -36,6 +36,12 @@ start-frontend
 - **🔌 Backend:** http://api.creative-muse.local/health
 - **📊 Traefik:** http://traefik.creative-muse.local
 
+### 5. Bei Traefik-Problemen
+```bash
+# Traefik neu starten (behebt Netzwerk-Warnungen):
+restart-traefik
+```
+
 ## 🔧 Klassisch (Port-basiert)
 
 ### Nach dem DevContainer-Start
