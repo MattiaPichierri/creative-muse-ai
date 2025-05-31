@@ -25,8 +25,10 @@ class DatabaseInitializer:
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or self._load_default_config()
-        self.db_path = Path("database/creative_muse.db")
-        self.schema_path = Path("database/schema.sql")
+        # Pfade relativ zum Projektroot (ein Verzeichnis höher)
+        project_root = Path(__file__).parent.parent
+        self.db_path = project_root / "database" / "creative_muse.db"
+        self.schema_path = project_root / "database" / "schema.sql"
         
         # Sicherheitskomponenten
         self.crypto_manager = None
@@ -135,6 +137,7 @@ class DatabaseInitializer:
         try:
             print("\n📁 Erstelle Verzeichnisse...")
             
+            project_root = Path(__file__).parent.parent
             directories = [
                 "database",
                 "database/backups",
@@ -142,7 +145,7 @@ class DatabaseInitializer:
             ]
             
             for directory in directories:
-                path = Path(directory)
+                path = project_root / directory
                 path.mkdir(parents=True, exist_ok=True)
                 os.chmod(path, 0o700)
                 print(f"✅ {directory}")
@@ -253,35 +256,49 @@ class DatabaseInitializer:
     
     def _split_sql_statements(self, sql: str) -> list:
         """Teile SQL in einzelne Statements auf"""
-        # Einfache Aufteilung - in Produktion sollte ein SQL-Parser verwendet werden
         statements = []
         current_statement = ""
         in_comment = False
+        in_multiline_comment = False
         
         for line in sql.split('\n'):
+            original_line = line
             line = line.strip()
             
-            # Kommentare überspringen
-            if line.startswith('--') or line.startswith('/*'):
+            # Mehrzeilige Kommentare handhaben
+            if '/*' in line and '*/' in line:
+                # Kommentar in einer Zeile
+                line = line[:line.find('/*')] + line[line.find('*/')+2:]
+                line = line.strip()
+            elif '/*' in line:
+                in_multiline_comment = True
+                line = line[:line.find('/*')].strip()
+            elif '*/' in line and in_multiline_comment:
+                in_multiline_comment = False
+                line = line[line.find('*/')+2:].strip()
+            elif in_multiline_comment:
                 continue
             
-            if line.endswith('*/'):
-                in_comment = False
+            # Einzeilige Kommentare überspringen
+            if line.startswith('--'):
                 continue
             
-            if in_comment:
-                continue
-            
-            if line.startswith('/*'):
-                in_comment = True
-                continue
+            # Kommentare am Ende der Zeile entfernen
+            if '--' in line:
+                line = line[:line.find('--')].strip()
             
             if line:
-                current_statement += line + '\n'
+                current_statement += line + ' '
                 
                 if line.endswith(';'):
-                    statements.append(current_statement.strip())
+                    stmt = current_statement.strip()
+                    if stmt and not stmt.isspace():
+                        statements.append(stmt)
                     current_statement = ""
+        
+        # Letztes Statement hinzufügen, falls es nicht mit ; endet
+        if current_statement.strip():
+            statements.append(current_statement.strip())
         
         return statements
     

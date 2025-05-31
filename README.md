@@ -25,7 +25,7 @@ Creative Muse AI nutzt lokale LLM-Modelle (Mistral-7B-Instruct-v0.3) und gewähr
 
 ```bash
 # Repository klonen
-git clone <repository-url>
+git clone https://github.com/MattiaPichierri/creative-muse-ai.git
 cd creative_muse_ai
 
 # Vollständiges sicheres Setup

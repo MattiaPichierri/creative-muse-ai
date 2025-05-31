@@ -9,11 +9,11 @@ pyopenssl>=23.3.0
 # Password Hashing & Key Derivation
 argon2-cffi>=23.1.0
 bcrypt>=4.1.2
-scrypt>=0.8.20
+# scrypt>=0.8.20  # Problematisch auf macOS, verwende argon2 stattdessen
 
-# Secure Random Number Generation
-secrets>=3.3.2
-os-urandom>=1.0.0
+# Secure Random Number Generation (secrets ist ein eingebautes Python-Modul)
+# secrets ist bereits in Python enthalten
+# os-urandom>=1.0.0  # Nicht verfügbar, verwende eingebaute os.urandom
 
 # Certificate Management
 certifi>=2023.11.17
@@ -43,29 +43,29 @@ requests[security]>=2.31.0
 urllib3[secure]>=2.1.0
 
 # Database Security
-sqlcipher3>=0.5.2
+# sqlcipher3>=0.5.2  # Problematisch auf macOS, verwende normale SQLite mit Anwendungsebenen-Verschlüsselung
 sqlalchemy-utils>=0.41.1
 
 # Monitoring & Intrusion Detection
 watchdog>=3.0.0
 psutil>=5.9.6
 
-# Secure File Operations
-secure-delete>=1.0.0
-tempfile-secure>=1.0.0
+# Secure File Operations (verwende eingebaute tempfile und os Module)
+# secure-delete>=1.0.0  # Nicht verfügbar, implementiere eigene sichere Löschung
+# tempfile-secure>=1.0.0  # Nicht verfügbar, verwende eingebautes tempfile
 
-# Compliance & Auditing
-audit-python-security>=1.0.0
-compliance-checker>=1.0.0
+# Compliance & Auditing (implementiere eigene Lösungen)
+# audit-python-security>=1.0.0  # Nicht verfügbar
+# compliance-checker>=1.0.0  # Nicht verfügbar
 
-# Memory Protection
-pymemprotect>=1.0.0
-secure-memory>=1.0.0
+# Memory Protection (implementiere eigene Lösungen)
+# pymemprotect>=1.0.0  # Nicht verfügbar
+# secure-memory>=1.0.0  # Nicht verfügbar
 
-# Anti-Tampering
-integrity-checker>=1.0.0
-file-integrity>=1.0.0
+# Anti-Tampering (implementiere eigene Lösungen)
+# integrity-checker>=1.0.0  # Nicht verfügbar
+# file-integrity>=1.0.0  # Nicht verfügbar
 
 # Secure Communication
 tls-parser>=2.0.0
-ssl-checker>=1.0.0
+# ssl-checker>=1.0.0  # Nicht verfügbar, implementiere eigene SSL-Prüfung

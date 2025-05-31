@@ -1,0 +1,8 @@
+{
+  "subject": "<Name(C=DE,ST=Local,L=Local,O=Creative Muse AI,CN=localhost)>",
+  "issuer": "<Name(C=DE,ST=Local,L=Local,O=Creative Muse AI,CN=localhost)>",
+  "serial_number": "704111815887402462626341699714145946696295531247",
+  "not_valid_before": "2025-05-31T21:53:16",
+  "not_valid_after": "2026-05-31T21:53:16",
+  "fingerprint_sha256": "472533058d4f871e358aac65f90ef0cd66d02a4ad3417793eae3c1ff12faef02"
+}

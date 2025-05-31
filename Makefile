@@ -33,7 +33,7 @@ help:
 	@echo ""
 
 # Vollständiges sicheres Setup
-setup-secure: generate-keys setup-encryption install-deps init-secure-db
+setup-secure: install-deps generate-keys setup-encryption init-secure-db
 	@echo "✅ Sicheres Setup abgeschlossen"
 
 # Kryptographische Schlüssel generieren
@@ -41,7 +41,7 @@ generate-keys:
 	@echo "🔑 Generiere kryptographische Schlüssel..."
 	@mkdir -p security/keys
 	@chmod 700 security/keys
-	@python scripts/key_generation.py
+	@cd ai_core && source venv/bin/activate && python3 ../scripts/key_generation.py
 	@echo "✅ Schlüssel generiert"
 
 # Verschlüsselungsinfrastruktur einrichten
@@ -49,7 +49,7 @@ setup-encryption:
 	@echo "🔒 Richte Verschlüsselungsinfrastruktur ein..."
 	@mkdir -p security/certificates
 	@chmod 700 security/certificates
-	@python scripts/security_setup.py
+	@python3 scripts/security_setup.py
 	@echo "✅ Verschlüsselung eingerichtet"
 
 # Alle Abhängigkeiten installieren
@@ -58,9 +58,11 @@ install-deps: install-python install-node
 
 install-python:
 	@echo "🐍 Installiere Python-Abhängigkeiten..."
-	@cd ai_core && python -m pip install --upgrade pip
-	@cd ai_core && pip install -r requirements.txt
-	@cd ai_core && pip install -r requirements-security.txt
+	@cd ai_core && python3 -m venv venv
+	@cd ai_core && source venv/bin/activate && python3 -m pip install --upgrade pip
+	@cd ai_core && source venv/bin/activate && pip install -r requirements.txt
+	@cd ai_core && source venv/bin/activate && pip install -r requirements-security.txt
+	@echo "✅ Python-Umgebung erstellt: ai_core/venv"
 
 install-node:
 	@echo "📦 Installiere Node.js-Abhängigkeiten..."
@@ -71,7 +73,7 @@ init-secure-db:
 	@echo "🗄️ Initialisiere sichere Datenbank..."
 	@mkdir -p database
 	@chmod 700 database
-	@python database/init_db.py
+	@cd ai_core && source venv/bin/activate && python3 ../database/init_db.py
 	@echo "✅ Datenbank initialisiert"
 
 # Sichere Entwicklungsumgebung starten
@@ -81,7 +83,7 @@ dev-secure: start-monitoring start-backend start-frontend
 # Backend starten
 start-backend:
 	@echo "🔧 Starte Backend..."
-	@cd ai_core && python main.py &
+	@cd ai_core && source venv/bin/activate && python3 main.py &
 
 # Frontend starten
 start-frontend:
@@ -93,7 +95,7 @@ start-monitoring:
 	@echo "👁️ Starte Sicherheitsmonitoring..."
 	@mkdir -p logs/audit logs/security logs/performance
 	@chmod 700 logs
-	@python ai_core/monitoring/security_monitor.py &
+	@python3 ai_core/monitoring/security_monitor.py &
 
 # Sicherheitstests ausführen
 test-security: test-encryption test-authentication test-authorization test-audit
@@ -101,24 +103,24 @@ test-security: test-encryption test-authentication test-authorization test-audit
 
 test-encryption:
 	@echo "🔐 Teste Verschlüsselung..."
-	@python -m pytest tests/security/test_encryption.py -v
+	@cd ai_core && python3 -m pytest tests/security/test_encryption.py -v
 
 test-authentication:
 	@echo "🔑 Teste Authentifizierung..."
-	@python -m pytest tests/security/test_authentication.py -v
+	@cd ai_core && python3 -m pytest tests/security/test_authentication.py -v
 
 test-authorization:
 	@echo "🛡️ Teste Autorisierung..."
-	@python -m pytest tests/security/test_authorization.py -v
+	@cd ai_core && python3 -m pytest tests/security/test_authorization.py -v
 
 test-audit:
 	@echo "📋 Teste Audit-System..."
-	@python -m pytest tests/security/test_audit.py -v
+	@cd ai_core && python3 -m pytest tests/security/test_audit.py -v
 
 # Backend-Tests
 test-backend:
 	@echo "🧪 Führe Backend-Tests aus..."
-	@cd ai_core && python -m pytest tests/ -v
+	@cd ai_core && python3 -m pytest tests/ -v
 
 # Frontend-Tests
 test-frontend:
@@ -128,31 +130,31 @@ test-frontend:
 # Compliance-Überprüfung
 compliance-check:
 	@echo "📊 Führe Compliance-Check durch..."
-	@python scripts/compliance_checker.py
+	@python3 scripts/compliance_checker.py
 	@echo "✅ Compliance-Check abgeschlossen"
 
 # Verschlüsseltes Backup erstellen
 backup:
 	@echo "💾 Erstelle verschlüsseltes Backup..."
-	@python scripts/backup_script.py
+	@python3 scripts/backup_script.py
 	@echo "✅ Backup erstellt"
 
 # Schlüsselrotation durchführen
 rotate-keys:
 	@echo "🔄 Führe Schlüsselrotation durch..."
-	@python scripts/key_rotation.py
+	@python3 scripts/key_rotation.py
 	@echo "✅ Schlüsselrotation abgeschlossen"
 
 # Sicherheitsaudit durchführen
 security-audit:
 	@echo "🔍 Führe Sicherheitsaudit durch..."
-	@python scripts/security_audit.py
+	@python3 scripts/security_audit.py
 	@echo "✅ Sicherheitsaudit abgeschlossen"
 
 # Modell herunterladen
 download-model:
 	@echo "📥 Lade Mistral-7B Modell herunter..."
-	@python scripts/download_model.py
+	@python3 scripts/download_model.py
 	@echo "✅ Modell heruntergeladen"
 
 # Temporäre Dateien löschen
@@ -168,15 +170,15 @@ clean:
 # Notfall-Prozeduren
 emergency-lockdown:
 	@echo "🚨 Notfall-Lockdown aktiviert..."
-	@pkill -f "python.*main.py" || true
+	@pkill -f "python3.*main.py" || true
 	@pkill -f "npm.*dev" || true
-	@python scripts/emergency_procedures.py
+	@python3 scripts/emergency_procedures.py
 	@echo "🔒 System gesichert"
 
 # Alle Prozesse stoppen
 stop-all:
 	@echo "⏹️ Stoppe alle Prozesse..."
-	@pkill -f "python.*main.py" || true
+	@pkill -f "python3.*main.py" || true
 	@pkill -f "npm.*dev" || true
 	@pkill -f "security_monitor.py" || true
 	@echo "✅ Alle Prozesse gestoppt"
@@ -190,7 +192,7 @@ show-logs:
 # System-Status anzeigen
 status:
 	@echo "📊 System-Status:"
-	@echo "Backend: $(shell pgrep -f 'python.*main.py' > /dev/null && echo '✅ Läuft' || echo '❌ Gestoppt')"
+	@echo "Backend: $(shell pgrep -f 'python3.*main.py' > /dev/null && echo '✅ Läuft' || echo '❌ Gestoppt')"
 	@echo "Frontend: $(shell pgrep -f 'npm.*dev' > /dev/null && echo '✅ Läuft' || echo '❌ Gestoppt')"
 	@echo "Monitoring: $(shell pgrep -f 'security_monitor.py' > /dev/null && echo '✅ Läuft' || echo '❌ Gestoppt')"
 	@echo "Datenbank: $(shell test -f database/creative_muse.db && echo '✅ Vorhanden' || echo '❌ Nicht gefunden')"

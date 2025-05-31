@@ -48,7 +48,9 @@ def generate_master_key():
     print("\n🔑 Generiere Master-Schlüssel...")
     
     try:
-        keys_dir = Path("security/keys")
+        # Pfad relativ zum Projektroot
+        project_root = Path(__file__).parent.parent
+        keys_dir = project_root / "security" / "keys"
         master_key_file = keys_dir / "master.key"
         
         # Master-Schlüssel generieren
@@ -121,7 +123,8 @@ def generate_application_keys(master_key):
         ("audit", "Audit-Log-Verschlüsselung")
     ]
     
-    keys_dir = Path("security/keys")
+    project_root = Path(__file__).parent.parent
+    keys_dir = project_root / "security" / "keys"
     fernet = Fernet(base64.urlsafe_b64encode(master_key))
     
     key_metadata = {}
@@ -170,7 +173,8 @@ def generate_tls_certificates():
     print("\n🔒 Generiere TLS-Zertifikate...")
     
     try:
-        certs_dir = Path("security/certificates")
+        project_root = Path(__file__).parent.parent
+        certs_dir = project_root / "security" / "certificates"
         
         # Private Key generieren
         private_key = rsa.generate_private_key(
@@ -308,7 +312,9 @@ LOG_ENCRYPTION=true
 LOG_ROTATION_SIZE_MB=100
 """
         
-        env_file = Path(".env")
+        # .env-Datei im Projektroot erstellen
+        project_root = Path(__file__).parent.parent
+        env_file = project_root / ".env"
         with open(env_file, 'w') as f:
             f.write(env_content)
         
@@ -321,7 +327,7 @@ LOG_ROTATION_SIZE_MB=100
             "MASTER_KEY_PASSWORD=your_secure_password_here"
         )
         
-        example_file = Path(".env.example")
+        example_file = project_root / ".env.example"
         with open(example_file, 'w') as f:
             f.write(example_content)
         
