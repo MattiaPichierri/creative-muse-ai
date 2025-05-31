@@ -50,6 +50,15 @@ lsof -ti:8000 | xargs kill -9  # Für Port 8000
 - `Ctrl+Shift+P` → "Dev Containers: Rebuild Container"
 - Oder: "Rebuild Container Without Cache" für kompletten Neuaufbau
 
+**Pyflakes RecursionError (Sympy):**
+```
+pyflakes[F] failed during execution due to RecursionError('maximum recursion depth exceeded')
+```
+**Lösung:**
+- ✅ Flake8-Konfiguration erstellt (`.devcontainer/.flake8`)
+- ✅ Sympy-Pakete von Linting ausgeschlossen
+- ✅ VS Code Settings und Tasks aktualisiert
+
 **Docker Desktop Probleme:**
 - Docker Desktop neu starten
 - Genügend Speicherplatz sicherstellen (min. 4GB frei)

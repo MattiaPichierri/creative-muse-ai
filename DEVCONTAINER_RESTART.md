@@ -1,10 +1,12 @@
 # 🔄 DevContainer Neustart nach Port-Fix
 
-## Problem behoben
+## Probleme behoben
 - ✅ Port 5000 → 5001 geändert (macOS AirPlay Konflikt)
 - ✅ Alte Container und Images entfernt
 - ✅ VS Code Cache geleert
 - ✅ Docker Compose Version-Warnung entfernt
+- ✅ API-URL automatische Erkennung (Frontend-Backend-Verbindung)
+- ✅ Pyflakes RecursionError mit Sympy behoben
 
 ## 🚀 Jetzt DevContainer starten
 

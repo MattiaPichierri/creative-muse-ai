@@ -339,7 +339,18 @@
     </div>
 
     <script>
-        const API_BASE = 'http://127.0.0.1:8000/api/v1';
+        // Automatische API-URL-Erkennung für DevContainer und lokale Entwicklung
+        const getApiBase = () => {
+            const hostname = window.location.hostname;
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:8000/api/v1';
+            }
+            // Für DevContainer oder andere Umgebungen
+            return `http://${hostname}:8000/api/v1`;
+        };
+        
+        const API_BASE = getApiBase();
+        console.log('Using API Base:', API_BASE);
         
         // DOM Elemente
         const ideaForm = document.getElementById('ideaForm');

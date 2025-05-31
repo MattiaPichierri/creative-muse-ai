@@ -1,0 +1,24 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203,W503
+exclude = 
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .mypy_cache,
+    venv,
+    .venv,
+    env,
+    .env,
+    build,
+    dist,
+    *.egg-info,
+    .tox,
+    node_modules,
+    # Exclude problematic sympy files that cause recursion errors
+    */site-packages/sympy/*,
+    */venv/lib/python*/site-packages/sympy/*
+per-file-ignores =
+    __init__.py:F401
+    */tests/*:F401,F811
+max-complexity = 10

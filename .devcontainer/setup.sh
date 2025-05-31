@@ -54,6 +54,13 @@ if [ -f "database/schema.sql" ]; then
         echo "ℹ️ Database already exists"
     fi
     cd /workspace
+else
+    echo "⚠️ Database schema not found, creating minimal database..."
+    mkdir -p /workspace/database
+    cd /workspace/database
+    sqlite3 creative_muse.db "CREATE TABLE IF NOT EXISTS ideas (id INTEGER PRIMARY KEY, content TEXT, category TEXT, rating INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+    echo "✅ Minimal database created"
+    cd /workspace
 fi
 
 # Create .env file if it doesn't exist
@@ -139,3 +146,10 @@ echo "  format-code    - Format code with black"
 echo "  db-shell       - Open SQLite database shell"
 echo ""
 echo "🚀 Ready to develop! Happy coding! 🎨🤖"
+echo ""
+echo "💡 WICHTIG: Um das System zu starten:"
+echo "1. Öffne ein neues Terminal: Ctrl+Shift+\`"
+echo "2. Starte das Backend: start-backend"
+echo "3. Öffne ein weiteres Terminal: Ctrl+Shift+\`"
+echo "4. Starte das Frontend: start-frontend"
+echo "5. Öffne http://localhost:3000 im Browser"
