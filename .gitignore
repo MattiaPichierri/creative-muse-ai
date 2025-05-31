@@ -1,0 +1,285 @@
+# Creative Muse AI - Git Ignore Rules (Security-Aware)
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+*.tar.gz
+
+# Electron
+out/
+dist/
+build/
+.webpack/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# SICHERHEITSKRITISCHE DATEIEN - NIEMALS COMMITTEN!
+# Kryptographische Schlüssel
+security/keys/
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+
+# Verschlüsselte Datenbanken
+*.db
+*.sqlite
+*.sqlite3
+database/creative_muse.db
+database/backups/
+
+# Konfigurationsdateien mit Geheimnissen
+.env
+.env.local
+.env.production
+.env.development
+config/secrets.json
+config/local.json
+
+# Logs (können sensible Daten enthalten)
+logs/
+*.log
+audit_*.log
+security_*.log
+performance_*.log
+
+# Backups (verschlüsselt, aber trotzdem nicht committen)
+backups/
+*.backup
+*.bak
+
+# Temporäre Dateien
+tmp/
+temp/
+.tmp/
+*.tmp
+
+# AI-Modelle (zu groß für Git)
+ai_core/models/
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+model_cache/
+
+# Monitoring und Metriken
+metrics/
+monitoring/
+.monitoring/
+
+# Test-Artefakte
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Jupyter Notebooks (können sensible Daten enthalten)
+.ipynb_checkpoints
+*.ipynb
+
+# Dokumentation Build
+docs/_build/
+docs/build/
+site/
+
+# Cache-Verzeichnisse
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist
+
+# Webpack
+.webpack/
+webpack-stats.json
+
+# ESLint
+.eslintcache
+
+# Stylelint
+.stylelintcache
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# Snowpack dependency directory (https://snowpack.dev/)
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# SICHERHEITSHINWEISE FÜR ENTWICKLER:
+# 1. Niemals echte Schlüssel oder Passwörter committen
+# 2. Immer .env-Dateien für lokale Konfiguration verwenden
+# 3. Sensible Daten nur in verschlüsselter Form speichern
+# 4. Regelmäßig git log auf versehentlich committete Geheimnisse prüfen
+# 5. Bei versehentlichem Commit von Geheimnissen: Sofort Schlüssel rotieren!
+
+# Lokale Entwicklungsdateien (können sensible Daten enthalten)
+local_config.json
+debug_output.txt
+test_data.json
+development_notes.md

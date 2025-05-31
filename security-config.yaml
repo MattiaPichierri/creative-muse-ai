@@ -1,0 +1,236 @@
+# Creative Muse AI - Globale Sicherheitskonfiguration
+
+# Verschlüsselungseinstellungen
+encryption:
+  # Hauptverschlüsselungsalgorithmus
+  algorithm: "AES-256-GCM"
+  
+  # Schlüsselableitung
+  key_derivation:
+    algorithm: "PBKDF2"
+    iterations: 100000
+    salt_length: 32
+    hash_algorithm: "SHA-256"
+  
+  # Schlüsselrotation
+  key_rotation:
+    interval_days: 90
+    auto_rotate: true
+    backup_old_keys: true
+    max_key_age_days: 365
+  
+  # Backup-Verschlüsselung
+  backup_encryption:
+    algorithm: "AES-256-CBC"
+    compression: true
+    integrity_check: true
+
+# Audit und Logging
+audit:
+  # Audit-Level (1=Minimal, 5=Vollständig)
+  level: 4
+  
+  # Log-Kategorien
+  categories:
+    - "data_access"
+    - "system_events"
+    - "security_events"
+    - "performance_events"
+    - "error_events"
+  
+  # Log-Rotation
+  rotation:
+    max_file_size_mb: 100
+    max_files: 10
+    compress_old_logs: true
+    encrypt_logs: true
+  
+  # Echtzeitüberwachung
+  real_time_monitoring:
+    enabled: true
+    alert_threshold: 3  # Anzahl verdächtiger Ereignisse
+    notification_methods: ["log", "system"]
+
+# Netzwerksicherheit
+network:
+  # Lokale TLS-Konfiguration
+  tls:
+    version: "1.3"
+    cipher_suites:
+      - "TLS_AES_256_GCM_SHA384"
+      - "TLS_CHACHA20_POLY1305_SHA256"
+    certificate_path: "security/certificates/server.crt"
+    private_key_path: "security/certificates/server.key"
+  
+  # API-Sicherheit
+  api:
+    rate_limiting:
+      enabled: true
+      requests_per_minute: 60
+      burst_limit: 10
+    
+    cors:
+      enabled: false  # Nur lokale Verbindungen
+      allowed_origins: ["http://localhost", "https://localhost"]
+    
+    authentication:
+      session_timeout_minutes: 30
+      max_concurrent_sessions: 1
+
+# Dateisystem-Sicherheit
+filesystem:
+  # Dateiberechtigungen
+  permissions:
+    config_files: "600"
+    log_files: "600"
+    database_files: "600"
+    key_files: "600"
+    executable_files: "700"
+  
+  # Sichere temporäre Dateien
+  temp_files:
+    encrypt: true
+    secure_delete: true
+    max_lifetime_minutes: 60
+  
+  # Backup-Einstellungen
+  backup:
+    auto_backup: true
+    backup_interval_hours: 24
+    max_backups: 7
+    backup_location: "backups/"
+    verify_integrity: true
+
+# Anwendungssicherheit
+application:
+  # Input-Validierung
+  input_validation:
+    max_prompt_length: 10000
+    allowed_characters: "alphanumeric_extended"
+    sanitize_html: true
+    check_malicious_patterns: true
+  
+  # Session-Management
+  session:
+    secure_cookies: true
+    httponly_cookies: true
+    samesite_policy: "strict"
+    regenerate_on_auth: true
+  
+  # Content Security Policy
+  csp:
+    default_src: "'self'"
+    script_src: "'self' 'unsafe-inline'"
+    style_src: "'self' 'unsafe-inline'"
+    img_src: "'self' data:"
+    connect_src: "'self' wss://localhost:* https://localhost:*"
+    font_src: "'self'"
+    object_src: "'none'"
+    base_uri: "'self'"
+    form_action: "'self'"
+
+# Performance und Ressourcen
+performance:
+  # Speicher-Limits
+  memory:
+    max_heap_size_gb: 8
+    model_cache_size_gb: 4
+    database_cache_size_mb: 512
+  
+  # CPU-Limits
+  cpu:
+    max_threads: 8
+    ai_processing_threads: 4
+    background_threads: 2
+  
+  # Monitoring
+  monitoring:
+    enabled: true
+    metrics_interval_seconds: 30
+    alert_thresholds:
+      cpu_usage_percent: 80
+      memory_usage_percent: 85
+      disk_usage_percent: 90
+
+# Compliance-Einstellungen
+compliance:
+  # Datenaufbewahrung
+  data_retention:
+    ideas_retention_days: 365
+    audit_logs_retention_days: 2555  # 7 Jahre
+    session_logs_retention_days: 90
+    performance_logs_retention_days: 30
+  
+  # Datenschutz
+  privacy:
+    data_minimization: true
+    purpose_limitation: true
+    storage_limitation: true
+    anonymization_after_days: 730
+  
+  # Benutzerrechte
+  user_rights:
+    data_export: true
+    data_deletion: true
+    data_correction: true
+    data_portability: true
+
+# Entwicklungseinstellungen
+development:
+  # Debug-Modus
+  debug:
+    enabled: false
+    log_level: "INFO"
+    detailed_errors: false
+  
+  # Test-Modus
+  testing:
+    mock_encryption: false
+    skip_model_loading: false
+    fast_key_derivation: false
+  
+  # Hot-Reload
+  hot_reload:
+    enabled: true
+    watch_patterns: ["*.py", "*.js", "*.jsx"]
+    exclude_patterns: ["*.log", "*.db", "*.key"]
+
+# Notfall-Prozeduren
+emergency:
+  # Automatische Reaktionen
+  auto_responses:
+    lockdown_on_breach: true
+    backup_on_threat: true
+    notify_on_anomaly: true
+  
+  # Incident Response
+  incident_response:
+    auto_collect_evidence: true
+    preserve_logs: true
+    secure_shutdown: true
+  
+  # Recovery
+  recovery:
+    auto_restore_from_backup: false
+    verify_integrity_on_restore: true
+    reset_keys_on_restore: true
+
+# Externe Integrationen (alle deaktiviert für Offline-Betrieb)
+external:
+  # Update-Checks
+  updates:
+    check_for_updates: false
+    auto_download: false
+    verify_signatures: true
+  
+  # Telemetrie
+  telemetry:
+    enabled: false
+    anonymous_usage_stats: false
+    error_reporting: false
+  
+  # Cloud-Services
+  cloud:
+    enabled: false
+    backup_to_cloud: false
+    sync_settings: false
