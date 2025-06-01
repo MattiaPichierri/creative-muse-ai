@@ -1,8 +1,8 @@
-# Creative Muse AI - React Frontend
+# Creative Muse AI - Next.js Frontend
 
 ## 🎨 Überblick
 
-Das React Frontend ist eine moderne, responsive Webanwendung, die eine intuitive Benutzeroberfläche für die Creative Muse AI bietet.
+Das Next.js Frontend ist eine moderne, responsive Webanwendung, die eine intuitive Benutzeroberfläche für die Creative Muse AI bietet.
 
 ## ✨ Features
 
@@ -14,9 +14,9 @@ Das React Frontend ist eine moderne, responsive Webanwendung, die eine intuitive
 - **Accessibility**: WCAG 2.1 konform
 
 ### Technologie-Stack
+- **Next.js 15**: Neueste Next.js-Version mit App Router und Server Components
 - **React 19**: Neueste React-Version mit Concurrent Features
 - **TypeScript**: Vollständige Typsicherheit
-- **Vite**: Schneller Build-Tool und Dev-Server
 - **Tailwind CSS**: Utility-First CSS Framework
 - **Framer Motion**: Animationsbibliothek
 - **Lucide React**: Moderne Icon-Bibliothek
@@ -24,8 +24,8 @@ Das React Frontend ist eine moderne, responsive Webanwendung, die eine intuitive
 ### Funktionalitäten
 - **Ideengenerierung**: KI-gestützte Kreativitätshilfe
 - **Real-time Updates**: Live-Aktualisierung der generierten Ideen
-- **Mehrsprachigkeit**: Deutsch/Englisch Support
-- **Offline-Fähig**: PWA-Ready für Offline-Nutzung
+- **Mehrsprachigkeit**: Deutsch/Englisch/Französisch/Spanisch/Italienisch Support
+- **Server-Side Rendering**: Optimierte Performance durch SSR
 - **Bewertungssystem**: 5-Sterne-Bewertung für Ideen
 
 ## 🚀 Installation & Setup
@@ -36,7 +36,7 @@ Das React Frontend ist eine moderne, responsive Webanwendung, die eine intuitive
 
 ### Installation
 ```bash
-cd creative-muse-react
+cd creative-muse-modern
 npm install
 ```
 
@@ -50,31 +50,32 @@ npm run dev
 npm run build
 ```
 
-### Preview der Produktion
+### Start der Produktion
 ```bash
-npm run preview
+npm start
 ```
 
 ## 📁 Projektstruktur
 
 ```
-creative-muse-react/
+creative-muse-modern/
 ├── public/                 # Statische Assets
 ├── src/
-│   ├── components/         # React Komponenten
-│   │   ├── IdeaGenerator/  # Ideengenerierung-Komponenten
-│   │   └── Layout/         # Layout-Komponenten
-│   ├── context/           # React Context für State Management
-│   ├── i18n/              # Internationalisierung
-│   ├── pages/             # Seiten-Komponenten
-│   ├── services/          # API Services
-│   ├── types/             # TypeScript Typdefinitionen
-│   ├── App.tsx            # Haupt-App-Komponente
-│   ├── main.tsx           # Entry Point
-│   ├── index.css          # Globale Styles
-│   └── App.css            # App-spezifische Styles
+│   ├── app/               # Next.js App Router
+│   │   ├── globals.css    # Globale Styles
+│   │   ├── layout.tsx     # Root Layout
+│   │   ├── page.tsx       # Homepage
+│   │   ├── ideas/         # Ideen-Seite
+│   │   └── stats/         # Statistiken-Seite
+│   ├── components/        # React Komponenten
+│   │   ├── ui/            # UI-Komponenten
+│   │   └── ...            # Feature-Komponenten
+│   ├── contexts/          # React Context für State Management
+│   ├── hooks/             # Custom React Hooks
+│   ├── lib/               # Utility-Funktionen und API Services
+│   └── types/             # TypeScript Typdefinitionen
 ├── tailwind.config.js     # Tailwind Konfiguration
-├── vite.config.ts         # Vite Konfiguration
+├── next.config.ts         # Next.js Konfiguration
 ├── tsconfig.json          # TypeScript Konfiguration
 └── package.json           # Abhängigkeiten
 ```
@@ -102,12 +103,11 @@ creative-muse-react/
 
 ### Environment Variables
 ```bash
-# .env
-VITE_API_BASE_URL=http://localhost:8000
-VITE_APP_NAME=Creative Muse AI
-VITE_APP_VERSION=1.0.0
-VITE_ENABLE_ANALYTICS=false
-VITE_ENABLE_PWA=true
+# .env.local
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_APP_NAME=Creative Muse AI
+NEXT_PUBLIC_APP_VERSION=1.0.0
+NEXT_PUBLIC_ENABLE_ANALYTICS=false
 ```
 
 ### Tailwind CSS
@@ -117,56 +117,72 @@ Die Tailwind-Konfiguration befindet sich in `tailwind.config.js` und umfasst:
 - Custom Fonts
 - Responsive Breakpoints
 
-### Vite Konfiguration
+### Next.js Konfiguration
 ```typescript
-// vite.config.ts
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': 'http://localhost:8000'
-    }
-  }
-})
+// next.config.ts
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  experimental: {
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
+  },
+}
+
+export default nextConfig
 ```
 
 ## 🧩 Komponenten
 
-### IdeaForm
-Hauptformular für die Ideengenerierung mit:
-- Prompt-Eingabe
-- Kategorie-Auswahl
-- Kreativitätslevel-Slider
-- Optionen für KI und Typing-Animation
+### Server Components
+Next.js Server Components für optimale Performance:
+- **Layout**: Root Layout mit Theme und Language Provider
+- **Page**: Statische Seiten-Komponenten
+- **Metadata**: SEO-optimierte Meta-Tags
 
-### IdeaCard
-Darstellung generierter Ideen mit:
-- Titel und Beschreibung
-- Kategorie-Badge
-- Bewertungssystem
-- Zeitstempel
+### Client Components
+Interactive React Components:
+- **IdeaGenerator**: Hauptformular für die Ideengenerierung
+- **IdeaCard**: Darstellung generierter Ideen
+- **ThemeToggle**: Dark/Light Mode Umschalter
+- **LanguageSelector**: Sprachauswahl
+- **Navigation**: Responsive Navigation
 
-### TypingAnimation
-Simuliert Schreibmaschinen-Effekt für:
-- Realistische KI-Generierung
-- Benutzerengagement
-- Visuelles Feedback
+### UI Components
+Wiederverwendbare UI-Elemente:
+- **Button**: Verschiedene Button-Varianten
+- **Card**: Container für Inhalte
+- **Input/Textarea**: Formulareingaben
+- **Badge**: Status- und Kategorie-Anzeigen
 
 ## 🌐 Internationalisierung
 
 ### Unterstützte Sprachen
 - Deutsch (de) - Standard
 - Englisch (en)
+- Französisch (fr)
+- Spanisch (es)
+- Italienisch (it)
 
 ### Übersetzungen hinzufügen
 ```typescript
-// src/i18n/translations.ts
-export const translations = {
+// src/contexts/LanguageContext.tsx
+const translations = {
   de: {
-    // Deutsche Übersetzungen
+    'header.title': 'Creative Muse',
+    'home.title': 'Entfessle deine Kreativität',
+    // Weitere deutsche Übersetzungen
   },
   en: {
-    // Englische Übersetzungen
+    'header.title': 'Creative Muse',
+    'home.title': 'Unleash Your Creativity',
+    // Weitere englische Übersetzungen
   }
 }
 ```
@@ -208,10 +224,17 @@ npm run lint
 
 ## 🚀 Deployment
 
+### Vercel (Empfohlen)
+```bash
+npm run build
+# Automatisches Deployment über Vercel CLI oder GitHub Integration
+```
+
 ### Statische Hosting
 ```bash
 npm run build
-# Upload dist/ folder to hosting provider
+npm run export
+# Upload out/ folder zu statischen Hosting-Anbietern
 ```
 
 ### Docker
@@ -223,7 +246,14 @@ RUN npm ci --only=production
 COPY . .
 RUN npm run build
 EXPOSE 3000
-CMD ["npm", "run", "preview"]
+CMD ["npm", "start"]
+```
+
+### Selbst-gehostet
+```bash
+npm run build
+npm start
+# Läuft auf Port 3000
 ```
 
 ## 🔒 Sicherheit
@@ -241,9 +271,10 @@ CMD ["npm", "run", "preview"]
 ## 📊 Performance
 
 ### Optimierungen
-- Code Splitting
-- Lazy Loading
+- Server-Side Rendering (SSR)
+- Static Site Generation (SSG)
 - Image Optimization
+- Code Splitting
 - Bundle Analysis
 
 ### Metriken
@@ -255,8 +286,8 @@ CMD ["npm", "run", "preview"]
 
 ### Development Tools
 - React Developer Tools
-- Redux DevTools (falls verwendet)
-- Vite DevTools
+- Next.js DevTools
+- Browser DevTools
 
 ### Logging
 ```typescript
@@ -264,9 +295,18 @@ CMD ["npm", "run", "preview"]
 console.log('Debug info')
 
 // Produktion
-if (import.meta.env.DEV) {
+if (process.env.NODE_ENV === 'development') {
   console.log('Debug info')
 }
+```
+
+### Next.js Debugging
+```bash
+# Debug Mode
+DEBUG=* npm run dev
+
+# Analyze Bundle
+npm run analyze
 ```
 
 ## 🤝 Beitragen
@@ -284,7 +324,8 @@ if (import.meta.env.DEV) {
 
 ## 📚 Weitere Ressourcen
 
+- [Next.js Dokumentation](https://nextjs.org/docs)
 - [React Dokumentation](https://react.dev)
 - [Tailwind CSS Dokumentation](https://tailwindcss.com)
 - [Framer Motion Dokumentation](https://www.framer.com/motion)
-- [Vite Dokumentation](https://vitejs.dev)
+- [TypeScript Dokumentation](https://www.typescriptlang.org/docs)

@@ -21,7 +21,7 @@ Creative Muse AI nutzt lokale LLM-Modelle (Mistral-7B-Instruct-v0.3) und gewähr
 - Mindestens 16GB RAM (für Mistral-7B)
 - 20GB freier Speicherplatz
 
-### Schnelle Installation (React Frontend)
+### Schnelle Installation (Next.js Frontend)
 
 ```bash
 # Repository klonen
@@ -39,8 +39,8 @@ cd ..
 python database/init_db.py
 python scripts/update_database.py
 
-# React Frontend einrichten
-cd creative-muse-react
+# Next.js Frontend einrichten
+cd creative-muse-modern
 npm install
 
 # Backend starten (Terminal 1)
@@ -49,7 +49,7 @@ export HF_TOKEN=$(cat ~/.cache/huggingface/token)  # Optional
 python main_mistral_api.py
 
 # Frontend starten (Terminal 2)
-cd ../creative-muse-react
+cd ../creative-muse-modern
 npm run dev
 ```
 
@@ -60,9 +60,11 @@ npm run dev
 make setup-secure
 
 # Entwicklungsumgebung starten
-make start-react  # Für React Frontend
+make start-modern   # Für Next.js Frontend
 # oder
-make start-electron  # Für Electron Frontend
+make start-react    # Für Legacy React Frontend
+# oder
+make start-electron # Für Electron Frontend
 ```
 
 ### Manuelle Installation
@@ -82,8 +84,8 @@ python ../scripts/key_generation.py
 # 3. Datenbank initialisieren
 python ../database/init_db.py
 
-# 4. React Frontend-Abhängigkeiten installieren
-cd ../creative-muse-react
+# 4. Next.js Frontend-Abhängigkeiten installieren
+cd ../creative-muse-modern
 npm install
 
 # 5. Backend starten (in separatem Terminal)
@@ -92,7 +94,7 @@ export HF_TOKEN=$(cat ~/.cache/huggingface/token)  # Falls Hugging Face Token vo
 python main_mistral_api.py
 
 # 6. Frontend starten (in separatem Terminal)
-cd ../creative-muse-react
+cd ../creative-muse-modern
 npm run dev
 ```
 
@@ -100,15 +102,16 @@ npm run dev
 
 ```
 creative_muse_ai/
-├── ai_core/              # Python Backend (FastAPI + Mistral-7B)
-├── creative-muse-react/  # React Frontend (Vite + TypeScript)
-├── ui_frontend/          # Legacy Electron Frontend
-├── database/             # Verschlüsselte SQLite Datenbank
-├── security/             # Sicherheits- und Verschlüsselungsmodule
-├── logs/                 # Verschlüsselte Audit-Logs
-├── scripts/              # Setup- und Utility-Skripte
-├── data/                 # Datenverzeichnis
-└── backups/              # Backup-Verzeichnis
+├── ai_core/                # Python Backend (FastAPI + Mistral-7B)
+├── creative-muse-modern/   # Next.js 15 Frontend (React 19 + TypeScript)
+├── creative-muse-react/    # Legacy React Frontend (Vite + TypeScript)
+├── ui_frontend/            # Legacy Electron Frontend
+├── database/               # Verschlüsselte SQLite Datenbank
+├── security/               # Sicherheits- und Verschlüsselungsmodule
+├── logs/                   # Verschlüsselte Audit-Logs
+├── scripts/                # Setup- und Utility-Skripte
+├── data/                   # Datenverzeichnis
+└── backups/                # Backup-Verzeichnis
 ```
 
 ## 🔒 Sicherheitsfeatures
@@ -122,15 +125,26 @@ creative_muse_ai/
 
 ## ✨ Frontend Features
 
-### React Frontend (creative-muse-react)
-- **Modernes Design**: Glasmorphismus mit Tailwind CSS
-- **Responsive Layout**: Optimiert für alle Bildschirmgrößen
-- **Dark Mode**: Nahtloser Wechsel zwischen Hell- und Dunkelmodus
-- **Animationen**: Framer Motion für flüssige Übergänge
-- **TypeScript**: Vollständige Typsicherheit
-- **Mehrsprachigkeit**: Deutsch/Englisch Support
+### Next.js Modern Frontend (creative-muse-modern) 🚀
+- **Next.js 15 + React 19**: Neueste Web-Technologien
+- **Turbopack**: Ultraschnelle Entwicklung und Builds
+- **App Router**: Moderne Next.js Routing-Architektur
+- **Server Components**: Optimierte Performance
+- **Tailwind CSS 4**: Modernste CSS-Framework-Version
+- **Radix UI**: Barrierefreie UI-Komponenten
+- **Framer Motion 12**: Flüssige Animationen und Übergänge
+- **TypeScript 5**: Vollständige Typsicherheit
+- **Mehrsprachigkeit**: Deutsch/Englisch/Italienisch Support
+- **Dark/Light Mode**: Intelligenter Theme-Wechsel
+- **Responsive Design**: Optimiert für alle Geräte
+- **Export-Funktionen**: JSON/Markdown Export
+- **LocalStorage**: Automatische Datenpersistierung
+
+### Legacy React Frontend (creative-muse-react)
+- **Vite + React**: Schnelle Entwicklungsumgebung
+- **Glasmorphismus Design**: Moderne UI mit Tailwind CSS
+- **PWA-Ready**: Progressive Web App Features
 - **Real-time Updates**: Live-Aktualisierung der Ideen
-- **Offline-Fähig**: PWA-Ready für Offline-Nutzung
 
 ### Legacy Electron Frontend (ui_frontend)
 - **Desktop-App**: Native Desktop-Anwendung
@@ -139,15 +153,32 @@ creative_muse_ai/
 
 ## 📖 Dokumentation
 
-- [React Frontend Dokumentation](docs/REACT_FRONTEND.md)
-- [Sicherheitsdokumentation](docs/SECURITY.md)
-- [Datenschutz-Richtlinien](docs/PRIVACY.md)
+- [Frontend Features Übersicht](FRONTEND_FEATURES.md)
+- [Next.js Frontend Dokumentation](docs/REACT_FRONTEND.md)
+- [Mehrsprachigkeits-Support](MULTILINGUAL_SUPPORT.md)
+- [Sicherheitsdokumentation](SECURITY_SETUP.md)
 - [API-Dokumentation](docs/API.md)
 - [Entwicklungshandbuch](docs/DEVELOPMENT.md)
 - [Deployment-Anleitung](docs/DEPLOYMENT.md)
+- [DevContainer Setup](DEVCONTAINER.md)
 
 ## 🛠️ Entwicklung
 
+### Next.js Frontend Entwicklung
+```bash
+# Entwicklungsserver mit Turbopack starten
+cd creative-muse-modern
+npm run dev
+
+# Production Build erstellen
+npm run build
+npm run start
+
+# Code-Qualität prüfen
+npm run lint
+```
+
+### Backend Entwicklung
 ```bash
 # Entwicklungsumgebung starten
 make dev-secure
@@ -160,6 +191,13 @@ make compliance-check
 
 # Backup erstellen
 make backup
+```
+
+### DevContainer Setup
+```bash
+# DevContainer verwenden (empfohlen)
+# Siehe DEVCONTAINER.md für Details
+code .  # Öffnet automatisch DevContainer-Prompt
 ```
 
 ## 📊 Systemanforderungen
@@ -182,8 +220,10 @@ Die Anwendung kann über verschiedene Konfigurationsdateien angepasst werden:
 
 - [`security-config.yaml`](security-config.yaml) - Globale Sicherheitseinstellungen
 - [`ai_core/config.py`](ai_core/config.py) - Backend-Konfiguration
-- [`creative-muse-react/vite.config.ts`](creative-muse-react/vite.config.ts) - Frontend-Konfiguration
-- [`creative-muse-react/tailwind.config.js`](creative-muse-react/tailwind.config.js) - Design-Konfiguration
+- [`creative-muse-modern/next.config.ts`](creative-muse-modern/next.config.ts) - Next.js Konfiguration
+- [`creative-muse-modern/tailwind.config.js`](creative-muse-modern/tailwind.config.js) - Design-Konfiguration
+- [`creative-muse-modern/tsconfig.json`](creative-muse-modern/tsconfig.json) - TypeScript-Konfiguration
+- [`creative-muse-react/vite.config.ts`](creative-muse-react/vite.config.ts) - Legacy React Frontend
 
 ## 🆘 Support
 

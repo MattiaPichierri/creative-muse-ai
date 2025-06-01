@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-Creative Muse AI - React Frontend Setup Script
-Configura automaticamente il React frontend con tutte le dipendenze necessarie.
+Creative Muse AI - Next.js Frontend Setup Script
+Configura automaticamente il Next.js frontend con tutte le dipendenze.
 """
 
-import os
 import sys
 import subprocess
-import json
 from pathlib import Path
+
 
 def run_command(command, cwd=None, check=True):
     """Esegue un comando shell e gestisce gli errori."""
@@ -29,6 +28,7 @@ def run_command(command, cwd=None, check=True):
             sys.exit(1)
         return None
 
+
 def check_node_version():
     """Verifica la versione di Node.js."""
     print("🔍 Verifico la versione di Node.js...")
@@ -41,82 +41,91 @@ def check_node_version():
             print(f"✅ Node.js {version} trovato (>= 18 richiesto)")
             return True
         else:
-            print(f"❌ Node.js {version} trovato, ma è richiesta la versione >= 18")
+            print(f"❌ Node.js {version} trovato, versione >= 18 richiesta")
             return False
-    except:
+    except Exception:
         print("❌ Node.js non trovato. Installa Node.js >= 18")
         return False
 
-def setup_react_frontend():
-    """Configura il React frontend."""
-    print("🚀 Configurazione React Frontend...")
+
+def setup_nextjs_frontend():
+    """Configura il Next.js frontend."""
+    print("🚀 Configurazione Next.js Frontend...")
     
-    react_dir = Path(__file__).parent.parent / "creative-muse-react"
+    nextjs_dir = Path(__file__).parent.parent / "creative-muse-modern"
     
-    if not react_dir.exists():
-        print(f"❌ Directory React non trovata: {react_dir}")
+    if not nextjs_dir.exists():
+        print(f"❌ Directory Next.js non trovata: {nextjs_dir}")
         return False
     
-    print(f"📁 Directory React: {react_dir}")
+    print(f"📁 Directory Next.js: {nextjs_dir}")
     
     # Installa dipendenze
     print("📦 Installazione dipendenze...")
-    run_command("npm install", cwd=react_dir)
+    run_command("npm install", cwd=nextjs_dir)
     
     # Verifica che Tailwind CSS sia configurato
-    tailwind_config = react_dir / "tailwind.config.js"
+    tailwind_config = nextjs_dir / "tailwind.config.js"
     if tailwind_config.exists():
         print("✅ Tailwind CSS configurato")
     else:
         print("⚠️ Tailwind CSS non configurato")
     
     # Verifica PostCSS
-    postcss_config = react_dir / "postcss.config.js"
+    postcss_config = nextjs_dir / "postcss.config.mjs"
     if postcss_config.exists():
         print("✅ PostCSS configurato")
     else:
         print("⚠️ PostCSS non configurato")
     
     # Verifica TypeScript
-    tsconfig = react_dir / "tsconfig.json"
+    tsconfig = nextjs_dir / "tsconfig.json"
     if tsconfig.exists():
         print("✅ TypeScript configurato")
     else:
         print("⚠️ TypeScript non configurato")
     
-    print("✅ Setup React Frontend completato!")
+    # Verifica Next.js config
+    next_config = nextjs_dir / "next.config.ts"
+    if next_config.exists():
+        print("✅ Next.js configurato")
+    else:
+        print("⚠️ Next.js config non trovato")
+    
+    print("✅ Setup Next.js Frontend completato!")
     return True
 
+
 def create_env_file():
-    """Crea file .env per il React frontend se non esiste."""
-    react_dir = Path(__file__).parent.parent / "creative-muse-react"
-    env_file = react_dir / ".env"
+    """Crea file .env.local per il Next.js frontend se non esiste."""
+    nextjs_dir = Path(__file__).parent.parent / "creative-muse-modern"
+    env_file = nextjs_dir / ".env.local"
     
     if not env_file.exists():
-        print("📝 Creazione file .env...")
-        env_content = """# Creative Muse AI - React Frontend Environment
-VITE_API_BASE_URL=http://localhost:8000
-VITE_APP_NAME=Creative Muse AI
-VITE_APP_VERSION=1.0.0
-VITE_ENABLE_ANALYTICS=false
-VITE_ENABLE_PWA=true
+        print("📝 Creazione file .env.local...")
+        env_content = """# Creative Muse AI - Next.js Frontend Environment
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_APP_NAME=Creative Muse AI
+NEXT_PUBLIC_APP_VERSION=1.0.0
+NEXT_PUBLIC_ENABLE_ANALYTICS=false
 """
         env_file.write_text(env_content)
-        print("✅ File .env creato")
+        print("✅ File .env.local creato")
     else:
-        print("✅ File .env già esistente")
+        print("✅ File .env.local già esistente")
+
 
 def main():
     """Funzione principale."""
-    print("🎨 Creative Muse AI - React Frontend Setup")
+    print("🎨 Creative Muse AI - Next.js Frontend Setup")
     print("=" * 50)
     
     # Verifica Node.js
     if not check_node_version():
         sys.exit(1)
     
-    # Setup React frontend
-    if not setup_react_frontend():
+    # Setup Next.js frontend
+    if not setup_nextjs_frontend():
         sys.exit(1)
     
     # Crea file .env
@@ -124,7 +133,8 @@ def main():
     
     print("\n🎉 Setup completato con successo!")
     print("\nPer avviare il frontend:")
-    print("cd creative-muse-react && npm run dev")
+    print("cd creative-muse-modern && npm run dev")
+
 
 if __name__ == "__main__":
     main()
