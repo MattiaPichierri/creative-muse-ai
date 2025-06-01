@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 
 export type Language = 'it' | 'en' | 'de' | 'fr' | 'es';
 
@@ -156,6 +156,21 @@ const translations = {
       "Genera un nome creativo e memorabile per un'app mobile, inclusa una breve descrizione",
     'prompts.everydayDesc':
       'Identifica un problema quotidiano e sviluppa una soluzione pratica e innovativa',
+    
+    // New prompt features
+    'prompts.predefined': 'Prompt Predefiniti',
+    'prompts.selectPrompt': 'Seleziona un Prompt',
+    'prompts.allCategories': 'Tutte le Categorie',
+    
+    // Categories
+    'categories.general': 'Generale',
+    'categories.business': 'Business',
+    'categories.technology': 'Tecnologia',
+    'categories.art': 'Arte',
+    'categories.science': 'Scienza',
+    'categories.health': 'Salute',
+    'categories.education': 'Educazione',
+    'categories.entertainment': 'Intrattenimento',
   },
 
   en: {
@@ -257,7 +272,30 @@ const translations = {
     'rating.rate': 'Rate this idea',
 
     // Search and Filter
-    'search.placeholder': 'Search ideas...',
+    'search.title': 'Ricerca Avanzata',
+    'search.description': 'Trova le tue idee usando filtri avanzati',
+    'search.placeholder': 'Cerca nelle tue idee...',
+    'search.results': 'risultati',
+    'search.clear': 'Cancella filtri',
+    'search.filters': 'Filtri',
+    'search.category': 'Categoria',
+    'search.allCategories': 'Tutte le categorie',
+    'search.rating': 'Valutazione',
+    'search.anyRating': 'Qualsiasi valutazione',
+    'search.dateRange': 'Periodo',
+    'search.anyTime': 'Qualsiasi momento',
+    'search.today': 'Oggi',
+    'search.thisWeek': 'Questa settimana',
+    'search.thisMonth': 'Questo mese',
+    'search.thisYear': 'Quest\'anno',
+    'search.model': 'Modello AI',
+    'search.anyModel': 'Qualsiasi modello',
+    'search.mockModel': 'Modello Mock',
+    'search.sortBy': 'Ordina per',
+    'search.sortDate': 'Data',
+    'search.sortTitle': 'Titolo',
+    'search.sortRating': 'Valutazione',
+    'search.sortCategory': 'Categoria',
     'filter.allCategories': 'All categories',
     'filter.allRatings': 'All ratings',
     'filter.category': 'Category',
@@ -297,6 +335,62 @@ const translations = {
       'Generate a creative and memorable name for a mobile app, including a brief description',
     'prompts.everydayDesc':
       'Identify an everyday problem and develop a practical, innovative solution',
+    
+    // New prompt features
+    'prompts.predefined': 'Predefined Prompts',
+    'prompts.selectPrompt': 'Select a Prompt',
+    'prompts.allCategories': 'All Categories',
+
+    // Categories
+    'categories.general': 'General',
+    'categories.business': 'Business',
+    'categories.technology': 'Technology',
+    'categories.art': 'Art',
+    'categories.science': 'Science',
+    'categories.health': 'Health',
+    'categories.education': 'Education',
+    'categories.entertainment': 'Entertainment',
+
+    // Bulk Actions
+    'bulk.selected': 'selezionati',
+    'bulk.actions': 'Azioni di Gruppo',
+    'bulk.description': 'Gestisci più idee contemporaneamente',
+    'bulk.export': 'Esporta',
+    'bulk.rate': 'Valuta',
+    'bulk.archive': 'Archivia',
+    'bulk.copy': 'Copia',
+    'bulk.delete': 'Elimina',
+    'bulk.items': 'elementi',
+    'bulk.rateTitle': 'Valuta Idee Selezionate',
+    'bulk.rateDescription': 'Assegna una valutazione a tutte le idee selezionate',
+    'bulk.deleteTitle': 'Elimina Idee Selezionate',
+    'bulk.deleteDescription': 'Sei sicuro di voler eliminare le idee selezionate?',
+    'bulk.confirmDelete': 'Elimina Definitivamente',
+
+    // Templates
+    'templates.title': 'Modelli di Idee',
+    'templates.description': 'Usa modelli strutturati per organizzare le tue idee',
+    'templates.sections': 'sezioni',
+    'templates.fillSections': 'Compila le sezioni del modello per creare la tua idea',
+    'templates.useTemplate': 'Usa Modello',
+
+    // Advanced Stats
+    'stats.advanced': 'Statistiche Avanzate',
+    'stats.detailedAnalysis': 'Analisi dettagliata delle tue idee creative',
+    'stats.productivityScore': 'Punteggio Produttività',
+    'stats.creativityTrend': 'Tendenza Creatività',
+    'stats.weeklyProgress': 'Progresso Settimanale',
+    'stats.categoryDistribution': 'Distribuzione Categorie',
+    'stats.categoryDescription': 'Come sono distribuite le tue idee',
+    'stats.insights': 'Insights e Raccomandazioni',
+    'stats.insightsDescription': 'Analisi personalizzate del tuo comportamento creativo',
+    'stats.peakHours': 'Ore di Picco',
+    'stats.favoriteCategories': 'Categorie Preferite',
+    'stats.modelPerformance': 'Performance Modello',
+    'stats.noModelLoaded': 'Nessun modello caricato',
+    'stats.error': 'Errore nel caricamento',
+    'stats.noData': 'Nessun dato disponibile',
+    'stats.retry': 'Riprova',
   },
 
   de: {
@@ -444,6 +538,21 @@ const translations = {
       'Generiere einen kreativen und einprägsamen Namen für eine mobile App, inklusive einer kurzen Beschreibung',
     'prompts.everydayDesc':
       'Identifiziere ein alltägliches Problem und entwickle eine praktische, innovative Lösung',
+    
+    // New prompt features
+    'prompts.predefined': 'Vordefinierte Prompts',
+    'prompts.selectPrompt': 'Prompt Auswählen',
+    'prompts.allCategories': 'Alle Kategorien',
+
+    // Categories
+    'categories.general': 'Allgemein',
+    'categories.business': 'Business',
+    'categories.technology': 'Technologie',
+    'categories.art': 'Kunst',
+    'categories.science': 'Wissenschaft',
+    'categories.health': 'Gesundheit',
+    'categories.education': 'Bildung',
+    'categories.entertainment': 'Unterhaltung',
   },
 
   fr: {
@@ -591,6 +700,21 @@ const translations = {
       'Générez un nom créatif et mémorable pour une application mobile, incluant une brève description',
     'prompts.everydayDesc':
       'Identifiez un problème quotidien et développez une solution pratique et innovante',
+    
+    // New prompt features
+    'prompts.predefined': 'Prompts Prédéfinis',
+    'prompts.selectPrompt': 'Sélectionner un Prompt',
+    'prompts.allCategories': 'Toutes les Catégories',
+
+    // Categories
+    'categories.general': 'Général',
+    'categories.business': 'Business',
+    'categories.technology': 'Technologie',
+    'categories.art': 'Art',
+    'categories.science': 'Science',
+    'categories.health': 'Santé',
+    'categories.education': 'Éducation',
+    'categories.entertainment': 'Divertissement',
   },
 
   es: {
@@ -734,6 +858,21 @@ const translations = {
       'Genera un nombre creativo y memorable para una aplicación móvil, incluyendo una breve descripción',
     'prompts.everydayDesc':
       'Identifica un problema cotidiano y desarrolla una solución práctica e innovadora',
+    
+    // New prompt features
+    'prompts.predefined': 'Prompts Predefinidos',
+    'prompts.selectPrompt': 'Seleccionar un Prompt',
+    'prompts.allCategories': 'Todas las Categorías',
+
+    // Categories
+    'categories.general': 'General',
+    'categories.business': 'Negocios',
+    'categories.technology': 'Tecnología',
+    'categories.art': 'Arte',
+    'categories.science': 'Ciencia',
+    'categories.health': 'Salud',
+    'categories.education': 'Educación',
+    'categories.entertainment': 'Entretenimiento',
   },
 };
 
@@ -742,37 +881,44 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Carica la lingua salvata dal localStorage
-    const savedLanguage = localStorage.getItem(
-      'creativeMuseLanguage'
-    ) as Language;
-    if (savedLanguage && translations[savedLanguage]) {
-      setLanguageState(savedLanguage);
-    } else {
-      // Usa la lingua del browser se disponibile
-      const browserLang = navigator.language.split('-')[0] as Language;
-      if (translations[browserLang]) {
-        setLanguageState(browserLang);
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem(
+        'creativeMuseLanguage'
+      ) as Language;
+      if (savedLanguage && translations[savedLanguage]) {
+        setLanguageState(savedLanguage);
+      } else {
+        // Usa la lingua del browser se disponibile
+        const browserLang = navigator.language.split('-')[0] as Language;
+        if (translations[browserLang]) {
+          setLanguageState(browserLang);
+        }
       }
     }
   }, []); // Empty dependency array to run only once
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('creativeMuseLanguage', lang);
-    // Aggiorna anche l'attributo lang del documento
-    document.documentElement.lang = lang;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('creativeMuseLanguage', lang);
+      // Aggiorna anche l'attributo lang del documento
+      document.documentElement.lang = lang;
+    }
   };
 
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     const translation = translations[language] as Record<string, string>;
     return translation[key] || key;
-  };
+  }, [language]);
 
-  const contextValue = useMemo(() => ({
-    language,
-    setLanguage,
-    t
-  }), [language]);
+  const contextValue = useMemo(
+    () => ({
+      language,
+      setLanguage,
+      t,
+    }),
+    [language, t]
+  );
 
   return (
     <LanguageContext.Provider value={contextValue}>

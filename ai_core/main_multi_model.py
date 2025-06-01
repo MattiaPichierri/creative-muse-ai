@@ -24,6 +24,8 @@ from model_manager import ModelManager
 
 # Lade Umgebungsvariablen
 load_dotenv("../.env")
+# Fallback: Lade auch lokale .env falls vorhanden
+load_dotenv(".env")
 
 # Logging konfigurieren
 logging.basicConfig(
@@ -90,7 +92,9 @@ class Stats(BaseModel):
 
 
 # Globale Variablen
-db_path = Path("../database/creative_muse.db")
+# Verwende absoluten Pfad basierend auf dem aktuellen Skript-Verzeichnis
+script_dir = Path(__file__).parent
+db_path = script_dir.parent / "database" / "creative_muse.db"
 
 
 @asynccontextmanager
@@ -381,6 +385,25 @@ async def switch_model(request: ModelSwitchRequest):
         )
 
 
+@app.post("/api/v1/models/deactivate")
+async def deactivate_model():
+    """Deaktiviere das aktuelle Modell"""
+    if not model_manager:
+        raise HTTPException(status_code=503, detail="Model Manager nicht verfügbar")
+    
+    success = model_manager.unload_current_model()
+    if success:
+        return {
+            "message": "Modell erfolgreich deaktiviert",
+            "current_model": None
+        }
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Fehler beim Deaktivieren des Modells"
+        )
+
+
 @app.post("/api/v1/generate", response_model=IdeaResponse)
 async def generate_idea(request: IdeaRequest):
     """Generiere neue Idee"""
@@ -523,6 +546,61 @@ async def get_stats():
         
     except Exception as e:
         logger.error(f"❌ Fehler beim Laden der Statistiken: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/ideas/{idea_id}/rate")
+async def rate_idea(idea_id: str, rating_data: dict):
+    """Bewerte eine Idee"""
+    try:
+        rating = rating_data.get("rating")
+        if not rating or not isinstance(rating, int) or rating < 1 or rating > 5:
+            raise HTTPException(status_code=400, detail="Rating muss zwischen 1 und 5 liegen")
+        
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.cursor()
+        
+        # Überprüfe, ob die Idee existiert
+        cursor.execute("SELECT id FROM simple_ideas WHERE id = ?", (idea_id,))
+        if not cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=404, detail="Idee nicht gefunden")
+        
+        # Update das Rating
+        cursor.execute(
+            "UPDATE simple_ideas SET rating = ? WHERE id = ?",
+            (rating, idea_id)
+        )
+        conn.commit()
+        
+        # Lade die aktualisierte Idee
+        cursor.execute("""
+            SELECT id, title, content, category, rating, generation_method,
+                   model_used, created_at
+            FROM simple_ideas WHERE id = ?
+        """, (idea_id,))
+        
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            return IdeaResponse(
+                id=row[0],
+                title=row[1],
+                content=row[2],
+                category=row[3],
+                rating=row[4],
+                generation_method=row[5],
+                model_used=row[6],
+                created_at=row[7]
+            )
+        else:
+            raise HTTPException(status_code=404, detail="Idee nicht gefunden")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Fehler beim Rating der Idee: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

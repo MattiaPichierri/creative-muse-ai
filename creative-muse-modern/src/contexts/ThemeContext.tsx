@@ -16,31 +16,35 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Carica il tema salvato dal localStorage
-    const savedTheme = localStorage.getItem('darkMode');
-    if (savedTheme === 'true') {
-      setTheme('dark');
-    } else if (savedTheme === 'false') {
-      setTheme('light');
-    } else {
-      // Usa la preferenza del sistema se non c'è un tema salvato
-      const prefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches;
-      setTheme(prefersDark ? 'dark' : 'light');
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('darkMode');
+      if (savedTheme === 'true') {
+        setTheme('dark');
+      } else if (savedTheme === 'false') {
+        setTheme('light');
+      } else {
+        // Usa la preferenza del sistema se non c'è un tema salvato
+        const prefersDark = window.matchMedia(
+          '(prefers-color-scheme: dark)'
+        ).matches;
+        setTheme(prefersDark ? 'dark' : 'light');
+      }
     }
   }, []);
 
   useEffect(() => {
     // Applica il tema al documento
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    if (typeof window !== 'undefined') {
+      const root = document.documentElement;
+      if (theme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
 
-    // Salva la preferenza
-    localStorage.setItem('darkMode', theme === 'dark' ? 'true' : 'false');
+      // Salva la preferenza
+      localStorage.setItem('darkMode', theme === 'dark' ? 'true' : 'false');
+    }
   }, [theme]);
 
   const toggleTheme = () => {

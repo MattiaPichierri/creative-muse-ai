@@ -1,7 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { ExportButton } from '@/components/ExportButton';
+import { IdeaRating } from '@/components/IdeaRating';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { ModelSelector } from '@/components/ModelSelector';
+import { DesktopNavigation, MobileNavigation } from '@/components/Navigation';
+import { PredefinedPrompts } from '@/components/PredefinedPrompts';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,28 +17,22 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { apiService, type Idea } from '@/lib/api';
-import { MobileNavigation, DesktopNavigation } from '@/components/Navigation';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { ExportButton } from '@/components/ExportButton';
-import { PredefinedPrompts } from '@/components/PredefinedPrompts';
-import { LanguageSelector } from '@/components/LanguageSelector';
-import { IdeaRating } from '@/components/IdeaRating';
-import { ModelSelector } from '@/components/ModelSelector';
-import { useIdeasStorage } from '@/hooks/useLocalStorage';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIdeasStorage } from '@/hooks/useLocalStorage';
+import { apiService, type Idea } from '@/lib/api';
+import { motion } from 'framer-motion';
 import {
-  Lightbulb,
-  Sparkles,
-  Brain,
-  Zap,
-  Star,
-  ArrowRight,
-  Shuffle,
-  Plus,
   AlertCircle,
+  ArrowRight,
+  Brain,
+  Lightbulb,
+  Plus,
+  Shuffle,
+  Sparkles,
+  Star,
+  Zap,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const { t } = useLanguage();
@@ -65,7 +65,10 @@ export default function Home() {
               <div className="flex items-center space-x-4">
                 <DesktopNavigation />
                 <div className="flex items-center space-x-2">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 text-blue-700"
+                  >
                     {t('header.aiPowered')}
                   </Badge>
                   <ModelSelector />
@@ -334,7 +337,7 @@ export default function Home() {
                   href="/ideas"
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
                 >
-                  {t('home.viewAll')} →
+                  {t('home.viewAll')}
                 </a>
               )}
             </div>

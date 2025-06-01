@@ -40,7 +40,7 @@ export function LanguageSelector() {
         <span className="sm:hidden text-sm">{currentLanguage?.flag}</span>
         <ChevronDown className="h-3 w-3" />
       </Button>
-      
+
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50">
           {languages.map((lang) => (
@@ -51,7 +51,9 @@ export function LanguageSelector() {
             >
               <div className="flex items-center space-x-2">
                 <span>{lang.flag}</span>
-                <span className="text-sm text-gray-800 dark:text-gray-200">{lang.name}</span>
+                <span className="text-sm text-gray-800 dark:text-gray-200">
+                  {lang.name}
+                </span>
               </div>
               {language === lang.code && (
                 <Check className="h-4 w-4 text-blue-600" />
@@ -60,12 +62,9 @@ export function LanguageSelector() {
           ))}
         </div>
       )}
-      
+
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
       )}
     </div>
   );

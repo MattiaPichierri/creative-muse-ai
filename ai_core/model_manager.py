@@ -220,6 +220,31 @@ class ModelManager:
             self.model_status[model_key] = ModelStatus.ERROR
             return False
     
+    def unload_current_model(self) -> bool:
+        """Deaktiviere das aktuelle Modell"""
+        if not self.current_model:
+            logger.info("ℹ️  Kein Modell aktiv - nichts zu deaktivieren")
+            return True
+        
+        try:
+            model_key = self.current_model
+            logger.info(f"🔄 Deaktiviere Modell: {model_key}")
+            
+            # Entferne das Modell aus dem Speicher
+            if model_key in self.models:
+                del self.models[model_key]
+            
+            # Setze Status zurück
+            self.model_status[model_key] = ModelStatus.NOT_LOADED
+            self.current_model = None
+            
+            logger.info(f"✅ Modell erfolgreich deaktiviert: {model_key}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Fehler beim Deaktivieren des Modells: {e}")
+            return False
+    
     def _determine_device(self, preference: str) -> str:
         """Bestimme das beste verfügbare Device"""
         if preference == "cpu":

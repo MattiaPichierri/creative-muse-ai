@@ -23,6 +23,8 @@ from dotenv import load_dotenv
 
 # Lade Umgebungsvariablen aus dem Hauptverzeichnis
 load_dotenv("../.env")
+# Fallback: Lade auch lokale .env falls vorhanden
+load_dotenv(".env")
 
 # Transformers und Torch für Mistral
 try:
@@ -175,7 +177,9 @@ class Stats(BaseModel):
     recent_activity: int
 
 # Globale Variablen
-db_path = Path("../database/creative_muse.db")
+# Verwende absoluten Pfad basierend auf dem aktuellen Skript-Verzeichnis
+script_dir = Path(__file__).parent
+db_path = script_dir.parent / "database" / "creative_muse.db"
 
 def init_simple_db():
     """Initialisiere vereinfachte Datenbank"""

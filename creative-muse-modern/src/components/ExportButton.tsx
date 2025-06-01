@@ -26,12 +26,7 @@ export function ExportButton({ ideas }: ExportButtonProps) {
   // Verhindere Hydration-Mismatch
   if (!isMounted) {
     return (
-      <Button
-        variant="ghost"
-        size="sm"
-        disabled
-        title="Lade..."
-      >
+      <Button variant="ghost" size="sm" disabled title="Lade...">
         <Download className="h-4 w-4" />
       </Button>
     );

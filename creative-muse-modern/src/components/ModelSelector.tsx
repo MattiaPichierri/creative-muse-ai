@@ -29,6 +29,7 @@ import {
   Star,
   HardDrive,
   Key,
+  XCircle,
 } from 'lucide-react';
 
 export function ModelSelector() {
@@ -37,13 +38,14 @@ export function ModelSelector() {
   const [switching, setSwitching] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [currentModelKey, setCurrentModelKey] = useState<string | null>(null);
 
   const loadModels = async () => {
     setLoading(true);
     setError(null);
 
     console.log('🔍 Lade Modelle von API...');
-    
+
     // Direkter Test der Verbindung
     try {
       console.log('🧪 Teste direkte Verbindung...');
@@ -51,8 +53,19 @@ export function ModelSelector() {
       console.log('🧪 Direkte Antwort:', directResponse.status);
       const directData = await directResponse.json();
       console.log('🧪 Direkte Daten:', directData);
-      
+
       setModels(directData);
+      
+      // Aktualisiere den aktuellen Modellstatus
+      const currentModel = directData.find((m: ModelInfo) => m.current);
+      if (currentModel) {
+        setCurrentModelKey(currentModel.key);
+        // Speichere im localStorage für Persistenz
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('selectedModel', currentModel.key);
+        }
+      }
+      
       setLoading(false);
       return;
     } catch (directError) {
@@ -69,6 +82,16 @@ export function ModelSelector() {
     } else if (result.data) {
       console.log('✅ Modelle geladen:', result.data);
       setModels(result.data);
+      
+      // Aktualisiere den aktuellen Modellstatus
+      const currentModel = result.data.find((m: ModelInfo) => m.current);
+      if (currentModel) {
+        setCurrentModelKey(currentModel.key);
+        // Speichere im localStorage für Persistenz
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('selectedModel', currentModel.key);
+        }
+      }
     }
 
     setLoading(false);
@@ -83,19 +106,29 @@ export function ModelSelector() {
     // Direkter Switch-Call
     try {
       console.log('🧪 Teste direkten Model-Switch...');
-      const directResponse = await fetch('http://127.0.0.1:8000/api/v1/models/switch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ model_key: modelKey }),
-      });
-      
+      const directResponse = await fetch(
+        'http://127.0.0.1:8000/api/v1/models/switch',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ model_key: modelKey }),
+        }
+      );
+
       console.log('🧪 Switch Response Status:', directResponse.status);
-      
+
       if (directResponse.ok) {
         const switchData = await directResponse.json();
         console.log('✅ Model Switch erfolgreich:', switchData);
+        
+        // Aktualisiere lokalen Status sofort
+        setCurrentModelKey(modelKey);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('selectedModel', modelKey);
+        }
+        
         // Aktualisiere Modell-Status
         await loadModels();
         setSwitching(null);
@@ -113,13 +146,52 @@ export function ModelSelector() {
     setSwitching(null);
   };
 
+  const deactivateModel = async () => {
+    setSwitching('deactivating');
+    setError(null);
+
+    console.log('🔄 Deaktiviere aktuelles Modell...');
+
+    // Verwende API Service für Deaktivierung
+    const result = await apiService.deactivateModel();
+    console.log('📡 Deactivate API Response:', result);
+
+    if (result.error) {
+      console.error('❌ API Fehler:', result.error);
+      setError(result.error);
+    } else {
+      console.log('✅ Modell erfolgreich deaktiviert');
+      
+      // Lösche lokalen Status
+      setCurrentModelKey(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('selectedModel');
+      }
+      
+      // Aktualisiere Modell-Status
+      await loadModels();
+    }
+
+    setSwitching(null);
+  };
+
+  // Initialisiere den Modellstatus beim Laden der Komponente
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedModel = localStorage.getItem('selectedModel');
+      if (savedModel) {
+        setCurrentModelKey(savedModel);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       loadModels();
     }
   }, [isOpen]);
 
-  const currentModel = models.find((m) => m.current);
+  const currentModel = models.find((m) => m.current) || models.find((m) => m.key === currentModelKey);
   const availableModels = models.filter((m) => m.available);
   const unavailableModels = models.filter((m) => !m.available);
 
@@ -148,7 +220,7 @@ export function ModelSelector() {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Brain className="h-4 w-4" />
-          {currentModel ? currentModel.key : 'Modell wählen'}
+          {currentModel ? currentModel.key : currentModelKey || 'Modell wählen'}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -251,8 +323,29 @@ export function ModelSelector() {
                         )}
 
                         {model.current && (
-                          <div className="text-center text-sm text-green-600 font-medium">
-                            ✓ Aktuell aktiv
+                          <div className="space-y-2">
+                            <div className="text-center text-sm text-green-600 font-medium">
+                              ✓ Aktuell aktiv
+                            </div>
+                            <Button
+                              onClick={deactivateModel}
+                              disabled={switching === 'deactivating'}
+                              variant="outline"
+                              className="w-full"
+                              size="sm"
+                            >
+                              {switching === 'deactivating' ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  Deaktiviere...
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Deaktivieren
+                                </>
+                              )}
+                            </Button>
                           </div>
                         )}
                       </CardContent>
