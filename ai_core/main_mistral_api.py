@@ -99,9 +99,13 @@ app = FastAPI(
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "*"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -132,9 +136,11 @@ class IdeaRating(BaseModel):
 
 class Stats(BaseModel):
     total_ideas: int
-    categories: dict
+    recent_ideas: int
     average_rating: float
-    recent_activity: int
+    categories: dict
+    llm_ideas: int
+    mock_ideas: int
 
 # Globale Variablen
 db_path = Path("../database/creative_muse.db")
@@ -231,10 +237,17 @@ async def generate_with_mistral_api(prompt: str, category: str, language: str, c
         )
         
         if response.status_code != 200:
-            logger.error(f"❌ Mistral API Fehler: {response.status_code}")
+            error_text = response.text if hasattr(response, 'text') else 'Unknown error'
+            logger.error(f"❌ Mistral API Fehler: {response.status_code} - {error_text}")
             return generate_mock_idea(prompt, category, language, creativity_level)
         
         result = response.json()
+        logger.info(f"✅ Mistral API Response: {result}")
+        
+        if not result or not isinstance(result, list) or len(result) == 0:
+            logger.error("❌ Mistral API returned empty or invalid response")
+            return generate_mock_idea(prompt, category, language, creativity_level)
+            
         generated_text = result[0]['generated_text'].strip()
         
         # Parse Titel und Inhalt
@@ -253,7 +266,8 @@ async def generate_with_mistral_api(prompt: str, category: str, language: str, c
         }
         
     except Exception as e:
-        logger.error(f"❌ Fehler bei Mistral API Generierung: {e}")
+        logger.error(f"❌ Fehler bei Mistral API Generierung: {type(e).__name__}: {str(e)}")
+        logger.error(f"❌ Prompt war: {formatted_prompt[:100]}...")
         # Fallback auf Mock
         return generate_mock_idea(prompt, category, language, creativity_level)
 
@@ -453,15 +467,24 @@ async def get_stats():
         cursor.execute(
             "SELECT COUNT(*) FROM simple_ideas WHERE created_at > datetime('now', '-1 day')"
         )
-        recent_activity = cursor.fetchone()[0]
+        recent_ideas = cursor.fetchone()[0]
+        
+        # LLM vs Mock Ideen
+        cursor.execute("SELECT COUNT(*) FROM simple_ideas WHERE generation_method = 'llm'")
+        llm_ideas = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM simple_ideas WHERE generation_method IN ('mock', 'random')")
+        mock_ideas = cursor.fetchone()[0]
         
         conn.close()
         
         return Stats(
             total_ideas=total_ideas,
-            categories=categories,
+            recent_ideas=recent_ideas,
             average_rating=round(avg_rating, 2),
-            recent_activity=recent_activity
+            categories=categories,
+            llm_ideas=llm_ideas,
+            mock_ideas=mock_ideas
         )
         
     except Exception as e:
