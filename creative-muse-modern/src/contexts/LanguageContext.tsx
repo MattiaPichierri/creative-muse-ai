@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 
 export type Language = 'it' | 'en' | 'de' | 'fr' | 'es';
 
@@ -768,8 +768,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return translation[key] || key;
   };
 
+  const contextValue = useMemo(() => ({
+    language,
+    setLanguage,
+    t
+  }), [language]);
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );
