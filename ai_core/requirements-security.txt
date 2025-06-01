@@ -23,6 +23,7 @@ pyopenssl>=23.3.0
 bandit>=1.7.5
 safety>=2.3.5
 semgrep>=1.45.0
+pip-audit>=2.9.0
 
 # Input Validation & Sanitization
 bleach>=6.1.0

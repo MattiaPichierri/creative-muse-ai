@@ -56,8 +56,8 @@ RUN chown -R vscode:vscode /workspace
 # Switch to vscode user
 USER vscode
 
-# Install Python development tools
-RUN pip install --user --upgrade pip setuptools wheel
+# Install Python development tools and security tools
+RUN pip install --user --upgrade pip setuptools wheel pip-audit
 
 # Set up shell environment
 RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc

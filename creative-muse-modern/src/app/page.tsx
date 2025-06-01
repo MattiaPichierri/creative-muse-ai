@@ -51,7 +51,7 @@ interface AdvancedSettings {
 }
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [localIdeas, setLocalIdeas] = useIdeasStorage();
   const [ideas, setIdeas] = useState<Idea[]>(localIdeas || []);
   const [customPrompt, setCustomPrompt] = useState('');
@@ -123,7 +123,7 @@ export default function Home() {
     setIsGenerating(true);
     setError(null);
 
-    const result = await apiService.generateRandomIdea();
+    const result = await apiService.generateRandomIdea(undefined, language);
 
     if (result.error) {
       setError(result.error);
@@ -146,7 +146,7 @@ export default function Home() {
       prompt: customPrompt,
       category: advancedSettings.defaultCategory,
       creativity_level: advancedSettings.defaultCreativityLevel,
-      language: 'de',
+      language: language,
     };
 
     const result = await apiService.generateCustomIdea(ideaRequest);

@@ -14,10 +14,14 @@ help:
 	@echo "  init-secure-db   - Sichere Datenbank initialisieren"
 	@echo ""
 	@echo "Entwicklung:"
-	@echo "  dev-secure       - Sichere Entwicklungsumgebung starten"
-	@echo "  start-backend    - Backend starten"
-	@echo "  start-frontend   - Frontend starten"
-	@echo "  start-monitoring - Sicherheitsmonitoring starten"
+	@echo "  dev-secure         - Sichere Entwicklungsumgebung starten"
+	@echo "  start-backend      - Multi-Model Backend starten (Standard)"
+	@echo "  start-multi-model  - Multi-Model Backend explizit starten"
+	@echo "  start-simple-backend - Einfaches Backend starten (Legacy)"
+	@echo "  start-llm-backend  - LLM Backend starten"
+	@echo "  start-mistral-backend - Mistral API Backend starten"
+	@echo "  start-frontend     - Frontend starten"
+	@echo "  start-monitoring   - Sicherheitsmonitoring starten"
 	@echo ""
 	@echo "Tests:"
 	@echo "  test-security    - Sicherheitstests ausführen"
@@ -97,8 +101,28 @@ dev-secure: start-monitoring start-backend start-frontend
 
 # Backend starten
 start-backend:
-	@echo "🔧 Starte Backend..."
+	@echo "🔧 Starte Backend mit Multi-Model-Support..."
+	@cd ai_core && source venv/bin/activate && python3 main_multi_model.py &
+
+# Multi-Model Backend starten (explizit)
+start-multi-model:
+	@echo "🤖 Starte Multi-Model Backend..."
+	@cd ai_core && source venv/bin/activate && python3 main_multi_model.py &
+
+# Einfaches Backend starten (Legacy)
+start-simple-backend:
+	@echo "🔧 Starte einfaches Backend..."
 	@cd ai_core && source venv/bin/activate && python3 main.py &
+
+# LLM Backend starten
+start-llm-backend:
+	@echo "🧠 Starte LLM Backend..."
+	@cd ai_core && source venv/bin/activate && python3 main_llm.py &
+
+# Mistral API Backend starten
+start-mistral-backend:
+	@echo "🌟 Starte Mistral API Backend..."
+	@cd ai_core && source venv/bin/activate && python3 main_mistral_api.py &
 
 # Frontend starten
 start-frontend:
