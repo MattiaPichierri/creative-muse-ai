@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +19,7 @@ import { ExportButton } from '@/components/ExportButton';
 import { PredefinedPrompts } from '@/components/PredefinedPrompts';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { IdeaRating } from '@/components/IdeaRating';
+import { ModelSelector } from '@/components/ModelSelector';
 import { useIdeasStorage } from '@/hooks/useLocalStorage';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -36,24 +37,10 @@ import {
 export default function Home() {
   const { t } = useLanguage();
   const [localIdeas, setLocalIdeas] = useIdeasStorage();
-  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [ideas, setIdeas] = useState<Idea[]>(localIdeas || []);
   const [customPrompt, setCustomPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Carica le idee dal localStorage all'avvio
-  useEffect(() => {
-    if (localIdeas && Array.isArray(localIdeas)) {
-      setIdeas(localIdeas);
-    }
-  }, [localIdeas]);
-
-  // Salva le idee nel localStorage quando cambiano
-  useEffect(() => {
-    if (ideas.length > 0) {
-      setLocalIdeas(ideas);
-    }
-  }, [ideas, setLocalIdeas]);
 
   const generateRandomIdea = async () => {
     setIsGenerating(true);
@@ -64,7 +51,9 @@ export default function Home() {
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
-      setIdeas((prev) => [result.data!, ...prev]);
+      const newIdeas = [result.data!, ...ideas];
+      setIdeas(newIdeas);
+      setLocalIdeas(newIdeas);
     }
 
     setIsGenerating(false);
@@ -76,12 +65,21 @@ export default function Home() {
     setIsGenerating(true);
     setError(null);
 
-    const result = await apiService.generateCustomIdea(customPrompt);
+    const ideaRequest = {
+      prompt: customPrompt,
+      category: 'general',
+      creativity_level: 7,
+      language: 'de'
+    };
+
+    const result = await apiService.generateCustomIdea(ideaRequest);
 
     if (result.error) {
       setError(result.error);
     } else if (result.data) {
-      setIdeas((prev) => [result.data!, ...prev]);
+      const newIdeas = [result.data!, ...ideas];
+      setIdeas(newIdeas);
+      setLocalIdeas(newIdeas);
       setCustomPrompt('');
     }
 
@@ -130,6 +128,7 @@ export default function Home() {
                 >
                   {t('header.aiPowered')}
                 </Badge>
+                <ModelSelector />
                 <ExportButton ideas={ideas} />
                 <LanguageSelector />
                 <ThemeToggle />
@@ -305,6 +304,12 @@ export default function Home() {
                           <Badge variant="outline" className="text-xs">
                             {idea.category}
                           </Badge>
+                          {idea.model_used && idea.model_used !== 'mock' && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Brain className="h-3 w-3 mr-1" />
+                              {idea.model_used}
+                            </Badge>
+                          )}
                         </div>
                         {idea.rating && (
                           <div className="flex items-center space-x-1">

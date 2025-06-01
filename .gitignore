@@ -283,3 +283,16 @@ local_config.json
 debug_output.txt
 test_data.json
 development_notes.md
+
+# AI Models und Cache
+models/
+*.safetensors
+*.bin
+*.onnx
+*.pt
+*.pth
+.cache/
+temp_offload/
+
+# Hugging Face Cache
+~/.cache/huggingface/

@@ -19,6 +19,10 @@ from datetime import datetime
 import uuid
 import asyncio
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# Lade Umgebungsvariablen aus dem Hauptverzeichnis
+load_dotenv("../.env")
 
 # Transformers und Torch für Mistral
 try:
@@ -50,13 +54,20 @@ async def load_mistral_model():
         return False
     
     try:
-        # Verwende das Mistral-7B-Instruct-v0.3 Modell
+        # Verwende das Mistral-7B-Instruct-v0.3 Modell mit HF Token
         model_name = "mistralai/Mistral-7B-Instruct-v0.3"
+        hf_token = os.getenv("HF_TOKEN")
+        
+        if not hf_token:
+            logger.error("❌ HF_TOKEN nicht gefunden in .env Datei")
+            return False
+            
         logger.info(f"🤖 Lade Mistral-7B-Instruct-v0.3 Modell: {model_name}")
+        logger.info("🔑 Verwende Hugging Face Token für Authentifizierung")
         logger.info("📥 Download kann einige Minuten dauern (ca. 1.5GB)...")
         
-        # Tokenizer laden
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # Tokenizer laden mit Token
+        tokenizer = AutoTokenizer.from_pretrained(model_name, token=hf_token)
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
         
@@ -68,6 +79,7 @@ async def load_mistral_model():
         # Maximale Speicher-Optimierung für Mistral-7B ohne bitsandbytes
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
+            token=hf_token,
             torch_dtype=torch.float16 if device == "cuda" else torch.float32,
             device_map="cpu",  # Forciere CPU um OOM zu vermeiden
             low_cpu_mem_usage=True,
