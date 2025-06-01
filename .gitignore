@@ -81,7 +81,7 @@ security/keys/
 *.db
 *.sqlite
 *.sqlite3
-database/creative_muse.db
+database/*
 database/backups/
 
 # Konfigurationsdateien mit Geheimnissen

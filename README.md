@@ -21,18 +21,48 @@ Creative Muse AI nutzt lokale LLM-Modelle (Mistral-7B-Instruct-v0.3) und gewähr
 - Mindestens 16GB RAM (für Mistral-7B)
 - 20GB freier Speicherplatz
 
-### Installation
+### Schnelle Installation (React Frontend)
 
 ```bash
 # Repository klonen
 git clone https://github.com/MattiaPichierri/creative-muse-ai.git
 cd creative_muse_ai
 
-# Vollständiges sicheres Setup
+# Python Backend einrichten
+cd ai_core
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+
+# Datenbank initialisieren und aktualisieren
+cd ..
+python database/init_db.py
+python scripts/update_database.py
+
+# React Frontend einrichten
+cd creative-muse-react
+npm install
+
+# Backend starten (Terminal 1)
+cd ../ai_core
+export HF_TOKEN=$(cat ~/.cache/huggingface/token)  # Optional
+python main_mistral_api.py
+
+# Frontend starten (Terminal 2)
+cd ../creative-muse-react
+npm run dev
+```
+
+### Vollständiges sicheres Setup
+
+```bash
+# Vollständiges sicheres Setup mit allen Sicherheitsfeatures
 make setup-secure
 
 # Entwicklungsumgebung starten
-make dev-secure
+make start-react  # Für React Frontend
+# oder
+make start-electron  # Für Electron Frontend
 ```
 
 ### Manuelle Installation
@@ -47,30 +77,38 @@ pip install -r requirements.txt
 pip install -r requirements-security.txt
 
 # 2. Sicherheitsschlüssel generieren
-python scripts/key_generation.py
+python ../scripts/key_generation.py
 
 # 3. Datenbank initialisieren
-python database/init_db.py
+python ../database/init_db.py
 
-# 4. Frontend-Abhängigkeiten installieren
-cd ../ui_frontend
+# 4. React Frontend-Abhängigkeiten installieren
+cd ../creative-muse-react
 npm install
 
-# 5. Modell herunterladen
-cd ../
-python scripts/download_model.py
+# 5. Backend starten (in separatem Terminal)
+cd ../ai_core
+export HF_TOKEN=$(cat ~/.cache/huggingface/token)  # Falls Hugging Face Token vorhanden
+python main_mistral_api.py
+
+# 6. Frontend starten (in separatem Terminal)
+cd ../creative-muse-react
+npm run dev
 ```
 
 ## 🏗️ Architektur
 
 ```
 creative_muse_ai/
-├── ai_core/          # Python Backend (FastAPI + Mistral-7B)
-├── ui_frontend/      # Electron Frontend (React)
-├── database/         # Verschlüsselte SQLite Datenbank
-├── security/         # Sicherheits- und Verschlüsselungsmodule
-├── logs/             # Verschlüsselte Audit-Logs
-└── scripts/          # Setup- und Utility-Skripte
+├── ai_core/              # Python Backend (FastAPI + Mistral-7B)
+├── creative-muse-react/  # React Frontend (Vite + TypeScript)
+├── ui_frontend/          # Legacy Electron Frontend
+├── database/             # Verschlüsselte SQLite Datenbank
+├── security/             # Sicherheits- und Verschlüsselungsmodule
+├── logs/                 # Verschlüsselte Audit-Logs
+├── scripts/              # Setup- und Utility-Skripte
+├── data/                 # Datenverzeichnis
+└── backups/              # Backup-Verzeichnis
 ```
 
 ## 🔒 Sicherheitsfeatures
@@ -82,8 +120,26 @@ creative_muse_ai/
 - **Process Isolation** zwischen Modulen
 - **Automatische Schlüsselrotation**
 
+## ✨ Frontend Features
+
+### React Frontend (creative-muse-react)
+- **Modernes Design**: Glasmorphismus mit Tailwind CSS
+- **Responsive Layout**: Optimiert für alle Bildschirmgrößen
+- **Dark Mode**: Nahtloser Wechsel zwischen Hell- und Dunkelmodus
+- **Animationen**: Framer Motion für flüssige Übergänge
+- **TypeScript**: Vollständige Typsicherheit
+- **Mehrsprachigkeit**: Deutsch/Englisch Support
+- **Real-time Updates**: Live-Aktualisierung der Ideen
+- **Offline-Fähig**: PWA-Ready für Offline-Nutzung
+
+### Legacy Electron Frontend (ui_frontend)
+- **Desktop-App**: Native Desktop-Anwendung
+- **Sicherheit**: Isolierte Prozesse
+- **Cross-Platform**: Windows, macOS, Linux
+
 ## 📖 Dokumentation
 
+- [React Frontend Dokumentation](docs/REACT_FRONTEND.md)
 - [Sicherheitsdokumentation](docs/SECURITY.md)
 - [Datenschutz-Richtlinien](docs/PRIVACY.md)
 - [API-Dokumentation](docs/API.md)
@@ -126,7 +182,8 @@ Die Anwendung kann über verschiedene Konfigurationsdateien angepasst werden:
 
 - [`security-config.yaml`](security-config.yaml) - Globale Sicherheitseinstellungen
 - [`ai_core/config.py`](ai_core/config.py) - Backend-Konfiguration
-- [`ui_frontend/security-config.json`](ui_frontend/security-config.json) - Frontend-Sicherheit
+- [`creative-muse-react/vite.config.ts`](creative-muse-react/vite.config.ts) - Frontend-Konfiguration
+- [`creative-muse-react/tailwind.config.js`](creative-muse-react/tailwind.config.js) - Design-Konfiguration
 
 ## 🆘 Support
 

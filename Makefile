@@ -33,7 +33,7 @@ help:
 	@echo ""
 
 # Vollständiges sicheres Setup
-setup-secure: install-deps generate-keys setup-encryption init-secure-db
+setup-secure: install-deps generate-keys setup-encryption init-secure-db update-db load-env
 	@echo "✅ Sicheres Setup abgeschlossen"
 
 # Kryptographische Schlüssel generieren
@@ -67,6 +67,7 @@ install-python:
 install-node:
 	@echo "📦 Installiere Node.js-Abhängigkeiten..."
 	@cd ui_frontend && npm install
+	@cd creative-muse-react && npm install
 
 # Sichere Datenbank initialisieren
 init-secure-db:
@@ -75,6 +76,19 @@ init-secure-db:
 	@chmod 700 database
 	@cd ai_core && source venv/bin/activate && python3 ../database/init_db.py
 	@echo "✅ Datenbank initialisiert"
+
+# Datenbank aktualisieren
+update-db:
+	@echo "🔄 Aktualisiere Datenbank-Schema..."
+	@python3 scripts/update_database.py
+	@echo "✅ Datenbank aktualisiert"
+
+# Environment-Variablen laden
+load-env:
+	@echo "🔧 Lade Environment-Variablen..."
+	@python3 scripts/load_env.py bash
+	@echo "✅ Environment-Script erstellt: load_env.sh"
+	@echo "💡 Verwende: source load_env.sh"
 
 # Sichere Entwicklungsumgebung starten
 dev-secure: start-monitoring start-backend start-frontend
@@ -88,6 +102,18 @@ start-backend:
 # Frontend starten
 start-frontend:
 	@echo "🖥️ Starte Frontend..."
+	@echo "Wähle Frontend:"
+	@echo "1. React Frontend (empfohlen): make start-react"
+	@echo "2. Legacy Electron Frontend: make start-electron"
+
+# React Frontend starten
+start-react:
+	@echo "🖥️ Starte React Frontend..."
+	@cd creative-muse-react && npm run dev &
+
+# Electron Frontend starten
+start-electron:
+	@echo "🖥️ Starte Electron Frontend..."
 	@cd ui_frontend && npm run dev &
 
 # Sicherheitsmonitoring starten
@@ -126,6 +152,7 @@ test-backend:
 test-frontend:
 	@echo "🧪 Führe Frontend-Tests aus..."
 	@cd ui_frontend && npm test
+	@cd creative-muse-react && npm test
 
 # Compliance-Überprüfung
 compliance-check:
@@ -165,6 +192,8 @@ clean:
 	@find . -type f -name "*.log" -delete
 	@rm -rf ai_core/.pytest_cache
 	@rm -rf ui_frontend/node_modules/.cache
+	@rm -rf creative-muse-react/node_modules/.cache
+	@rm -rf creative-muse-react/dist
 	@echo "✅ Cleanup abgeschlossen"
 
 # Notfall-Prozeduren
