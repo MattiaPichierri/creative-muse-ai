@@ -67,7 +67,8 @@ install-python:
 install-node:
 	@echo "📦 Installiere Node.js-Abhängigkeiten..."
 	@cd ui_frontend && npm install
-	@cd creative-muse-react && npm install
+	@cd creative-muse-modern && npm install
+	@if [ -d "creative-muse-react" ]; then cd creative-muse-react && npm install; fi
 
 # Sichere Datenbank initialisieren
 init-secure-db:
@@ -103,13 +104,19 @@ start-backend:
 start-frontend:
 	@echo "🖥️ Starte Frontend..."
 	@echo "Wähle Frontend:"
-	@echo "1. React Frontend (empfohlen): make start-react"
-	@echo "2. Legacy Electron Frontend: make start-electron"
+	@echo "1. Next.js Frontend (empfohlen): make start-modern"
+	@echo "2. Legacy React Frontend: make start-react"
+	@echo "3. Legacy Electron Frontend: make start-electron"
 
-# React Frontend starten
+# Next.js Frontend starten
+start-modern:
+	@echo "🖥️ Starte Next.js Frontend..."
+	@cd creative-muse-modern && npm run dev &
+
+# Legacy React Frontend starten
 start-react:
-	@echo "🖥️ Starte React Frontend..."
-	@cd creative-muse-react && npm run dev &
+	@echo "🖥️ Starte Legacy React Frontend..."
+	@if [ -d "creative-muse-react" ]; then cd creative-muse-react && npm run dev &; else echo "❌ Legacy React Frontend nicht gefunden"; fi
 
 # Electron Frontend starten
 start-electron:
@@ -152,7 +159,8 @@ test-backend:
 test-frontend:
 	@echo "🧪 Führe Frontend-Tests aus..."
 	@cd ui_frontend && npm test
-	@cd creative-muse-react && npm test
+	@cd creative-muse-modern && npm test
+	@if [ -d "creative-muse-react" ]; then cd creative-muse-react && npm test; fi
 
 # Compliance-Überprüfung
 compliance-check:
@@ -192,8 +200,9 @@ clean:
 	@find . -type f -name "*.log" -delete
 	@rm -rf ai_core/.pytest_cache
 	@rm -rf ui_frontend/node_modules/.cache
-	@rm -rf creative-muse-react/node_modules/.cache
-	@rm -rf creative-muse-react/dist
+	@rm -rf creative-muse-modern/node_modules/.cache
+	@rm -rf creative-muse-modern/.next
+	@if [ -d "creative-muse-react" ]; then rm -rf creative-muse-react/node_modules/.cache creative-muse-react/dist; fi
 	@echo "✅ Cleanup abgeschlossen"
 
 # Notfall-Prozeduren
@@ -247,7 +256,7 @@ deploy-quick: ## ⚡ Schnelles Deployment (ohne Backup/Build)
 docker-build: ## 🔨 Docker Images bauen
 	@echo "🔨 Baue Docker Images..."
 	@cd ai_core && docker build -t creative-muse-api .
-	@cd creative-muse-react && docker build -t creative-muse-frontend .
+	@cd creative-muse-modern && docker build -t creative-muse-frontend .
 
 .PHONY: docker-up
 docker-up: ## 🐳 Docker Container starten

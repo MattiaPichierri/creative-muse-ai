@@ -86,9 +86,17 @@ echo "🔧 Configuring git..."
 git config --global --add safe.directory /workspace
 git config --global init.defaultBranch main
 
-# Install Node.js dependencies for React app
+# Install Node.js dependencies for Next.js app
+if [ -d "creative-muse-modern" ]; then
+    echo "⚛️ Installing Next.js app dependencies..."
+    cd /workspace/creative-muse-modern
+    npm install
+    cd /workspace
+fi
+
+# Install Node.js dependencies for legacy React app (if exists)
 if [ -d "creative-muse-react" ]; then
-    echo "⚛️ Installing React app dependencies..."
+    echo "⚛️ Installing legacy React app dependencies..."
     cd /workspace/creative-muse-react
     npm install
     cd /workspace
@@ -120,14 +128,15 @@ alias egrep='egrep --color=auto'
 
 # Project specific aliases
 alias start-backend='cd /workspace && python ai_core/main_llm.py'
-alias start-frontend='cd /workspace/creative-muse-react && npm run dev -- --host 0.0.0.0'
-alias start-frontend-build='cd /workspace/creative-muse-react && npm run build && npm run preview -- --host 0.0.0.0'
+alias start-frontend='cd /workspace/creative-muse-modern && npm run dev -- --host 0.0.0.0'
+alias start-frontend-build='cd /workspace/creative-muse-modern && npm run build && npm start -- --host 0.0.0.0'
+alias start-react='cd /workspace/creative-muse-react && npm run dev -- --host 0.0.0.0'
 alias run-tests='cd /workspace && python -m pytest'
-alias run-frontend-tests='cd /workspace/creative-muse-react && npm test'
+alias run-frontend-tests='cd /workspace/creative-muse-modern && npm test'
 alias check-code='cd /workspace && flake8 ai_core/ && black --check ai_core/'
 alias format-code='cd /workspace && black ai_core/'
-alias format-frontend='cd /workspace/creative-muse-react && npm run format'
-alias lint-frontend='cd /workspace/creative-muse-react && npm run lint'
+alias format-frontend='cd /workspace/creative-muse-modern && npm run format'
+alias lint-frontend='cd /workspace/creative-muse-modern && npm run lint'
 alias db-shell='sqlite3 /workspace/database/creative_muse.db'
 alias init-database='bash /workspace/.devcontainer/init-database.sh'
 alias setup-hosts='bash /workspace/.devcontainer/setup-hosts.sh'
@@ -136,19 +145,20 @@ alias restart-traefik='bash /workspace/.devcontainer/restart-traefik.sh'
 
 # Quick navigation
 alias backend='cd /workspace/ai_core'
-alias frontend='cd /workspace/creative-muse-react'
+alias frontend='cd /workspace/creative-muse-modern'
+alias react='cd /workspace/creative-muse-react'
 alias db='cd /workspace/database'
 alias logs='cd /workspace/logs'
 
 echo "🎨 Creative Muse AI DevContainer ready!"
 echo "💡 Use 'start-backend' to run the API server"
-echo "⚛️ Use 'start-frontend' to run the React development server"
-echo "🏗️ Use 'start-frontend-build' to build and preview React app"
+echo "⚛️ Use 'start-frontend' to run the Next.js development server"
+echo "🏗️ Use 'start-frontend-build' to build and preview Next.js app"
 echo "🧪 Use 'run-tests' to run Python tests"
-echo "⚛️ Use 'run-frontend-tests' to run React tests"
+echo "⚛️ Use 'run-frontend-tests' to run Next.js tests"
 echo "🔍 Use 'check-code' to check Python code quality"
-echo "✨ Use 'format-frontend' to format React code"
-echo "🔍 Use 'lint-frontend' to lint React code"
+echo "✨ Use 'format-frontend' to format Next.js code"
+echo "🔍 Use 'lint-frontend' to lint Next.js code"
 EOF
 
 # Source the new aliases
@@ -159,27 +169,28 @@ echo "🎉 Creative Muse AI Development Environment Setup Complete!"
 echo ""
 echo "📋 Quick Start Commands:"
 echo "  start-backend       - Start the FastAPI backend server"
-echo "  start-frontend      - Start the React development server"
-echo "  start-frontend-build- Build and preview React app"
+echo "  start-frontend      - Start the Next.js development server"
+echo "  start-frontend-build- Build and preview Next.js app"
+echo "  start-react         - Start legacy React development server"
 echo "  run-tests           - Run Python test suite"
-echo "  run-frontend-tests  - Run React test suite"
+echo "  run-frontend-tests  - Run Next.js test suite"
 echo "  check-code          - Check Python code quality"
 echo "  format-code         - Format Python code with black"
-echo "  format-frontend     - Format React code with Prettier"
-echo "  lint-frontend       - Lint React code with ESLint"
+echo "  format-frontend     - Format Next.js code with Prettier"
+echo "  lint-frontend       - Lint Next.js code with ESLint"
 echo "  db-shell            - Open SQLite database shell"
 echo ""
 echo "🚀 Ready to develop! Happy coding! 🎨🤖"
 echo ""
-echo "💡 WICHTIG: Um das React System zu starten:"
+echo "💡 WICHTIG: Um das Next.js System zu starten:"
 echo "1. Öffne ein neues Terminal: Ctrl+Shift+\`"
 echo "2. Starte das Backend: start-backend"
 echo "3. Öffne ein weiteres Terminal: Ctrl+Shift+\`"
-echo "4. Starte das React Frontend: start-frontend"
+echo "4. Starte das Next.js Frontend: start-frontend"
 echo "5. Öffne http://localhost:3000 im Browser"
 echo ""
 echo "🌐 Verfügbare URLs im DevContainer:"
-echo "  - React App: http://localhost:3000"
+echo "  - Next.js App: http://localhost:3000"
 echo "  - Backend API: http://localhost:8001"
 echo "  - API Docs: http://localhost:8001/docs"
 echo "  - Traefik Dashboard: http://localhost:8080"

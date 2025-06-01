@@ -83,7 +83,7 @@
       "onAutoForward": "silent"
     },
     "3000": {
-      "label": "React Development Server",
+      "label": "Next.js Development Server",
       "onAutoForward": "silent"
     },
     "5001": {
