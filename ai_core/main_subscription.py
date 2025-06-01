@@ -76,11 +76,11 @@ class IdeaResponse(BaseModel):
     created_at: str
     generation_method: str
     model_used: str
-    user_id: int
+    user_id: str
 
 
 class UserProfile(BaseModel):
-    id: int
+    id: str
     uuid: str
     email: str
     username: Optional[str]
@@ -150,7 +150,12 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

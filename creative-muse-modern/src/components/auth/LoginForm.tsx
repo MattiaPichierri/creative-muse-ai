@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LoginFormProps {
   onSuccess?: (token: string, user: any) => void;
@@ -20,6 +22,8 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +31,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8001/api/v1/auth/login', {
+      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,16 +45,31 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
         throw new Error(data.detail || 'Errore durante il login');
       }
 
-      // Salva il token nel localStorage
-      localStorage.setItem('auth_token', data.access_token);
-      localStorage.setItem('user_data', JSON.stringify(data.user));
+      // Crea l'oggetto user con la struttura corretta
+      const user = {
+        id: data.user_id,
+        email: data.email,
+        username: data.username,
+        subscription_tier: data.subscription_tier,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        is_active: true,
+        email_verified: data.email_verified === 1
+      };
+
+      // Usa il login del AuthContext
+      login(data.token, user);
 
       if (onSuccess) {
-        onSuccess(data.access_token, data.user);
+        onSuccess(data.token, user);
       }
 
-    } catch (err: any) {
-      setError(err.message || 'Errore durante il login');
+      // Redirect alla homepage dopo il login
+      router.push('/');
+
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Errore durante il login';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

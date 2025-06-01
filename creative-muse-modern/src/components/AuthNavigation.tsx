@@ -49,7 +49,7 @@ export default function AuthNavigation() {
   return (
     <div className="flex items-center space-x-4">
       {/* Badge del piano */}
-      {subscriptionInfo && (
+      {subscriptionInfo && subscriptionInfo.plan && (
         <Link href="/subscription">
           <Badge className={`${getPlanColor(subscriptionInfo.plan.name)} hover:opacity-80 cursor-pointer`}>
             <Crown className="h-3 w-3 mr-1" />

@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   username?: string;
   subscription_tier: string;
@@ -39,6 +39,29 @@ interface SubscriptionInfo {
   usage: {
     daily_ideas: number;
     monthly_ideas: number;
+  };
+}
+
+interface BackendSubscriptionResponse {
+  tier: string;
+  limits: {
+    daily_ideas: number;
+    monthly_ideas: number;
+    team_members: number;
+    projects: number;
+  };
+  usage: {
+    daily_ideas: number;
+    monthly_ideas: number;
+  };
+  features: {
+    ai_models: string[];
+    export_formats: string[];
+    collaboration: boolean;
+    priority_support: boolean;
+    api_access: boolean;
+    white_label: boolean;
+    analytics: boolean;
   };
 }
 
@@ -100,15 +123,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!currentToken) return;
 
     try {
-      const response = await fetch('http://localhost:8001/api/v1/subscription/info', {
+      const response = await fetch('http://localhost:8000/api/v1/subscription/info', {
         headers: {
           'Authorization': `Bearer ${currentToken}`,
         },
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setSubscriptionInfo(data);
+        const data: BackendSubscriptionResponse = await response.json();
+        
+        // Transform backend response to frontend format
+        const transformedData: SubscriptionInfo = {
+          plan: {
+            name: data.tier,
+            display_name: data.tier.charAt(0).toUpperCase() + data.tier.slice(1),
+            price_monthly: data.tier === 'free' ? 0 :
+                          data.tier === 'creator' ? 9.99 :
+                          data.tier === 'pro' ? 29.99 : 99.99
+          },
+          limits: {
+            daily_ideas_limit: data.limits.daily_ideas,
+            monthly_ideas_limit: data.limits.monthly_ideas,
+            max_team_members: data.limits.team_members,
+            max_projects: data.limits.projects,
+            features: {
+              ai_models: data.features.ai_models,
+              export_formats: data.features.export_formats,
+              collaboration: data.features.collaboration,
+              priority_support: data.features.priority_support,
+              api_access: data.features.api_access,
+              white_label: data.features.white_label,
+              analytics: data.features.analytics
+            }
+          },
+          usage: {
+            daily_ideas: data.usage.daily_ideas,
+            monthly_ideas: data.usage.monthly_ideas
+          }
+        };
+        
+        setSubscriptionInfo(transformedData);
       } else {
         console.error('Errore nel caricamento info sottoscrizione');
       }
