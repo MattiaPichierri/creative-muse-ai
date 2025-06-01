@@ -754,7 +754,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         setLanguageState(browserLang);
       }
     }
-  }, []);
+  }, []); // Empty dependency array to run only once
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

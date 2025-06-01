@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { apiService, type Stats, type ModelInfo } from '@/lib/api';
+import { apiService, type Stats } from '@/lib/api';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIdeasStorage } from '@/hooks/useLocalStorage';
 import {
@@ -81,8 +81,8 @@ export default function StatsPage() {
         loaded_models: 0,
         current_model: null,
         model_status: {},
-        memory_usage: {}
-      }
+        memory_usage: {},
+      },
     });
 
     setLastUpdated(new Date());

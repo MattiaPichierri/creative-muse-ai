@@ -111,7 +111,14 @@ def get_model_cache_dir() -> Path:
     if not cache_path.is_absolute():
         cache_path = Path(__file__).parent.parent / cache_path
     
+    # Stelle sicher, dass das Verzeichnis existiert
     cache_path.mkdir(parents=True, exist_ok=True)
+    
+    # Erstelle auch das relative Verzeichnis für ai_core
+    ai_core_models = Path(__file__).parent.parent / "ai_core" / "models"
+    if not ai_core_models.exists():
+        ai_core_models.symlink_to(cache_path.resolve(), target_is_directory=True)
+    
     logger.info(f"📁 Model Cache Verzeichnis: {cache_path}")
     return cache_path
 
@@ -150,14 +157,21 @@ def download_model(model_key: str, force_download: bool = False) -> bool:
         logger.info("📥 Starte Download...")
         
         # Download mit snapshot_download für bessere Kontrolle
-        downloaded_path = snapshot_download(
-            repo_id=model_name,
-            cache_dir=str(cache_dir),
-            local_dir=str(model_cache_path),
-            token=hf_token,
-            resume_download=True,
-            local_dir_use_symlinks=False
-        )
+        try:
+            downloaded_path = snapshot_download(
+                repo_id=model_name,
+                cache_dir=str(cache_dir),
+                local_dir=str(model_cache_path),
+                token=hf_token,
+                resume_download=True,
+                local_dir_use_symlinks=False
+            )
+        except KeyboardInterrupt:
+            logger.info("⏸️  Download unterbrochen - kann später fortgesetzt werden")
+            return False
+        except Exception as download_error:
+            logger.error(f"❌ Download-Fehler: {download_error}")
+            return False
         
         logger.info(f"✅ Modell erfolgreich heruntergeladen: {downloaded_path}")
         

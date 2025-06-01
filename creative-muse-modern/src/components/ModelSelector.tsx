@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { apiService, type ModelInfo } from '@/lib/api';
-import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Brain,
   Cpu,
@@ -33,7 +32,6 @@ import {
 } from 'lucide-react';
 
 export function ModelSelector() {
-  const { t } = useLanguage();
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [switching, setSwitching] = useState<string | null>(null);
@@ -77,9 +75,9 @@ export function ModelSelector() {
     }
   }, [isOpen]);
 
-  const currentModel = models.find(m => m.current);
-  const availableModels = models.filter(m => m.available);
-  const unavailableModels = models.filter(m => !m.available);
+  const currentModel = models.find((m) => m.current);
+  const availableModels = models.filter((m) => m.available);
+  const unavailableModels = models.filter((m) => !m.available);
 
   const getStatusIcon = (model: ModelInfo) => {
     if (model.current) {
@@ -116,7 +114,8 @@ export function ModelSelector() {
             AI-Modell Auswahl
           </DialogTitle>
           <DialogDescription>
-            Wählen Sie ein AI-Modell für die Ideengenerierung. Empfohlene Modelle sind mit einem Stern markiert.
+            Wählen Sie ein AI-Modell für die Ideengenerierung. Empfohlene
+            Modelle sind mit einem Stern markiert.
           </DialogDescription>
         </DialogHeader>
 
@@ -143,9 +142,12 @@ export function ModelSelector() {
                 </h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   {availableModels.map((model) => (
-                    <Card key={model.key} className={`transition-all ${
-                      model.current ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-                    }`}>
+                    <Card
+                      key={model.key}
+                      className={`transition-all ${
+                        model.current ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                      }`}
+                    >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2">
@@ -157,7 +159,9 @@ export function ModelSelector() {
                               )}
                             </CardTitle>
                           </div>
-                          <Badge variant={model.current ? 'default' : 'secondary'}>
+                          <Badge
+                            variant={model.current ? 'default' : 'secondary'}
+                          >
                             {getStatusText(model)}
                           </Badge>
                         </div>
@@ -180,7 +184,7 @@ export function ModelSelector() {
                             )}
                           </div>
                         </div>
-                        
+
                         {!model.current && (
                           <Button
                             onClick={() => switchModel(model.key)}
@@ -201,7 +205,7 @@ export function ModelSelector() {
                             )}
                           </Button>
                         )}
-                        
+
                         {model.current && (
                           <div className="text-center text-sm text-green-600 font-medium">
                             ✓ Aktuell aktiv
@@ -235,9 +239,7 @@ export function ModelSelector() {
                               )}
                             </CardTitle>
                           </div>
-                          <Badge variant="destructive">
-                            Nicht verfügbar
-                          </Badge>
+                          <Badge variant="destructive">Nicht verfügbar</Badge>
                         </div>
                         <CardDescription className="text-sm">
                           {model.description}
@@ -258,11 +260,12 @@ export function ModelSelector() {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="text-center text-sm text-gray-500">
                           💡 Verwenden Sie: <br />
                           <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            python scripts/download_models.py --download {model.key}
+                            python scripts/download_models.py --download{' '}
+                            {model.key}
                           </code>
                         </div>
                       </CardContent>
@@ -276,7 +279,9 @@ export function ModelSelector() {
               <div className="text-center py-8 text-gray-500">
                 <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>Keine Modelle gefunden</p>
-                <p className="text-sm">Stellen Sie sicher, dass das Backend läuft</p>
+                <p className="text-sm">
+                  Stellen Sie sicher, dass das Backend läuft
+                </p>
               </div>
             )}
           </div>

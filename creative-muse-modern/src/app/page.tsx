@@ -69,7 +69,7 @@ export default function Home() {
       prompt: customPrompt,
       category: 'general',
       creativity_level: 7,
-      language: 'de'
+      language: 'de',
     };
 
     const result = await apiService.generateCustomIdea(ideaRequest);
