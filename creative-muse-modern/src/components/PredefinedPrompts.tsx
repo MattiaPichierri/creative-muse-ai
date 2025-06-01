@@ -1,60 +1,63 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Lightbulb, ChevronDown } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface PredefinedPromptsProps {
   onSelectPrompt: (prompt: string) => void
 }
 
-const predefinedPrompts = [
-  {
-    category: 'Nachhaltiges Startup',
-    prompt: 'Entwickle eine innovative Startup-Idee, die sich auf Nachhaltigkeit und Umweltschutz konzentriert. Die Lösung sollte ein reales Problem ansprechen und wirtschaftlich rentabel sein.'
-  },
-  {
-    category: 'Sci-Fi Story',
-    prompt: 'Erstelle eine fesselnde Science-Fiction-Geschichte, die in der nahen Zukunft spielt. Integriere fortschrittliche Technologien und deren Auswirkungen auf die Gesellschaft.'
-  },
-  {
-    category: 'Tech-Produkt',
-    prompt: 'Entwirf ein innovatives Technologieprodukt, das den Alltag der Menschen verbessert. Berücksichtige aktuelle Trends wie KI, IoT oder AR/VR.'
-  },
-  {
-    category: 'Musik-Konzept',
-    prompt: 'Entwickle ein kreatives Musikprojekt oder -konzept, das verschiedene Genres oder innovative Aufführungsformen kombiniert.'
-  },
-  {
-    category: 'Wellness-App',
-    prompt: 'Konzipiere eine App für Gesundheit und Wohlbefinden, die personalisierte Lösungen für mentale oder körperliche Gesundheit bietet.'
-  },
-  {
-    category: 'App-Name',
-    prompt: 'Generiere einen kreativen und einprägsamen Namen für eine mobile App, inklusive einer kurzen Beschreibung der App-Funktionalität.'
-  },
-  {
-    category: 'Alltagsproblem',
-    prompt: 'Identifiziere ein alltägliches Problem und entwickle eine praktische, innovative Lösung dafür. Die Lösung sollte einfach umsetzbar sein.'
-  }
-]
-
 export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
+  const { t } = useLanguage()
+  
+  const predefinedPrompts = [
+    {
+      category: t('prompts.startup'),
+      prompt: t('prompts.startupDesc')
+    },
+    {
+      category: t('prompts.scifi'),
+      prompt: t('prompts.scifiDesc')
+    },
+    {
+      category: t('prompts.tech'),
+      prompt: t('prompts.techDesc')
+    },
+    {
+      category: t('prompts.music'),
+      prompt: t('prompts.musicDesc')
+    },
+    {
+      category: t('prompts.wellness'),
+      prompt: t('prompts.wellnessDesc')
+    },
+    {
+      category: t('prompts.appName'),
+      prompt: t('prompts.appNameDesc')
+    },
+    {
+      category: t('prompts.everyday'),
+      prompt: t('prompts.everydayDesc')
+    }
+  ]
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="sm"
           className="text-sm"
         >
           <Lightbulb className="h-4 w-4 mr-2" />
-          Prompt Predefiniti
+          {t('prompts.title')}
           <ChevronDown className="h-4 w-4 ml-2" />
         </Button>
       </DropdownMenuTrigger>

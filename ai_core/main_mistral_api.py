@@ -27,6 +27,79 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Traduzioni per messaggi del backend
+BACKEND_TRANSLATIONS = {
+    "de": {
+        "api_error": "API-Fehler aufgetreten",
+        "database_error": "Datenbankfehler",
+        "generation_error": "Fehler bei der Ideengenerierung",
+        "invalid_request": "Ungültige Anfrage",
+        "idea_saved": "Idee erfolgreich gespeichert",
+        "idea_not_found": "Idee nicht gefunden",
+        "rating_updated": "Bewertung aktualisiert",
+        "backend_running": "Creative Muse AI Backend läuft",
+        "database_connected": "Datenbank verbunden",
+        "llm_ready": "KI-Modell bereit",
+        "mock_mode": "Mock-Modus aktiv"
+    },
+    "en": {
+        "api_error": "API error occurred",
+        "database_error": "Database error",
+        "generation_error": "Error during idea generation",
+        "invalid_request": "Invalid request",
+        "idea_saved": "Idea saved successfully",
+        "idea_not_found": "Idea not found",
+        "rating_updated": "Rating updated",
+        "backend_running": "Creative Muse AI Backend running",
+        "database_connected": "Database connected",
+        "llm_ready": "AI model ready",
+        "mock_mode": "Mock mode active"
+    },
+    "it": {
+        "api_error": "Errore API verificato",
+        "database_error": "Errore del database",
+        "generation_error": "Errore durante la generazione dell'idea",
+        "invalid_request": "Richiesta non valida",
+        "idea_saved": "Idea salvata con successo",
+        "idea_not_found": "Idea non trovata",
+        "rating_updated": "Valutazione aggiornata",
+        "backend_running": "Creative Muse AI Backend in esecuzione",
+        "database_connected": "Database connesso",
+        "llm_ready": "Modello IA pronto",
+        "mock_mode": "Modalità mock attiva"
+    },
+    "fr": {
+        "api_error": "Erreur API survenue",
+        "database_error": "Erreur de base de données",
+        "generation_error": "Erreur lors de la génération d'idée",
+        "invalid_request": "Demande invalide",
+        "idea_saved": "Idée sauvegardée avec succès",
+        "idea_not_found": "Idée non trouvée",
+        "rating_updated": "Évaluation mise à jour",
+        "backend_running": "Creative Muse AI Backend en cours d'exécution",
+        "database_connected": "Base de données connectée",
+        "llm_ready": "Modèle IA prêt",
+        "mock_mode": "Mode mock actif"
+    },
+    "es": {
+        "api_error": "Error de API ocurrido",
+        "database_error": "Error de base de datos",
+        "generation_error": "Error durante la generación de idea",
+        "invalid_request": "Solicitud inválida",
+        "idea_saved": "Idea guardada exitosamente",
+        "idea_not_found": "Idea no encontrada",
+        "rating_updated": "Calificación actualizada",
+        "backend_running": "Creative Muse AI Backend ejecutándose",
+        "database_connected": "Base de datos conectada",
+        "llm_ready": "Modelo IA listo",
+        "mock_mode": "Modo mock activo"
+    }
+}
+
+def get_translation(key: str, language: str = "de") -> str:
+    """Obtiene traducción para un mensaje del backend"""
+    return BACKEND_TRANSLATIONS.get(language, BACKEND_TRANSLATIONS["de"]).get(key, key)
+
 # Globale Variablen
 mistral_client = None
 
@@ -114,13 +187,13 @@ class IdeaRequest(BaseModel):
     prompt: str
     category: Optional[str] = "general"
     creativity_level: Optional[int] = 5
-    language: Optional[str] = "de"  # de, en, it
+    language: Optional[str] = "it"  # it, en, de, fr, es
     use_llm: Optional[bool] = True
     use_typing: Optional[bool] = False
 
 class RandomIdeaRequest(BaseModel):
     category: Optional[str] = "general"
-    language: Optional[str] = "de"
+    language: Optional[str] = "it"
 
 class IdeaResponse(BaseModel):
     id: str
@@ -196,6 +269,18 @@ def create_mistral_prompt(prompt: str, category: str, language: str, creativity_
             "instruction": f"Genera un'idea creativa per la categoria '{category}' basata su: '{prompt}'. "
                           f"Livello di creatività: {creativity_level}/10. "
                           f"Rispondi con un titolo conciso e una descrizione dettagliata.",
+        },
+        "fr": {
+            "system": "Vous êtes un assistant IA créatif qui génère des idées innovantes et pratiques.",
+            "instruction": f"Générez une idée créative pour la catégorie '{category}' basée sur : '{prompt}'. "
+                          f"Niveau de créativité : {creativity_level}/10. "
+                          f"Répondez avec un titre concis et une description détaillée.",
+        },
+        "es": {
+            "system": "Eres un asistente de IA creativo que genera ideas innovadoras y prácticas.",
+            "instruction": f"Genera una idea creativa para la categoría '{category}' basada en: '{prompt}'. "
+                          f"Nivel de creatividad: {creativity_level}/10. "
+                          f"Responde con un título conciso y una descripción detallada.",
         }
     }
     
@@ -285,7 +370,7 @@ def generate_mock_idea(prompt: str, category: str, language: str, creativity_lev
         ],
         "en": [
             "Innovative Solution for Modern Challenges",
-            "Creative Fusion of Technology and Sustainability", 
+            "Creative Fusion of Technology and Sustainability",
             "Revolutionary Approach for Daily Life",
             "Intelligent Platform for Community Building",
             "Sustainable Innovation with AI Support"
@@ -296,6 +381,20 @@ def generate_mock_idea(prompt: str, category: str, language: str, creativity_lev
             "Approccio Rivoluzionario per la Vita Quotidiana",
             "Piattaforma Intelligente per Community Building",
             "Innovazione Sostenibile con Supporto IA"
+        ],
+        "fr": [
+            "Solution Innovante pour les Défis Modernes",
+            "Fusion Créative de Technologie et Durabilité",
+            "Approche Révolutionnaire pour la Vie Quotidienne",
+            "Plateforme Intelligente pour la Construction Communautaire",
+            "Innovation Durable avec Support IA"
+        ],
+        "es": [
+            "Solución Innovadora para Desafíos Modernos",
+            "Fusión Creativa de Tecnología y Sostenibilidad",
+            "Enfoque Revolucionario para la Vida Diaria",
+            "Plataforma Inteligente para Construcción de Comunidad",
+            "Innovación Sostenible con Soporte IA"
         ]
     }
     
@@ -307,7 +406,11 @@ def generate_mock_idea(prompt: str, category: str, language: str, creativity_lev
         "en": f"This innovative idea is based on '{prompt}' and combines {category} with modern technologies. "
               f"With a creativity level of {creativity_level}, completely new possibilities emerge.",
         "it": f"Questa idea innovativa si basa su '{prompt}' e combina {category} con tecnologie moderne. "
-              f"Con un livello di creatività di {creativity_level}, emergono possibilità completamente nuove."
+              f"Con un livello di creatività di {creativity_level}, emergono possibilità completamente nuove.",
+        "fr": f"Cette idée innovante est basée sur '{prompt}' et combine {category} avec des technologies modernes. "
+              f"Avec un niveau de créativité de {creativity_level}, des possibilités complètement nouvelles émergent.",
+        "es": f"Esta idea innovadora se basa en '{prompt}' y combina {category} con tecnologías modernas. "
+              f"Con un nivel de creatividad de {creativity_level}, surgen posibilidades completamente nuevas."
     }
     
     return {
@@ -318,13 +421,16 @@ def generate_mock_idea(prompt: str, category: str, language: str, creativity_lev
 
 # API Endpunkte
 @app.get("/")
-async def root():
+async def root(language: str = "it"):
     """Root endpoint"""
     return {
-        "message": "Creative Muse AI Backend",
+        "message": get_translation("backend_running", language),
         "version": "1.0.0",
         "status": "running",
         "model": "mistral-7b-api" if mistral_client else "mock",
+        "model_status": get_translation("llm_ready" if mistral_client else "mock_mode", language),
+        "database_status": get_translation("database_connected", language),
+        "supported_languages": ["it", "en", "de", "fr", "es"],
         "endpoints": {
             "generate": "/api/v1/generate",
             "random": "/api/v1/random",
@@ -381,19 +487,43 @@ async def generate_idea(request: IdeaRequest):
         
     except Exception as e:
         logger.error(f"❌ Fehler bei Ideengenerierung: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        error_message = get_translation("generation_error", request.language)
+        raise HTTPException(status_code=500, detail=error_message)
 
 @app.post("/api/v1/random", response_model=IdeaResponse)
 async def generate_random_idea(request: RandomIdeaRequest):
     """Generiere zufällige Idee"""
-    random_prompts = [
-        "Zukunft der Arbeit", "Nachhaltigkeit", "Künstliche Intelligenz",
-        "Gemeinschaft", "Innovation", "Kreativität", "Technologie",
-        "Umwelt", "Bildung", "Gesundheit"
-    ]
+    random_prompts = {
+        "de": [
+            "Zukunft der Arbeit", "Nachhaltigkeit", "Künstliche Intelligenz",
+            "Gemeinschaft", "Innovation", "Kreativität", "Technologie",
+            "Umwelt", "Bildung", "Gesundheit"
+        ],
+        "en": [
+            "Future of Work", "Sustainability", "Artificial Intelligence",
+            "Community", "Innovation", "Creativity", "Technology",
+            "Environment", "Education", "Health"
+        ],
+        "it": [
+            "Futuro del Lavoro", "Sostenibilità", "Intelligenza Artificiale",
+            "Comunità", "Innovazione", "Creatività", "Tecnologia",
+            "Ambiente", "Educazione", "Salute"
+        ],
+        "fr": [
+            "Avenir du Travail", "Durabilité", "Intelligence Artificielle",
+            "Communauté", "Innovation", "Créativité", "Technologie",
+            "Environnement", "Éducation", "Santé"
+        ],
+        "es": [
+            "Futuro del Trabajo", "Sostenibilidad", "Inteligencia Artificial",
+            "Comunidad", "Innovación", "Creatividad", "Tecnología",
+            "Medio Ambiente", "Educación", "Salud"
+        ]
+    }
     
     import random
-    random_prompt = random.choice(random_prompts)
+    prompts_for_lang = random_prompts.get(request.language, random_prompts["it"])
+    random_prompt = random.choice(prompts_for_lang)
     
     idea_request = IdeaRequest(
         prompt=random_prompt,
@@ -406,7 +536,7 @@ async def generate_random_idea(request: RandomIdeaRequest):
     return await generate_idea(idea_request)
 
 @app.get("/api/v1/ideas", response_model=List[IdeaResponse])
-async def get_ideas(limit: int = 50, category: Optional[str] = None):
+async def get_ideas(limit: int = 50, category: Optional[str] = None, language: str = "it"):
     """Hole alle Ideen"""
     try:
         conn = sqlite3.connect(str(db_path))
@@ -442,10 +572,11 @@ async def get_ideas(limit: int = 50, category: Optional[str] = None):
         
     except Exception as e:
         logger.error(f"❌ Fehler beim Laden der Ideen: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        error_message = get_translation("database_error", language)
+        raise HTTPException(status_code=500, detail=error_message)
 
 @app.get("/api/v1/stats", response_model=Stats)
-async def get_stats():
+async def get_stats(language: str = "it"):
     """Hole Statistiken"""
     try:
         conn = sqlite3.connect(str(db_path))
@@ -489,7 +620,8 @@ async def get_stats():
         
     except Exception as e:
         logger.error(f"❌ Fehler beim Laden der Statistiken: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        error_message = get_translation("database_error", language)
+        raise HTTPException(status_code=500, detail=error_message)
 
 @app.get("/health")
 async def health_check():

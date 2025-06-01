@@ -11,7 +11,10 @@ import { MobileNavigation, DesktopNavigation } from '@/components/Navigation'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ExportButton } from '@/components/ExportButton'
 import { PredefinedPrompts } from '@/components/PredefinedPrompts'
+import { LanguageSelector } from '@/components/LanguageSelector'
+import { IdeaRating } from '@/components/IdeaRating'
 import { useIdeasStorage } from '@/hooks/useLocalStorage'
+import { useLanguage } from '@/contexts/LanguageContext'
 import {
   Lightbulb,
   Sparkles,
@@ -25,6 +28,7 @@ import {
 } from 'lucide-react'
 
 export default function Home() {
+  const { t } = useLanguage()
   const [localIdeas, setLocalIdeas] = useIdeasStorage()
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [customPrompt, setCustomPrompt] = useState('')
@@ -78,6 +82,14 @@ export default function Home() {
     setIsGenerating(false)
   }
 
+  const handleRatingChange = (ideaId: string, newRating: number) => {
+    const updatedIdeas = ideas.map(idea =>
+      idea.id === ideaId ? { ...idea, rating: newRating } : idea
+    )
+    setIdeas(updatedIdeas)
+    setLocalIdeas(updatedIdeas)
+  }
+
   return (
     <div className="min-h-screen gradient-bg">
       {/* Header */}
@@ -94,7 +106,7 @@ export default function Home() {
                 <Brain className="h-6 w-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold gradient-text">
-                Creative Muse
+                {t('header.title')}
               </h1>
             </motion.div>
             
@@ -107,9 +119,10 @@ export default function Home() {
               <DesktopNavigation />
               <div className="flex items-center space-x-2">
                 <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                  AI-Powered
+                  {t('header.aiPowered')}
                 </Badge>
                 <ExportButton ideas={ideas} />
+                <LanguageSelector />
                 <ThemeToggle />
               </div>
               <MobileNavigation />
@@ -128,11 +141,10 @@ export default function Home() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-4xl md:text-6xl font-bold mb-4 gradient-text">
-            Libera la tua creatività
+            {t('home.title')}
           </h2>
           <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Genera idee innovative con l&apos;intelligenza artificiale.
-            Trasforma i tuoi pensieri in progetti straordinari.
+            {t('home.subtitle')}
           </p>
         </motion.section>
 
@@ -162,10 +174,10 @@ export default function Home() {
               <CardHeader>
                 <div className="flex items-center space-x-2">
                   <Shuffle className="h-6 w-6 text-blue-600" />
-                  <CardTitle className="text-xl">Idea Casuale</CardTitle>
+                  <CardTitle className="text-xl">{t('home.randomIdea')}</CardTitle>
                 </div>
                 <CardDescription>
-                  Lascia che l&apos;AI generi un&apos;idea completamente nuova per te
+                  {t('home.randomDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -185,7 +197,7 @@ export default function Home() {
                   ) : (
                     <Zap className="h-5 w-5 mr-2" />
                   )}
-                  {isGenerating ? 'Generando...' : 'Genera Idea'}
+                  {isGenerating ? t('home.generating') : t('home.generateIdea')}
                 </Button>
               </CardContent>
             </Card>
@@ -201,10 +213,10 @@ export default function Home() {
               <CardHeader>
                 <div className="flex items-center space-x-2">
                   <Plus className="h-6 w-6 text-purple-600" />
-                  <CardTitle className="text-xl">Idea Personalizzata</CardTitle>
+                  <CardTitle className="text-xl">{t('home.customIdea')}</CardTitle>
                 </div>
                 <CardDescription>
-                  Descrivi quello che hai in mente e lascia che l&apos;AI lo sviluppi
+                  {t('home.customDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -212,7 +224,7 @@ export default function Home() {
                   <PredefinedPrompts onSelectPrompt={setCustomPrompt} />
                 </div>
                 <Textarea
-                  placeholder="Descrivi la tua idea o il tema che ti interessa..."
+                  placeholder={t('home.customPlaceholder')}
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
                   className="min-h-[100px] border-purple-200 focus:border-purple-400"
@@ -233,7 +245,7 @@ export default function Home() {
                   ) : (
                     <ArrowRight className="h-5 w-5 mr-2" />
                   )}
-                  {isGenerating ? 'Generando...' : 'Sviluppa Idea'}
+                  {isGenerating ? t('home.generating') : t('home.developIdea')}
                 </Button>
               </CardContent>
             </Card>
@@ -248,13 +260,13 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-800">Le tue idee</h3>
+              <h3 className="text-2xl font-bold text-slate-800">{t('home.yourIdeas')}</h3>
               {ideas.length > 3 && (
                 <a
                   href="/ideas"
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
                 >
-                  Visualizza tutte →
+                  {t('home.viewAll')} →
                 </a>
               )}
             </div>
@@ -284,10 +296,20 @@ export default function Home() {
                       </div>
                       <CardTitle className="text-lg leading-tight">{idea.title}</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
                       <p className="text-slate-600 text-sm leading-relaxed">{idea.content}</p>
-                      <div className="mt-4 text-xs text-slate-400">
-                        {new Date(idea.created_at).toLocaleDateString('it-IT')}
+                      
+                      {/* Rating Component */}
+                      <div className="pt-2 border-t border-slate-100">
+                        <IdeaRating
+                          ideaId={idea.id}
+                          currentRating={idea.rating || 0}
+                          onRatingChange={(rating) => handleRatingChange(idea.id, rating)}
+                        />
+                      </div>
+                      
+                      <div className="text-xs text-slate-400">
+                        {new Date(idea.created_at).toLocaleDateString()}
                       </div>
                     </CardContent>
                   </Card>
@@ -308,10 +330,10 @@ export default function Home() {
             <div className="p-6 card-gradient rounded-2xl shadow-sm max-w-md mx-auto">
               <Lightbulb className="h-12 w-12 text-slate-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-slate-600 mb-2">
-                Inizia a generare idee
+                {t('home.startGenerating')}
               </h3>
               <p className="text-slate-500 text-sm">
-                Clicca su uno dei pulsanti sopra per iniziare il tuo viaggio creativo
+                {t('home.startDescription')}
               </p>
             </div>
           </motion.div>
