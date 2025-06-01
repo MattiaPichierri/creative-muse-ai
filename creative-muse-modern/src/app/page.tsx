@@ -1,20 +1,26 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { apiService, type Idea } from '@/lib/api'
-import { MobileNavigation, DesktopNavigation } from '@/components/Navigation'
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { ExportButton } from '@/components/ExportButton'
-import { PredefinedPrompts } from '@/components/PredefinedPrompts'
-import { LanguageSelector } from '@/components/LanguageSelector'
-import { IdeaRating } from '@/components/IdeaRating'
-import { useIdeasStorage } from '@/hooks/useLocalStorage'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { apiService, type Idea } from '@/lib/api';
+import { MobileNavigation, DesktopNavigation } from '@/components/Navigation';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { ExportButton } from '@/components/ExportButton';
+import { PredefinedPrompts } from '@/components/PredefinedPrompts';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { IdeaRating } from '@/components/IdeaRating';
+import { useIdeasStorage } from '@/hooks/useLocalStorage';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Lightbulb,
   Sparkles,
@@ -24,71 +30,71 @@ import {
   ArrowRight,
   Shuffle,
   Plus,
-  AlertCircle
-} from 'lucide-react'
+  AlertCircle,
+} from 'lucide-react';
 
 export default function Home() {
-  const { t } = useLanguage()
-  const [localIdeas, setLocalIdeas] = useIdeasStorage()
-  const [ideas, setIdeas] = useState<Idea[]>([])
-  const [customPrompt, setCustomPrompt] = useState('')
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage();
+  const [localIdeas, setLocalIdeas] = useIdeasStorage();
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Carica le idee dal localStorage all'avvio
   useEffect(() => {
     if (localIdeas && Array.isArray(localIdeas)) {
-      setIdeas(localIdeas)
+      setIdeas(localIdeas);
     }
-  }, [localIdeas])
+  }, [localIdeas]);
 
   // Salva le idee nel localStorage quando cambiano
   useEffect(() => {
     if (ideas.length > 0) {
-      setLocalIdeas(ideas)
+      setLocalIdeas(ideas);
     }
-  }, [ideas, setLocalIdeas])
+  }, [ideas, setLocalIdeas]);
 
   const generateRandomIdea = async () => {
-    setIsGenerating(true)
-    setError(null)
-    
-    const result = await apiService.generateRandomIdea()
-    
+    setIsGenerating(true);
+    setError(null);
+
+    const result = await apiService.generateRandomIdea();
+
     if (result.error) {
-      setError(result.error)
+      setError(result.error);
     } else if (result.data) {
-      setIdeas(prev => [result.data!, ...prev])
+      setIdeas((prev) => [result.data!, ...prev]);
     }
-    
-    setIsGenerating(false)
-  }
+
+    setIsGenerating(false);
+  };
 
   const generateCustomIdea = async () => {
-    if (!customPrompt.trim()) return
-    
-    setIsGenerating(true)
-    setError(null)
-    
-    const result = await apiService.generateCustomIdea(customPrompt)
-    
+    if (!customPrompt.trim()) return;
+
+    setIsGenerating(true);
+    setError(null);
+
+    const result = await apiService.generateCustomIdea(customPrompt);
+
     if (result.error) {
-      setError(result.error)
+      setError(result.error);
     } else if (result.data) {
-      setIdeas(prev => [result.data!, ...prev])
-      setCustomPrompt('')
+      setIdeas((prev) => [result.data!, ...prev]);
+      setCustomPrompt('');
     }
-    
-    setIsGenerating(false)
-  }
+
+    setIsGenerating(false);
+  };
 
   const handleRatingChange = (ideaId: string, newRating: number) => {
-    const updatedIdeas = ideas.map(idea =>
+    const updatedIdeas = ideas.map((idea) =>
       idea.id === ideaId ? { ...idea, rating: newRating } : idea
-    )
-    setIdeas(updatedIdeas)
-    setLocalIdeas(updatedIdeas)
-  }
+    );
+    setIdeas(updatedIdeas);
+    setLocalIdeas(updatedIdeas);
+  };
 
   return (
     <div className="min-h-screen gradient-bg">
@@ -96,7 +102,7 @@ export default function Home() {
       <header className="border-b glass sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <motion.div 
+            <motion.div
               className="flex items-center space-x-2"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -109,7 +115,7 @@ export default function Home() {
                 {t('header.title')}
               </h1>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -118,7 +124,10 @@ export default function Home() {
             >
               <DesktopNavigation />
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100 text-blue-700"
+                >
                   {t('header.aiPowered')}
                 </Badge>
                 <ExportButton ideas={ideas} />
@@ -134,7 +143,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <motion.section 
+        <motion.section
           className="text-center mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -174,11 +183,11 @@ export default function Home() {
               <CardHeader>
                 <div className="flex items-center space-x-2">
                   <Shuffle className="h-6 w-6 text-blue-600" />
-                  <CardTitle className="text-xl">{t('home.randomIdea')}</CardTitle>
+                  <CardTitle className="text-xl">
+                    {t('home.randomIdea')}
+                  </CardTitle>
                 </div>
-                <CardDescription>
-                  {t('home.randomDescription')}
-                </CardDescription>
+                <CardDescription>{t('home.randomDescription')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button
@@ -190,7 +199,11 @@ export default function Home() {
                   {isGenerating ? (
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: 'linear',
+                      }}
                     >
                       <Sparkles className="h-5 w-5 mr-2" />
                     </motion.div>
@@ -213,11 +226,11 @@ export default function Home() {
               <CardHeader>
                 <div className="flex items-center space-x-2">
                   <Plus className="h-6 w-6 text-purple-600" />
-                  <CardTitle className="text-xl">{t('home.customIdea')}</CardTitle>
+                  <CardTitle className="text-xl">
+                    {t('home.customIdea')}
+                  </CardTitle>
                 </div>
-                <CardDescription>
-                  {t('home.customDescription')}
-                </CardDescription>
+                <CardDescription>{t('home.customDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center mb-2">
@@ -238,7 +251,11 @@ export default function Home() {
                   {isGenerating ? (
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: 'linear',
+                      }}
                     >
                       <Sparkles className="h-5 w-5 mr-2" />
                     </motion.div>
@@ -260,7 +277,9 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-800">{t('home.yourIdeas')}</h3>
+              <h3 className="text-2xl font-bold text-slate-800">
+                {t('home.yourIdeas')}
+              </h3>
               {ideas.length > 3 && (
                 <a
                   href="/ideas"
@@ -290,24 +309,32 @@ export default function Home() {
                         {idea.rating && (
                           <div className="flex items-center space-x-1">
                             <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                            <span className="text-sm text-slate-600">{idea.rating}</span>
+                            <span className="text-sm text-slate-600">
+                              {idea.rating}
+                            </span>
                           </div>
                         )}
                       </div>
-                      <CardTitle className="text-lg leading-tight">{idea.title}</CardTitle>
+                      <CardTitle className="text-lg leading-tight">
+                        {idea.title}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <p className="text-slate-600 text-sm leading-relaxed">{idea.content}</p>
-                      
+                      <p className="text-slate-600 text-sm leading-relaxed">
+                        {idea.content}
+                      </p>
+
                       {/* Rating Component */}
                       <div className="pt-2 border-t border-slate-100">
                         <IdeaRating
                           ideaId={idea.id}
                           currentRating={idea.rating || 0}
-                          onRatingChange={(rating) => handleRatingChange(idea.id, rating)}
+                          onRatingChange={(rating) =>
+                            handleRatingChange(idea.id, rating)
+                          }
                         />
                       </div>
-                      
+
                       <div className="text-xs text-slate-400">
                         {new Date(idea.created_at).toLocaleDateString()}
                       </div>
@@ -321,7 +348,7 @@ export default function Home() {
 
         {/* Empty State */}
         {ideas.length === 0 && (
-          <motion.div 
+          <motion.div
             className="text-center py-12"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -340,5 +367,5 @@ export default function Home() {
         )}
       </main>
     </div>
-  )
+  );
 }

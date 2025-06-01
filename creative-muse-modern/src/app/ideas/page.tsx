@@ -1,122 +1,129 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { apiService, type Idea } from '@/lib/api'
-import { SearchAndFilter } from '@/components/SearchAndFilter'
-import { IdeaRating } from '@/components/IdeaRating'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useIdeasStorage } from '@/hooks/useLocalStorage'
-import { 
-  Lightbulb, 
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { apiService, type Idea } from '@/lib/api';
+import { SearchAndFilter } from '@/components/SearchAndFilter';
+import { IdeaRating } from '@/components/IdeaRating';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useIdeasStorage } from '@/hooks/useLocalStorage';
+import {
+  Lightbulb,
   ArrowLeft,
   Calendar,
   AlertCircle,
-  Loader2
-} from 'lucide-react'
-import Link from 'next/link'
+  Loader2,
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function IdeasPage() {
-  const { t } = useLanguage()
-  const [localIdeas, setLocalIdeas] = useIdeasStorage()
-  const [ideas, setIdeas] = useState<Idea[]>([])
-  const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [selectedRating, setSelectedRating] = useState<number>(0)
-  const [sortBy, setSortBy] = useState<string>('newest')
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage();
+  const [localIdeas, setLocalIdeas] = useIdeasStorage();
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [sortBy, setSortBy] = useState<string>('newest');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Carica le idee dal localStorage e API
-  useEffect(() => {
-    loadIdeas()
-  }, [])
+  const loadIdeas = useCallback(async () => {
+    setIsLoading(true);
+    const result = await apiService.getAllIdeas();
 
-  // Carica idee dal localStorage all'avvio
-  useEffect(() => {
-    if (localIdeas && Array.isArray(localIdeas)) {
-      setIdeas(localIdeas)
-      setIsLoading(false)
-    }
-  }, [localIdeas])
-
-  // Filtra e ordina le idee quando cambiano i filtri
-  useEffect(() => {
-    filterAndSortIdeas()
-  }, [ideas, searchTerm, selectedCategory, selectedRating, sortBy])
-
-  const loadIdeas = async () => {
-    setIsLoading(true)
-    const result = await apiService.getAllIdeas()
-    
     if (result.error) {
-      setError(result.error)
+      setError(result.error);
       // Fallback al localStorage se l'API fallisce
       if (localIdeas && Array.isArray(localIdeas)) {
-        setIdeas(localIdeas)
+        setIdeas(localIdeas);
       }
     } else if (result.data) {
-      setIdeas(result.data)
-      setLocalIdeas(result.data) // Sincronizza con localStorage
+      setIdeas(result.data);
+      setLocalIdeas(result.data); // Sincronizza con localStorage
     }
-    
-    setIsLoading(false)
-  }
 
-  const filterAndSortIdeas = () => {
-    let filtered = [...ideas]
+    setIsLoading(false);
+  }, [localIdeas, setLocalIdeas]);
+
+  const filterAndSortIdeas = useCallback(() => {
+    let filtered = [...ideas];
 
     // Filtro per ricerca testuale
     if (searchTerm) {
-      filtered = filtered.filter(idea =>
-        idea.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        idea.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        idea.category.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      filtered = filtered.filter(
+        (idea) =>
+          idea.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          idea.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          idea.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
     // Filtro per categoria
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(idea => idea.category === selectedCategory)
+      filtered = filtered.filter((idea) => idea.category === selectedCategory);
     }
 
     // Filtro per rating
     if (selectedRating > 0) {
-      filtered = filtered.filter(idea => (idea.rating || 0) >= selectedRating)
+      filtered = filtered.filter(
+        (idea) => (idea.rating || 0) >= selectedRating
+      );
     }
 
     // Ordinamento
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'oldest':
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          return (
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
         case 'rating':
-          return (b.rating || 0) - (a.rating || 0)
+          return (b.rating || 0) - (a.rating || 0);
         case 'alphabetical':
-          return a.title.localeCompare(b.title)
+          return a.title.localeCompare(b.title);
         case 'newest':
         default:
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          return (
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
       }
-    })
+    });
 
-    setFilteredIdeas(filtered)
-  }
+    setFilteredIdeas(filtered);
+  }, [ideas, searchTerm, selectedCategory, selectedRating, sortBy]);
+
+  // Carica le idee dal localStorage e API
+  useEffect(() => {
+    loadIdeas();
+  }, [loadIdeas]);
+
+  // Carica idee dal localStorage all'avvio
+  useEffect(() => {
+    if (localIdeas && Array.isArray(localIdeas)) {
+      setIdeas(localIdeas);
+      setIsLoading(false);
+    }
+  }, [localIdeas]);
+
+  // Filtra e ordina le idee quando cambiano i filtri
+  useEffect(() => {
+    filterAndSortIdeas();
+  }, [filterAndSortIdeas]);
 
   const handleRatingChange = (ideaId: string, newRating: number) => {
-    const updatedIdeas = ideas.map(idea =>
+    const updatedIdeas = ideas.map((idea) =>
       idea.id === ideaId ? { ...idea, rating: newRating } : idea
-    )
-    setIdeas(updatedIdeas)
-    setLocalIdeas(updatedIdeas)
-  }
+    );
+    setIdeas(updatedIdeas);
+    setLocalIdeas(updatedIdeas);
+  };
 
   // Estrai categorie uniche
-  const categories = Array.from(new Set(ideas.map(idea => idea.category)))
+  const categories = Array.from(new Set(ideas.map((idea) => idea.category)));
 
   if (isLoading) {
     return (
@@ -126,7 +133,7 @@ export default function IdeasPage() {
           <p className="text-slate-600">{t('ideas.loading')}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -218,23 +225,31 @@ export default function IdeasPage() {
                         {new Date(idea.created_at).toLocaleDateString()}
                       </div>
                     </div>
-                    <CardTitle className="text-lg leading-tight">{idea.title}</CardTitle>
+                    <CardTitle className="text-lg leading-tight">
+                      {idea.title}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-slate-600 text-sm leading-relaxed">{idea.content}</p>
-                    
+                    <p className="text-slate-600 text-sm leading-relaxed">
+                      {idea.content}
+                    </p>
+
                     {/* Rating Component */}
                     <div className="pt-2 border-t border-slate-100">
                       <IdeaRating
                         ideaId={idea.id}
                         currentRating={idea.rating || 0}
-                        onRatingChange={(rating) => handleRatingChange(idea.id, rating)}
+                        onRatingChange={(rating) =>
+                          handleRatingChange(idea.id, rating)
+                        }
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs text-slate-400">
                       <span>{idea.generation_method}</span>
-                      <span>{new Date(idea.created_at).toLocaleTimeString()}</span>
+                      <span>
+                        {new Date(idea.created_at).toLocaleTimeString()}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -243,7 +258,7 @@ export default function IdeasPage() {
           </motion.div>
         ) : ideas.length > 0 ? (
           // No results found
-          <motion.div 
+          <motion.div
             className="text-center py-12"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -258,10 +273,10 @@ export default function IdeasPage() {
               </p>
               <Button
                 onClick={() => {
-                  setSearchTerm('')
-                  setSelectedCategory('all')
-                  setSelectedRating(0)
-                  setSortBy('newest')
+                  setSearchTerm('');
+                  setSelectedCategory('all');
+                  setSelectedRating(0);
+                  setSortBy('newest');
                 }}
                 variant="outline"
                 size="sm"
@@ -272,7 +287,7 @@ export default function IdeasPage() {
           </motion.div>
         ) : (
           // Empty state
-          <motion.div 
+          <motion.div
             className="text-center py-12"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -295,5 +310,5 @@ export default function IdeasPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

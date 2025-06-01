@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-import { useTheme } from '@/contexts/ThemeContext'
-import { Button } from '@/components/ui/button'
-import { Moon, Sun } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { useTheme } from '@/contexts/ThemeContext';
+import { Button } from '@/components/ui/button';
+import { Moon, Sun } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <Button
@@ -14,7 +14,9 @@ export function ThemeToggle() {
       size="sm"
       onClick={toggleTheme}
       className="relative overflow-hidden"
-      title={theme === 'light' ? 'Attiva modalità scura' : 'Attiva modalità chiara'}
+      title={
+        theme === 'light' ? 'Attiva modalità scura' : 'Attiva modalità chiara'
+      }
     >
       <motion.div
         initial={false}
@@ -27,7 +29,7 @@ export function ThemeToggle() {
       >
         <Sun className="h-4 w-4 text-yellow-500" />
       </motion.div>
-      
+
       <motion.div
         initial={false}
         animate={{
@@ -39,11 +41,11 @@ export function ThemeToggle() {
       >
         <Moon className="h-4 w-4 text-blue-400" />
       </motion.div>
-      
+
       {/* Placeholder invisibile per mantenere le dimensioni */}
       <div className="opacity-0">
         <Sun className="h-4 w-4" />
       </div>
     </Button>
-  )
+  );
 }

@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useLanguage, type Language } from '@/contexts/LanguageContext'
-import { Button } from '@/components/ui/button'
-import { 
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Globe, Check } from 'lucide-react'
+} from '@/components/ui/dropdown-menu';
+import { Globe, Check } from 'lucide-react';
 
 const languages: { code: Language; name: string; flag: string }[] = [
   { code: 'it', name: 'Italiano', flag: '🇮🇹' },
@@ -16,18 +16,18 @@ const languages: { code: Language; name: string; flag: string }[] = [
   { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
   { code: 'es', name: 'Español', flag: '🇪🇸' },
-]
+];
 
 export function LanguageSelector() {
-  const { language, setLanguage, t } = useLanguage()
+  const { language, setLanguage, t } = useLanguage();
 
-  const currentLanguage = languages.find(lang => lang.code === language)
+  const currentLanguage = languages.find((lang) => lang.code === language);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           size="sm"
           className="flex items-center space-x-2"
           title={t('language.select')}
@@ -36,9 +36,7 @@ export function LanguageSelector() {
           <span className="hidden sm:inline text-sm">
             {currentLanguage?.flag} {currentLanguage?.name}
           </span>
-          <span className="sm:hidden text-sm">
-            {currentLanguage?.flag}
-          </span>
+          <span className="sm:hidden text-sm">{currentLanguage?.flag}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -59,5 +57,5 @@ export function LanguageSelector() {
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

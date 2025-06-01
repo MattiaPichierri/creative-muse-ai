@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { apiService, type Stats } from '@/lib/api'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useIdeasStorage } from '@/hooks/useLocalStorage'
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { apiService, type Stats } from '@/lib/api';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useIdeasStorage } from '@/hooks/useLocalStorage';
 import {
   BarChart3,
   Lightbulb,
@@ -20,71 +20,53 @@ import {
   AlertCircle,
   Loader2,
   Calendar,
-  Hash
-} from 'lucide-react'
-import Link from 'next/link'
+  Hash,
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function StatsPage() {
-  const { t } = useLanguage()
-  const [localIdeas] = useIdeasStorage()
-  const [stats, setStats] = useState<Stats | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+  const { t } = useLanguage();
+  const [localIdeas] = useIdeasStorage();
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  useEffect(() => {
-    loadStats()
-  }, [])
+  const calculateLocalStats = useCallback(() => {
+    if (!localIdeas || !Array.isArray(localIdeas)) return;
 
-  // Calcola statistiche dal localStorage se l'API fallisce
-  useEffect(() => {
-    if (error && localIdeas && Array.isArray(localIdeas)) {
-      calculateLocalStats()
-    }
-  }, [error, localIdeas])
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const loadStats = async () => {
-    setIsLoading(true)
-    setError(null)
-    const result = await apiService.getStats()
-    
-    if (result.error) {
-      setError(result.error)
-    } else if (result.data) {
-      setStats(result.data)
-      setLastUpdated(new Date())
-    }
-    
-    setIsLoading(false)
-  }
+    const recentIdeas = localIdeas.filter(
+      (idea) => new Date(idea.created_at) >= oneWeekAgo
+    );
 
-  const calculateLocalStats = () => {
-    if (!localIdeas || !Array.isArray(localIdeas)) return
+    const ratedIdeas = localIdeas.filter(
+      (idea) => idea.rating && idea.rating > 0
+    );
+    const averageRating =
+      ratedIdeas.length > 0
+        ? ratedIdeas.reduce((sum, idea) => sum + (idea.rating || 0), 0) /
+          ratedIdeas.length
+        : 0;
 
-    const now = new Date()
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    
-    const recentIdeas = localIdeas.filter(idea => 
-      new Date(idea.created_at) >= oneWeekAgo
-    )
+    const categories = localIdeas.reduce(
+      (acc, idea) => {
+        acc[idea.category] = (acc[idea.category] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const ratedIdeas = localIdeas.filter(idea => idea.rating && idea.rating > 0)
-    const averageRating = ratedIdeas.length > 0 
-      ? ratedIdeas.reduce((sum, idea) => sum + (idea.rating || 0), 0) / ratedIdeas.length
-      : 0
+    const llmIdeas = localIdeas.filter(
+      (idea) =>
+        idea.generation_method === 'llm' || idea.generation_method === 'mistral'
+    ).length;
 
-    const categories = localIdeas.reduce((acc, idea) => {
-      acc[idea.category] = (acc[idea.category] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-
-    const llmIdeas = localIdeas.filter(idea => 
-      idea.generation_method === 'llm' || idea.generation_method === 'mistral'
-    ).length
-
-    const mockIdeas = localIdeas.filter(idea => 
-      idea.generation_method === 'mock'
-    ).length
+    const mockIdeas = localIdeas.filter(
+      (idea) => idea.generation_method === 'mock'
+    ).length;
 
     setStats({
       total_ideas: localIdeas.length,
@@ -92,20 +74,46 @@ export default function StatsPage() {
       average_rating: averageRating,
       categories,
       llm_ideas: llmIdeas,
-      mock_ideas: mockIdeas
-    })
-    
-    setLastUpdated(new Date())
-    setIsLoading(false)
-  }
+      mock_ideas: mockIdeas,
+    });
+
+    setLastUpdated(new Date());
+    setIsLoading(false);
+  }, [localIdeas]);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  // Calcola statistiche dal localStorage se l'API fallisce
+  useEffect(() => {
+    if (error && localIdeas && Array.isArray(localIdeas)) {
+      calculateLocalStats();
+    }
+  }, [error, localIdeas, calculateLocalStats]);
+
+  const loadStats = async () => {
+    setIsLoading(true);
+    setError(null);
+    const result = await apiService.getStats();
+
+    if (result.error) {
+      setError(result.error);
+    } else if (result.data) {
+      setStats(result.data);
+      setLastUpdated(new Date());
+    }
+
+    setIsLoading(false);
+  };
 
   const refreshStats = () => {
     if (error) {
-      calculateLocalStats()
+      calculateLocalStats();
     } else {
-      loadStats()
+      loadStats();
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -115,7 +123,7 @@ export default function StatsPage() {
           <p className="text-slate-600">{t('stats.loading')}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -134,7 +142,10 @@ export default function StatsPage() {
               <h1 className="text-2xl font-bold gradient-text">
                 {t('stats.title')}
               </h1>
-              <Badge variant="secondary" className="bg-green-100 text-green-700">
+              <Badge
+                variant="secondary"
+                className="bg-green-100 text-green-700"
+              >
                 {t('stats.updatedNow')}
               </Badge>
             </div>
@@ -288,9 +299,9 @@ export default function StatsPage() {
                   {Object.keys(stats.categories).length > 0 ? (
                     <div className="space-y-4">
                       {Object.entries(stats.categories)
-                        .sort(([,a], [,b]) => b - a)
+                        .sort(([, a], [, b]) => b - a)
                         .map(([category, count], index) => {
-                          const percentage = (count / stats.total_ideas) * 100
+                          const percentage = (count / stats.total_ideas) * 100;
                           return (
                             <motion.div
                               key={category}
@@ -308,7 +319,10 @@ export default function StatsPage() {
                                     className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
                                     initial={{ width: 0 }}
                                     animate={{ width: `${percentage}%` }}
-                                    transition={{ delay: 0.8 + index * 0.1, duration: 0.8 }}
+                                    transition={{
+                                      delay: 0.8 + index * 0.1,
+                                      duration: 0.8,
+                                    }}
                                   />
                                 </div>
                               </div>
@@ -316,7 +330,7 @@ export default function StatsPage() {
                                 {count} ({percentage.toFixed(1)}%)
                               </div>
                             </motion.div>
-                          )
+                          );
                         })}
                     </div>
                   ) : (
@@ -380,7 +394,7 @@ export default function StatsPage() {
           </>
         ) : (
           // Empty state
-          <motion.div 
+          <motion.div
             className="text-center py-12"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -403,5 +417,5 @@ export default function StatsPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

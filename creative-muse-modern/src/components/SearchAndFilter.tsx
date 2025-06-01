@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
+import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Search, Filter, X, Calendar, Star } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
+} from '@/components/ui/dropdown-menu';
+import { Search, Filter, X, Calendar, Star } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SearchAndFilterProps {
-  searchTerm: string
-  onSearchChange: (term: string) => void
-  selectedCategory: string
-  onCategoryChange: (category: string) => void
-  selectedRating: number
-  onRatingChange: (rating: number) => void
-  sortBy: string
-  onSortChange: (sort: string) => void
-  categories: string[]
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
+  selectedCategory: string;
+  onCategoryChange: (category: string) => void;
+  selectedRating: number;
+  onRatingChange: (rating: number) => void;
+  sortBy: string;
+  onSortChange: (sort: string) => void;
+  categories: string[];
 }
 
 export function SearchAndFilter({
@@ -34,18 +34,22 @@ export function SearchAndFilter({
   onRatingChange,
   sortBy,
   onSortChange,
-  categories
+  categories,
 }: SearchAndFilterProps) {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
 
   const clearFilters = () => {
-    onSearchChange('')
-    onCategoryChange('all')
-    onRatingChange(0)
-    onSortChange('newest')
-  }
+    onSearchChange('');
+    onCategoryChange('all');
+    onRatingChange(0);
+    onSortChange('newest');
+  };
 
-  const hasActiveFilters = searchTerm || selectedCategory !== 'all' || selectedRating > 0 || sortBy !== 'newest'
+  const hasActiveFilters =
+    searchTerm ||
+    selectedCategory !== 'all' ||
+    selectedRating > 0 ||
+    sortBy !== 'newest';
 
   return (
     <div className="space-y-4">
@@ -67,7 +71,9 @@ export function SearchAndFilter({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-8">
               <Filter className="h-4 w-4 mr-2" />
-              {selectedCategory === 'all' ? t('filter.allCategories') : selectedCategory}
+              {selectedCategory === 'all'
+                ? t('filter.allCategories')
+                : selectedCategory}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -75,7 +81,10 @@ export function SearchAndFilter({
               {t('filter.allCategories')}
             </DropdownMenuItem>
             {categories.map((category) => (
-              <DropdownMenuItem key={category} onClick={() => onCategoryChange(category)}>
+              <DropdownMenuItem
+                key={category}
+                onClick={() => onCategoryChange(category)}
+              >
                 {category}
               </DropdownMenuItem>
             ))}
@@ -87,7 +96,9 @@ export function SearchAndFilter({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-8">
               <Star className="h-4 w-4 mr-2" />
-              {selectedRating === 0 ? t('filter.allRatings') : `${selectedRating}+ ⭐`}
+              {selectedRating === 0
+                ? t('filter.allRatings')
+                : `${selectedRating}+ ⭐`}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -95,7 +106,10 @@ export function SearchAndFilter({
               {t('filter.allRatings')}
             </DropdownMenuItem>
             {[5, 4, 3, 2, 1].map((rating) => (
-              <DropdownMenuItem key={rating} onClick={() => onRatingChange(rating)}>
+              <DropdownMenuItem
+                key={rating}
+                onClick={() => onRatingChange(rating)}
+              >
                 {rating}+ ⭐
               </DropdownMenuItem>
             ))}
@@ -170,5 +184,5 @@ export function SearchAndFilter({
         </motion.div>
       )}
     </div>
-  )
+  );
 }

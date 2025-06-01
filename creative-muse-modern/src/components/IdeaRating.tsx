@@ -1,36 +1,40 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Star } from 'lucide-react'
-import { apiService } from '@/lib/api'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
+import { apiService } from '@/lib/api';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface IdeaRatingProps {
-  ideaId: string
-  currentRating?: number
-  onRatingChange?: (rating: number) => void
+  ideaId: string;
+  currentRating?: number;
+  onRatingChange?: (rating: number) => void;
 }
 
-export function IdeaRating({ ideaId, currentRating = 0, onRatingChange }: IdeaRatingProps) {
-  const { t } = useLanguage()
-  const [rating, setRating] = useState(currentRating)
-  const [hoveredRating, setHoveredRating] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export function IdeaRating({
+  ideaId,
+  currentRating = 0,
+  onRatingChange,
+}: IdeaRatingProps) {
+  const { t } = useLanguage();
+  const [rating, setRating] = useState(currentRating);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRating = async (newRating: number) => {
-    if (isSubmitting) return
-    
-    setIsSubmitting(true)
-    const result = await apiService.rateIdea(ideaId, newRating)
-    
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    const result = await apiService.rateIdea(ideaId, newRating);
+
     if (result.data) {
-      setRating(newRating)
-      onRatingChange?.(newRating)
+      setRating(newRating);
+      onRatingChange?.(newRating);
     }
-    
-    setIsSubmitting(false)
-  }
+
+    setIsSubmitting(false);
+  };
 
   return (
     <div className="flex items-center space-x-1">
@@ -56,10 +60,8 @@ export function IdeaRating({ ideaId, currentRating = 0, onRatingChange }: IdeaRa
         </motion.button>
       ))}
       {rating > 0 && (
-        <span className="text-sm text-slate-500 ml-2">
-          ({rating}/5)
-        </span>
+        <span className="text-sm text-slate-500 ml-2">({rating}/5)</span>
       )}
     </div>
-  )
+  );
 }
