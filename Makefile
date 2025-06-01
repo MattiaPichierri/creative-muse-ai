@@ -224,4 +224,87 @@ status:
 	@echo "Backend: $(shell pgrep -f 'python3.*main.py' > /dev/null && echo '✅ Läuft' || echo '❌ Gestoppt')"
 	@echo "Frontend: $(shell pgrep -f 'npm.*dev' > /dev/null && echo '✅ Läuft' || echo '❌ Gestoppt')"
 	@echo "Monitoring: $(shell pgrep -f 'security_monitor.py' > /dev/null && echo '✅ Läuft' || echo '❌ Gestoppt')"
+# =============================================================================
+# DEPLOYMENT
+# =============================================================================
+
+.PHONY: deploy
+deploy: ## 🚀 Deployment durchführen
+	@echo "🚀 Starte Deployment..."
+	python scripts/deploy.py
+
+.PHONY: deploy-production
+deploy-production: ## 🏭 Production Deployment
+	@echo "🏭 Starte Production Deployment..."
+	python scripts/deploy.py --production
+
+.PHONY: deploy-quick
+deploy-quick: ## ⚡ Schnelles Deployment (ohne Backup/Build)
+	@echo "⚡ Starte schnelles Deployment..."
+	python scripts/deploy.py --skip-backup --skip-build
+
+.PHONY: docker-build
+docker-build: ## 🔨 Docker Images bauen
+	@echo "🔨 Baue Docker Images..."
+	@cd ai_core && docker build -t creative-muse-api .
+	@cd creative-muse-react && docker build -t creative-muse-frontend .
+
+.PHONY: docker-up
+docker-up: ## 🐳 Docker Container starten
+	@echo "🐳 Starte Docker Container..."
+	docker-compose up -d
+
+.PHONY: docker-down
+docker-down: ## 🛑 Docker Container stoppen
+	@echo "🛑 Stoppe Docker Container..."
+	docker-compose down
+
+.PHONY: docker-logs
+docker-logs: ## 📋 Docker Logs anzeigen
+	@echo "📋 Docker Logs:"
+	docker-compose logs --tail=50
+
+.PHONY: docker-clean
+docker-clean: ## 🧹 Docker aufräumen
+	@echo "🧹 Räume Docker auf..."
+	docker system prune -f
+	docker volume prune -f
+
+# =============================================================================
+# MONITORING UND WARTUNG
+# =============================================================================
+
+.PHONY: monitor
+monitor: ## 📊 System-Monitoring starten
+	@echo "📊 Starte System-Monitoring..."
+	python scripts/system_monitor.py
+
+.PHONY: optimize
+optimize: ## 🚀 Performance-Optimierung durchführen
+	@echo "🚀 Führe Performance-Optimierung durch..."
+	python scripts/performance_optimizer.py
+
+.PHONY: optimize-full
+optimize-full: ## 🚀 Vollständige Performance-Optimierung
+	@echo "🚀 Führe vollständige Performance-Optimierung durch..."
+	python scripts/performance_optimizer.py --full
+
+.PHONY: logs
+logs: ## 📋 Logs anzeigen
+	@echo "📋 Zeige aktuelle Logs..."
+	@if [ -d "logs" ]; then \
+		find logs -name "*.log" -type f -exec tail -n 20 {} + 2>/dev/null || echo "Keine Logs gefunden"; \
+	else \
+		echo "Log-Verzeichnis nicht gefunden"; \
+	fi
+
+.PHONY: health-check
+health-check: ## 🏥 Gesundheitsprüfung durchführen
+	@echo "🏥 Führe Gesundheitsprüfung durch..."
+	@echo "🔧 Backend API:"
+	@curl -s http://localhost:8000/health 2>/dev/null && echo " ✅ Online" || echo " ❌ Offline"
+	@echo "🖥️  Frontend:"
+	@curl -s http://localhost:3000 2>/dev/null >/dev/null && echo " ✅ Online" || echo " ❌ Offline"
+	@echo "🗄️  Database:"
+	@if [ -f "database/creative_muse.db" ]; then echo " ✅ Verfügbar"; else echo " ❌ Nicht gefunden"; fi
 	@echo "Datenbank: $(shell test -f database/creative_muse.db && echo '✅ Vorhanden' || echo '❌ Nicht gefunden')"

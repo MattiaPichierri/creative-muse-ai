@@ -1,0 +1,224 @@
+name: Creative Muse AI - CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Security Audit
+  security-audit:
+    runs-on: ubuntu-latest
+    name: 🔒 Security Audit
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd ai_core
+          pip install -r requirements.txt
+          pip install -r requirements-security.txt
+
+      - name: Run security audit
+        run: python scripts/security_audit.py
+
+  # Backend Tests
+  backend-tests:
+    runs-on: ubuntu-latest
+    name: 🧪 Backend Tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd ai_core
+          pip install -r requirements.txt
+          pip install -r requirements-security.txt
+          pip install pytest pytest-cov
+
+      - name: Run tests
+        run: |
+          cd ai_core
+          pytest tests/ -v --cov=. --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./ai_core/coverage.xml
+
+  # Frontend Tests
+  frontend-tests:
+    runs-on: ubuntu-latest
+    name: 🖥️ Frontend Tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: creative-muse-react/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd creative-muse-react
+          npm ci
+
+      - name: Run linting
+        run: |
+          cd creative-muse-react
+          npm run lint
+
+      - name: Build application
+        run: |
+          cd creative-muse-react
+          npm run build
+
+      - name: Run tests
+        run: |
+          cd creative-muse-react
+          npm test -- --coverage --watchAll=false
+
+  # Build Docker Images
+  build-images:
+    runs-on: ubuntu-latest
+    name: 🔨 Build Docker Images
+    needs: [security-audit, backend-tests, frontend-tests]
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api
+
+      - name: Extract metadata (tags, labels)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai_core
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./creative-muse-react
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Performance Tests
+  performance-tests:
+    runs-on: ubuntu-latest
+    name: ⚡ Performance Tests
+    needs: [build-images]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install locust requests
+
+      - name: Run performance tests
+        run: |
+          python scripts/performance_optimizer.py
+          echo "Performance tests completed"
+
+  # Deploy to Staging
+  deploy-staging:
+    runs-on: ubuntu-latest
+    name: 🚀 Deploy to Staging
+    needs: [build-images]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Add staging deployment commands here
+
+  # Deploy to Production
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: 🏭 Deploy to Production
+    needs: [build-images, performance-tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment..."
+          # Add production deployment commands here
+
+      - name: Run health checks
+        run: |
+          echo "Running post-deployment health checks..."
+          # Add health check commands here
+
+  # Cleanup
+  cleanup:
+    runs-on: ubuntu-latest
+    name: 🧹 Cleanup
+    needs: [deploy-production, deploy-staging]
+    if: always()
+    steps:
+      - name: Cleanup old images
+        run: |
+          echo "Cleaning up old container images..."
+          # Add cleanup commands here
