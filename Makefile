@@ -15,11 +15,13 @@ help:
 	@echo ""
 	@echo "Entwicklung:"
 	@echo "  dev-secure         - Sichere Entwicklungsumgebung starten"
-	@echo "  start-backend      - Multi-Model Backend starten (Standard)"
-	@echo "  start-multi-model  - Multi-Model Backend explizit starten"
+	@echo "  setup-subscription - Subscription-System komplett einrichten"
+	@echo "  start-backend      - Subscription Backend starten (Standard)"
+	@echo "  start-subscription - Subscription Backend explizit starten"
+	@echo "  start-multi-model  - Multi-Model Backend starten (Legacy)"
 	@echo "  start-simple-backend - Einfaches Backend starten (Legacy)"
-	@echo "  start-llm-backend  - LLM Backend starten"
-	@echo "  start-mistral-backend - Mistral API Backend starten"
+	@echo "  start-llm-backend  - LLM Backend starten (Legacy)"
+	@echo "  start-mistral-backend - Mistral API Backend starten (Legacy)"
 	@echo "  start-frontend     - Frontend starten"
 	@echo "  start-monitoring   - Sicherheitsmonitoring starten"
 	@echo ""
@@ -37,7 +39,7 @@ help:
 	@echo ""
 
 # Vollständiges sicheres Setup
-setup-secure: install-deps generate-keys setup-encryption init-secure-db update-db load-env
+setup-secure: install-deps init-secure-db generate-keys setup-encryption update-db load-env
 	@echo "✅ Sicheres Setup abgeschlossen"
 
 # Kryptographische Schlüssel generieren
@@ -64,8 +66,9 @@ install-python:
 	@echo "🐍 Installiere Python-Abhängigkeiten..."
 	@cd ai_core && python3 -m venv venv
 	@cd ai_core && source venv/bin/activate && python3 -m pip install --upgrade pip
-	@cd ai_core && source venv/bin/activate && pip install -r requirements.txt
-	@cd ai_core && source venv/bin/activate && pip install -r requirements-security.txt
+	@cd ai_core && source venv/bin/activate && pip install -r ../requirements.txt
+	@if [ -f "requirements.txt" ]; then cd ai_core && source venv/bin/activate && pip install -r requirements.txt; fi
+	@if [ -f "requirements-security.txt" ]; then cd ai_core && source venv/bin/activate && pip install -r requirements-security.txt; fi
 	@echo "✅ Python-Umgebung erstellt: ai_core/venv"
 
 install-node:
@@ -79,8 +82,9 @@ init-secure-db:
 	@echo "🗄️ Initialisiere sichere Datenbank..."
 	@mkdir -p database
 	@chmod 700 database
-	@cd ai_core && source venv/bin/activate && python3 ../database/init_db.py
-	@echo "✅ Datenbank initialisiert"
+	@cd database && python3 init_subscription_db.py
+	@if [ -f "database/init_db.py" ]; then cd ai_core && source venv/bin/activate && python3 ../database/init_db.py; fi
+	@echo "✅ Datenbank mit Subscription-Schema initialisiert"
 
 # Datenbank aktualisieren
 update-db:
@@ -95,33 +99,44 @@ load-env:
 	@echo "✅ Environment-Script erstellt: load_env.sh"
 	@echo "💡 Verwende: source load_env.sh"
 
+# Subscription-System komplett einrichten
+setup-subscription: install-python init-secure-db
+	@echo "💳 Richte Subscription-System ein..."
+	@cd ai_core && source venv/bin/activate && pip install bcrypt pyjwt stripe python-multipart
+	@echo "✅ Subscription-System eingerichtet"
+
 # Sichere Entwicklungsumgebung starten
 dev-secure: start-monitoring start-backend start-frontend
 	@echo "🚀 Sichere Entwicklungsumgebung gestartet"
 
-# Backend starten
+# Backend starten (Subscription-enabled)
 start-backend:
-	@echo "🔧 Starte Backend mit Multi-Model-Support..."
-	@cd ai_core && source venv/bin/activate && python3 main_multi_model.py &
+	@echo "🔧 Starte Subscription Backend..."
+	@cd ai_core && source venv/bin/activate && python3 main_subscription.py &
 
-# Multi-Model Backend starten (explizit)
+# Subscription Backend starten (explizit)
+start-subscription:
+	@echo "💳 Starte Subscription Backend..."
+	@cd ai_core && source venv/bin/activate && python3 main_subscription.py &
+
+# Multi-Model Backend starten (Legacy)
 start-multi-model:
-	@echo "🤖 Starte Multi-Model Backend..."
+	@echo "🤖 Starte Multi-Model Backend (Legacy)..."
 	@cd ai_core && source venv/bin/activate && python3 main_multi_model.py &
 
 # Einfaches Backend starten (Legacy)
 start-simple-backend:
-	@echo "🔧 Starte einfaches Backend..."
+	@echo "🔧 Starte einfaches Backend (Legacy)..."
 	@cd ai_core && source venv/bin/activate && python3 main.py &
 
-# LLM Backend starten
+# LLM Backend starten (Legacy)
 start-llm-backend:
-	@echo "🧠 Starte LLM Backend..."
+	@echo "🧠 Starte LLM Backend (Legacy)..."
 	@cd ai_core && source venv/bin/activate && python3 main_llm.py &
 
-# Mistral API Backend starten
+# Mistral API Backend starten (Legacy)
 start-mistral-backend:
-	@echo "🌟 Starte Mistral API Backend..."
+	@echo "🌟 Starte Mistral API Backend (Legacy)..."
 	@cd ai_core && source venv/bin/activate && python3 main_mistral_api.py &
 
 # Frontend starten

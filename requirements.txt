@@ -1,0 +1,39 @@
+# Creative Muse AI - Requirements
+# Sistema di sottoscrizioni e autenticazione
+
+# Framework web
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Autenticazione e sicurezza
+bcrypt>=4.0.1
+pyjwt>=2.8.0
+passlib[bcrypt]>=1.7.4
+
+# Database
+sqlite3
+
+# Pagamenti
+stripe>=7.0.0
+
+# Utilità
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+email-validator>=2.1.0
+
+# AI e ML (opzionali per modalità Mock)
+torch>=2.0.0
+transformers>=4.30.0
+sentence-transformers>=2.2.0
+
+# Sviluppo e testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+httpx>=0.25.0
+
+# Logging e monitoring
+structlog>=23.2.0
+
+# Validazione e parsing
+validators>=0.22.0

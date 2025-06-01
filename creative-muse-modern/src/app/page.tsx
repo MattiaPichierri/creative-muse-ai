@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { AdvancedPromptSettings } from '@/components/AdvancedPromptSettings';
 import { ExportButton } from '@/components/ExportButton';
 import { IdeaRating } from '@/components/IdeaRating';
@@ -8,6 +11,7 @@ import { ModelSelector } from '@/components/ModelSelector';
 import { DesktopNavigation, MobileNavigation } from '@/components/Navigation';
 import { PredefinedPrompts } from '@/components/PredefinedPrompts';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import AuthNavigation from '@/components/AuthNavigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,7 +37,7 @@ import {
   Star,
   Zap,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface AdvancedSettings {
   defaultCategory: string;
@@ -52,6 +56,8 @@ interface AdvancedSettings {
 
 export default function Home() {
   const { t, language } = useLanguage();
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
   const [localIdeas, setLocalIdeas] = useIdeasStorage();
   const [ideas, setIdeas] = useState<Idea[]>(localIdeas || []);
   const [customPrompt, setCustomPrompt] = useState('');
@@ -67,9 +73,33 @@ export default function Home() {
     customPrompts: []
   });
 
+  // Reindirizza alla landing page se l'utente non è autenticato
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/landing');
+    }
+  }, [user, isLoading, router]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Mostra loading se sta verificando l'autenticazione
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Caricamento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Non mostrare nulla se l'utente non è autenticato (verrà reindirizzato)
+  if (!user) {
+    return null;
+  }
 
   // Verhindere Hydration-Mismatch für framer-motion
   if (!isMounted) {
@@ -100,6 +130,7 @@ export default function Home() {
                   <LanguageSelector />
                   <ThemeToggle />
                 </div>
+                <AuthNavigation />
                 <MobileNavigation />
               </div>
             </div>
@@ -224,6 +255,7 @@ export default function Home() {
                 <LanguageSelector />
                 <ThemeToggle />
               </div>
+              <AuthNavigation />
               <MobileNavigation />
             </motion.div>
           </div>
