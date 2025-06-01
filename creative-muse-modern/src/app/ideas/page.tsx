@@ -40,16 +40,32 @@ export default function IdeasPage() {
       // Fallback al localStorage se l'API fallisce
       if (localIdeas && Array.isArray(localIdeas)) {
         setIdeas(localIdeas);
+      } else {
+        setIdeas([]); // Assicurati che sia sempre un array
       }
     } else if (result.data) {
-      setIdeas(result.data);
-      setLocalIdeas(result.data); // Sincronizza con localStorage
+      // La API restituisce {ideas: [...], total: number}
+      if (result.data.ideas && Array.isArray(result.data.ideas)) {
+        setIdeas(result.data.ideas);
+        setLocalIdeas(result.data.ideas); // Sincronizza con localStorage
+      } else {
+        setIdeas([]);
+        setError('Formato dati non valido ricevuto dal server');
+      }
+    } else {
+      setIdeas([]);
     }
 
     setIsLoading(false);
   };
 
   const filterAndSortIdeas = () => {
+    // Stelle sicher, dass ideas ein Array ist
+    if (!Array.isArray(ideas)) {
+      setFilteredIdeas([]);
+      return;
+    }
+    
     let filtered = [...ideas];
 
     // Filtro per ricerca testuale
@@ -125,7 +141,7 @@ export default function IdeasPage() {
   };
 
   // Estrai categorie uniche
-  const categories = Array.from(new Set(ideas.map((idea) => idea.category)));
+  const categories = Array.from(new Set(Array.isArray(ideas) ? ideas.map((idea) => idea.category) : []));
 
   if (isLoading) {
     return (

@@ -116,6 +116,18 @@ class ModelManager:
                 max_tokens=256,
                 temperature=0.8,
                 top_p=0.9
+            ),
+            ModelConfig(
+                key="mock",
+                name="Mock Model",
+                model_path="mock",
+                description="Mock-Modell für Tests und Fallback",
+                size_gb=0.0,
+                requires_token=False,
+                recommended=False,
+                max_tokens=512,
+                temperature=0.7,
+                top_p=0.9
             )
         ]
         
@@ -308,6 +320,10 @@ class ModelManager:
         """Generiere Text mit dem aktuellen oder spezifizierten Modell"""
         target_model = model_key or self.current_model
         
+        # Spezielle Behandlung für Mock-Modell
+        if target_model == "mock":
+            return self._generate_mock_text(prompt, **kwargs)
+        
         if not target_model or target_model not in self.pipelines:
             logger.error(f"❌ Modell nicht verfügbar: {target_model}")
             return None
@@ -334,6 +350,19 @@ class ModelManager:
         except Exception as e:
             logger.error(f"❌ Fehler bei Textgenerierung: {e}")
             return None
+    
+    def _generate_mock_text(self, prompt: str, **kwargs) -> str:
+        """Generiere Mock-Text für Tests"""
+        import random
+        
+        # Einfache Mock-Generierung basierend auf dem Prompt
+        mock_responses = [
+            f"Innovative Lösung: {prompt[:50]}...\n\nDiese kreative Idee kombiniert moderne Technologie mit nachhaltigen Ansätzen.",
+            f"Kreative Idee: {prompt[:50]}...\n\nEin revolutionärer Ansatz, der bestehende Probleme auf neue Weise löst.",
+            f"Zukunftsweisend: {prompt[:50]}...\n\nDiese Lösung nutzt innovative Methoden für praktische Anwendungen."
+        ]
+        
+        return random.choice(mock_responses)
     
     def get_statistics(self) -> Dict[str, Any]:
         """Hole Statistiken über geladene Modelle"""

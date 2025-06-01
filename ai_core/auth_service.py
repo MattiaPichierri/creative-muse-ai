@@ -334,18 +334,21 @@ class AuthService:
                 detail="Token non valido"
             )
     
-    def get_subscription_limits(self, tier: SubscriptionTier) -> SubscriptionLimits:
+    def get_subscription_limits(self, tier) -> SubscriptionLimits:
         """Ottieni limiti per tier di abbonamento"""
         try:
+            # Converti tier in string se è un Enum
+            tier_value = tier.value if hasattr(tier, 'value') else str(tier)
+            
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
                 cursor.execute("""
-                    SELECT daily_ideas_limit, monthly_ideas_limit, max_team_members, 
+                    SELECT daily_ideas_limit, monthly_ideas_limit, max_team_members,
                            max_projects, features
                     FROM subscription_plans
                     WHERE plan_code = ?
-                """, (tier.value,))
+                """, (tier_value,))
                 
                 plan_data = cursor.fetchone()
                 if not plan_data:

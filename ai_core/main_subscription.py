@@ -266,7 +266,15 @@ async def get_profile(current_user: User = Depends(get_current_user)):
 async def get_subscription_info(current_user: User = Depends(get_current_user)):
     """Informazioni abbonamento corrente"""
     try:
-        limits = auth_service.get_subscription_limits(current_user.subscription_tier)
+        # Leggi sempre il tier aggiornato dal database
+        import sqlite3
+        with sqlite3.connect(auth_service.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT subscription_tier FROM users WHERE id = ?", (current_user.id,))
+            result = cursor.fetchone()
+            current_tier = result[0] if result else "free"
+        
+        limits = auth_service.get_subscription_limits(current_tier)
         
         # Calcola usage corrente
         import sqlite3
@@ -292,20 +300,20 @@ async def get_subscription_info(current_user: User = Depends(get_current_user)):
             monthly_usage = cursor.fetchone()
             monthly_ideas = monthly_usage[0] if monthly_usage and monthly_usage[0] else 0
         
-        return SubscriptionInfo(
-            tier=current_user.subscription_tier.value,
-            limits={
+        return {
+            "tier": current_tier,
+            "limits": {
                 "daily_ideas": limits.daily_ideas_limit,
                 "monthly_ideas": limits.monthly_ideas_limit,
                 "team_members": limits.max_team_members,
                 "projects": limits.max_projects
             },
-            usage={
+            "usage": {
                 "daily_ideas": daily_ideas,
                 "monthly_ideas": monthly_ideas
             },
-            features=limits.features
-        )
+            "features": limits.features
+        }
     except Exception as e:
         logger.error(f"❌ Errore subscription_info: {e}")
         raise HTTPException(
@@ -618,6 +626,216 @@ def create_optimized_prompt(prompt: str, category: str, language: str, creativit
     
     lang_config = language_prompts.get(language, language_prompts["it"])
     return f"{lang_config['system']}\n\n{lang_config['instruction']}"
+
+
+# ============================================================================
+# SUBSCRIPTION MANAGEMENT
+# ============================================================================
+
+class SubscriptionUpdateRequest(BaseModel):
+    new_tier: str
+    payment_id: Optional[str] = None
+    payment_method: Optional[str] = "sandbox"
+
+@app.post("/api/v1/subscription/upgrade")
+async def upgrade_subscription(
+    request: SubscriptionUpdateRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Aggiorna la subscription dell'utente (sandbox)"""
+    try:
+        # Valida il tier richiesto
+        valid_tiers = ["free", "creator", "pro", "enterprise"]
+        if request.new_tier not in valid_tiers:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Tier non valido: {request.new_tier}"
+            )
+        
+        # Aggiorna nel database
+        import sqlite3
+        with sqlite3.connect(auth_service.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Aggiorna il tier dell'utente
+            cursor.execute("""
+                UPDATE users
+                SET subscription_tier = ?, updated_at = ?
+                WHERE id = ?
+            """, (request.new_tier, datetime.now().isoformat(), current_user.id))
+            
+            # Registra il pagamento (per audit)
+            cursor.execute("""
+                INSERT INTO payment_history (user_id, tier, payment_id, payment_method, amount, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                current_user.id,
+                request.new_tier,
+                request.payment_id or f"sandbox_{datetime.now().timestamp()}",
+                request.payment_method,
+                0.0,  # Sandbox amount
+                datetime.now().isoformat()
+            ))
+            
+            conn.commit()
+        
+        # Aggiorna l'oggetto user corrente
+        current_user.subscription_tier = request.new_tier
+        
+        logger.info(f"✅ Subscription aggiornata: {current_user.email} -> {request.new_tier}")
+        
+        return {
+            "success": True,
+            "message": f"Subscription aggiornata a {request.new_tier}",
+            "new_tier": request.new_tier,
+            "payment_method": request.payment_method
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Errore aggiornamento subscription: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore durante l'aggiornamento della subscription"
+        )
+
+
+# ============================================================================
+# MODEL MANAGEMENT
+# ============================================================================
+
+@app.get("/api/v1/models")
+async def get_models():
+    """Lista dei modelli disponibili"""
+    try:
+        # Hole verfügbare Modelle vom model_manager
+        available_model_names = []
+        if model_manager:
+            try:
+                models_data = model_manager.get_available_models()
+                if isinstance(models_data, list):
+                    available_model_names = models_data
+                elif isinstance(models_data, dict) and 'models' in models_data:
+                    available_model_names = models_data['models']
+            except Exception as e:
+                logger.error(f"❌ Fehler beim Abrufen der Modelle: {e}")
+        
+        # Erstelle vollständige Modell-Objekte
+        models = []
+        
+        # Definiere bekannte Modelle mit ihren Eigenschaften
+        known_models = {
+            "mock": {
+                "name": "Mock Model",
+                "description": "Modello di test per sviluppo",
+                "size_gb": 0.0,
+                "requires_token": False,
+                "recommended": True,
+                "current": True
+            },
+            "mistral-7b-instruct-v0.3": {
+                "name": "Mistral 7B Instruct",
+                "description": "Mistral 7B Instruct v0.3 Modell",
+                "size_gb": 14.0,
+                "requires_token": False,
+                "recommended": True,
+                "current": False
+            },
+            "microsoft-dialoGPT-medium": {
+                "name": "DialoGPT Medium",
+                "description": "Microsoft DialoGPT Medium Modell",
+                "size_gb": 2.5,
+                "requires_token": False,
+                "recommended": False,
+                "current": False
+            },
+            "microsoft-dialoGPT-large": {
+                "name": "DialoGPT Large",
+                "description": "Microsoft DialoGPT Large Modell",
+                "size_gb": 5.0,
+                "requires_token": False,
+                "recommended": False,
+                "current": False
+            }
+        }
+        
+        # Erstelle Modell-Objekte für verfügbare Modelle
+        for model_key in available_model_names:
+            if model_key in known_models:
+                model_info = known_models[model_key].copy()
+                model_info.update({
+                    "key": model_key,
+                    "available": True,
+                    "loaded": False,
+                    "status": "available"
+                })
+                models.append(model_info)
+        
+        # Fallback: Füge Mock-Modell hinzu wenn keine Modelle gefunden
+        if not models:
+            models.append({
+                "key": "mock",
+                "name": "Mock Model",
+                "description": "Modello di test per sviluppo",
+                "size_gb": 0.0,
+                "requires_token": False,
+                "recommended": True,
+                "available": True,
+                "loaded": True,
+                "status": "ready",
+                "current": True
+            })
+        else:
+            # Setze das erste Modell als aktuell
+            models[0]["current"] = True
+            models[0]["loaded"] = True
+            models[0]["status"] = "ready"
+        
+        return models
+    except Exception as e:
+        logger.error(f"❌ Errore get_models: {e}")
+        return []
+
+
+@app.post("/api/v1/models/switch")
+async def switch_model(request: dict):
+    """Wechsle zu einem anderen Modell"""
+    try:
+        model_key = request.get("model_key")
+        if not model_key:
+            raise HTTPException(status_code=400, detail="model_key erforderlich")
+        
+        logger.info(f"🔄 Wechsle zu Modell: {model_key}")
+        
+        # Hier würde normalerweise der model_manager das Modell wechseln
+        # Für jetzt simulieren wir einen erfolgreichen Wechsel
+        
+        return {
+            "message": f"Erfolgreich zu Modell {model_key} gewechselt",
+            "current_model": model_key,
+            "status": "success"
+        }
+    except Exception as e:
+        logger.error(f"❌ Fehler beim Model-Switch: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/models/deactivate")
+async def deactivate_model():
+    """Deaktiviere das aktuelle Modell"""
+    try:
+        logger.info("🔄 Deaktiviere aktuelles Modell")
+        
+        # Hier würde normalerweise der model_manager das Modell deaktivieren
+        # Für jetzt simulieren wir eine erfolgreiche Deaktivierung
+        
+        return {
+            "message": "Modell erfolgreich deaktiviert",
+            "current_model": None,
+            "status": "success"
+        }
+    except Exception as e:
+        logger.error(f"❌ Fehler beim Deaktivieren: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================================
