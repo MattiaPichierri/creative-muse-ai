@@ -1,5 +1,6 @@
 'use client';
 
+import { AdvancedPromptSettings } from '@/components/AdvancedPromptSettings';
 import { ExportButton } from '@/components/ExportButton';
 import { IdeaRating } from '@/components/IdeaRating';
 import { LanguageSelector } from '@/components/LanguageSelector';
@@ -34,6 +35,21 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+interface AdvancedSettings {
+  defaultCategory: string;
+  defaultCreativityLevel: number;
+  enableAutoSuggestions: boolean;
+  maxSuggestions: number;
+  preferredTags: string[];
+  customPrompts: Array<{
+    id: string;
+    text: string;
+    category: string;
+    creativityLevel: number;
+    tags: string[];
+  }>;
+}
+
 export default function Home() {
   const { t } = useLanguage();
   const [localIdeas, setLocalIdeas] = useIdeasStorage();
@@ -42,6 +58,14 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>({
+    defaultCategory: 'general',
+    defaultCreativityLevel: 5,
+    enableAutoSuggestions: true,
+    maxSuggestions: 5,
+    preferredTags: [],
+    customPrompts: []
+  });
 
   useEffect(() => {
     setIsMounted(true);
@@ -120,8 +144,8 @@ export default function Home() {
 
     const ideaRequest = {
       prompt: customPrompt,
-      category: 'general',
-      creativity_level: 7,
+      category: advancedSettings.defaultCategory,
+      creativity_level: advancedSettings.defaultCreativityLevel,
       language: 'de',
     };
 
@@ -137,6 +161,20 @@ export default function Home() {
     }
 
     setIsGenerating(false);
+  };
+
+  const handleAdvancedSettingsChange = (settings: AdvancedSettings) => {
+    setAdvancedSettings(settings);
+  };
+
+  const handlePromptSelect = (prompt: string, category: string, creativityLevel: number) => {
+    setCustomPrompt(prompt);
+    // Aggiorna le impostazioni per usare la categoria e il livello di creatività selezionati
+    setAdvancedSettings(prev => ({
+      ...prev,
+      defaultCategory: category,
+      defaultCreativityLevel: creativityLevel
+    }));
   };
 
   const handleRatingChange = (ideaId: string, newRating: number) => {
@@ -285,8 +323,12 @@ export default function Home() {
                 <CardDescription>{t('home.customDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex justify-between items-center mb-2 gap-2">
                   <PredefinedPrompts onSelectPrompt={setCustomPrompt} />
+                  <AdvancedPromptSettings
+                    onSettingsChange={handleAdvancedSettingsChange}
+                    onPromptSelect={handlePromptSelect}
+                  />
                 </div>
                 <Textarea
                   placeholder={t('home.customPlaceholder')}

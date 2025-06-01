@@ -111,6 +111,8 @@ fi
 # Make scripts executable
 echo "🔧 Setting up executable permissions..."
 find /workspace/scripts -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+chmod +x /workspace/database/web-admin/start-db-admin.sh 2>/dev/null || true
+chmod +x /workspace/.devcontainer/init-database.sh 2>/dev/null || true
 
 # Create useful aliases
 echo "🔗 Setting up aliases..."
@@ -139,6 +141,10 @@ alias format-frontend='cd /workspace/creative-muse-modern && npm run format'
 alias lint-frontend='cd /workspace/creative-muse-modern && npm run lint'
 alias db-shell='sqlite3 /workspace/database/creative_muse.db'
 alias init-database='bash /workspace/.devcontainer/init-database.sh'
+alias start-db-admin='cd /workspace/database/web-admin && ./start-db-admin.sh'
+alias stop-db-admin='cd /workspace/database/web-admin && docker-compose down'
+alias db-admin-status='cd /workspace/database/web-admin && docker-compose ps'
+alias db-admin-logs='cd /workspace/database/web-admin && docker-compose logs -f'
 alias setup-hosts='bash /workspace/.devcontainer/setup-hosts.sh'
 alias traefik-status='docker ps | grep traefik'
 alias restart-traefik='bash /workspace/.devcontainer/restart-traefik.sh'
@@ -159,6 +165,9 @@ echo "⚛️ Use 'run-frontend-tests' to run Next.js tests"
 echo "🔍 Use 'check-code' to check Python code quality"
 echo "✨ Use 'format-frontend' to format Next.js code"
 echo "🔍 Use 'lint-frontend' to lint Next.js code"
+echo "🗄️ Use 'start-db-admin' to start database web admin tools"
+echo "🛑 Use 'stop-db-admin' to stop database admin services"
+echo "📊 Use 'db-admin-status' to check database admin status"
 EOF
 
 # Source the new aliases
@@ -179,6 +188,9 @@ echo "  format-code         - Format Python code with black"
 echo "  format-frontend     - Format Next.js code with Prettier"
 echo "  lint-frontend       - Lint Next.js code with ESLint"
 echo "  db-shell            - Open SQLite database shell"
+echo "  start-db-admin      - Start database web admin tools"
+echo "  stop-db-admin       - Stop database admin services"
+echo "  db-admin-status     - Check database admin status"
 echo ""
 echo "🚀 Ready to develop! Happy coding! 🎨🤖"
 echo ""
@@ -189,8 +201,17 @@ echo "3. Öffne ein weiteres Terminal: Ctrl+Shift+\`"
 echo "4. Starte das Next.js Frontend: start-frontend"
 echo "5. Öffne http://localhost:3000 im Browser"
 echo ""
+echo "🗄️ Database Admin Tools:"
+echo "1. Starte die Database Admin Tools: start-db-admin"
+echo "2. Öffne eine der folgenden URLs:"
+echo "   - Adminer: http://localhost:8080"
+echo "   - SQLite Web: http://localhost:8081"
+echo "   - phpLiteAdmin: http://localhost:8082"
+echo ""
 echo "🌐 Verfügbare URLs im DevContainer:"
 echo "  - Next.js App: http://localhost:3000"
 echo "  - Backend API: http://localhost:8001"
 echo "  - API Docs: http://localhost:8001/docs"
-echo "  - Traefik Dashboard: http://localhost:8080"
+echo "  - Database Admin (Adminer): http://localhost:8080"
+echo "  - Database Admin (SQLite Web): http://localhost:8081"
+echo "  - Database Admin (phpLiteAdmin): http://localhost:8082"

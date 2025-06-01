@@ -162,6 +162,19 @@ const translations = {
     'prompts.selectPrompt': 'Seleziona un Prompt',
     'prompts.allCategories': 'Tutte le Categorie',
     
+    // Advanced Prompt Settings
+    'advanced.settings': 'Impostazioni Avanzate',
+    'advanced.basicSettings': 'Impostazioni Base',
+    'advanced.defaultCategory': 'Categoria Predefinita',
+    'advanced.defaultCreativity': 'Livello Creatività Predefinito',
+    'advanced.preferredTags': 'Tag Preferiti',
+    'advanced.addTag': 'Aggiungi Tag',
+    'advanced.promptSuggestions': 'Suggerimenti Prompt',
+    'advanced.addCustomPrompt': 'Aggiungi Prompt Personalizzato',
+    'advanced.promptText': 'Testo del Prompt',
+    'advanced.saveSettings': 'Salva Impostazioni',
+    'advanced.close': 'Chiudi',
+    
     // Categories
     'categories.general': 'Generale',
     'categories.business': 'Business',
@@ -171,6 +184,18 @@ const translations = {
     'categories.health': 'Salute',
     'categories.education': 'Educazione',
     'categories.entertainment': 'Intrattenimento',
+
+    // Prompt predefiniti
+    'prompts.1.text': 'Sviluppa una soluzione innovativa per il trasporto sostenibile nelle città',
+    'prompts.1.tags': 'sostenibilità,trasporto,città,innovazione',
+    'prompts.2.text': 'Progetta un progetto artistico che unisce tecnologia e natura',
+    'prompts.2.tags': 'arte,tecnologia,natura,connessione',
+    'prompts.3.text': 'Crea un modello di business per un\'app che rafforza le comunità locali',
+    'prompts.3.tags': 'app,comunità,locale,business',
+    'prompts.4.text': 'Sviluppa un concetto educativo per la risoluzione creativa dei problemi',
+    'prompts.4.tags': 'educazione,creatività,problem-solving,apprendimento',
+    'prompts.5.text': 'Progetta un programma di benessere per nomadi digitali',
+    'prompts.5.tags': 'benessere,digitale,nomadi,salute',
   },
 
   en: {
@@ -340,6 +365,19 @@ const translations = {
     'prompts.predefined': 'Predefined Prompts',
     'prompts.selectPrompt': 'Select a Prompt',
     'prompts.allCategories': 'All Categories',
+    
+    // Advanced Prompt Settings
+    'advanced.settings': 'Advanced Settings',
+    'advanced.basicSettings': 'Basic Settings',
+    'advanced.defaultCategory': 'Default Category',
+    'advanced.defaultCreativity': 'Default Creativity Level',
+    'advanced.preferredTags': 'Preferred Tags',
+    'advanced.addTag': 'Add Tag',
+    'advanced.promptSuggestions': 'Prompt Suggestions',
+    'advanced.addCustomPrompt': 'Add Custom Prompt',
+    'advanced.promptText': 'Prompt Text',
+    'advanced.saveSettings': 'Save Settings',
+    'advanced.close': 'Close',
 
     // Categories
     'categories.general': 'General',
@@ -350,6 +388,18 @@ const translations = {
     'categories.health': 'Health',
     'categories.education': 'Education',
     'categories.entertainment': 'Entertainment',
+
+    // Prompt predefiniti
+    'prompts.1.text': 'Develop an innovative solution for sustainable urban transportation',
+    'prompts.1.tags': 'sustainability,transport,cities,innovation',
+    'prompts.2.text': 'Design an art project that connects technology and nature',
+    'prompts.2.tags': 'art,technology,nature,connection',
+    'prompts.3.text': 'Create a business model for an app that strengthens local communities',
+    'prompts.3.tags': 'app,community,local,business',
+    'prompts.4.text': 'Develop an educational concept for creative problem solving',
+    'prompts.4.tags': 'education,creativity,problem-solving,learning',
+    'prompts.5.text': 'Design a wellness program for digital nomads',
+    'prompts.5.tags': 'wellness,digital,nomads,health',
 
     // Bulk Actions
     'bulk.selected': 'selezionati',
@@ -543,6 +593,19 @@ const translations = {
     'prompts.predefined': 'Vordefinierte Prompts',
     'prompts.selectPrompt': 'Prompt Auswählen',
     'prompts.allCategories': 'Alle Kategorien',
+    
+    // Advanced Prompt Settings
+    'advanced.settings': 'Erweiterte Einstellungen',
+    'advanced.basicSettings': 'Grundeinstellungen',
+    'advanced.defaultCategory': 'Standard-Kategorie',
+    'advanced.defaultCreativity': 'Standard-Kreativitätslevel',
+    'advanced.preferredTags': 'Bevorzugte Tags',
+    'advanced.addTag': 'Tag hinzufügen',
+    'advanced.promptSuggestions': 'Prompt-Vorschläge',
+    'advanced.addCustomPrompt': 'Eigenen Prompt hinzufügen',
+    'advanced.promptText': 'Prompt-Text',
+    'advanced.saveSettings': 'Einstellungen speichern',
+    'advanced.close': 'Schließen',
 
     // Categories
     'categories.general': 'Allgemein',
@@ -553,6 +616,18 @@ const translations = {
     'categories.health': 'Gesundheit',
     'categories.education': 'Bildung',
     'categories.entertainment': 'Unterhaltung',
+
+    // Prompt predefiniti
+    'prompts.1.text': 'Entwickle eine innovative Lösung für nachhaltigen Transport in Städten',
+    'prompts.1.tags': 'nachhaltigkeit,transport,städte,innovation',
+    'prompts.2.text': 'Entwirf ein Kunstprojekt, das Technologie und Natur verbindet',
+    'prompts.2.tags': 'kunst,technologie,natur,verbindung',
+    'prompts.3.text': 'Kreiere ein Geschäftsmodell für eine App, die lokale Gemeinschaften stärkt',
+    'prompts.3.tags': 'app,gemeinschaft,lokal,geschäft',
+    'prompts.4.text': 'Entwickle ein Bildungskonzept für kreatives Problemlösen',
+    'prompts.4.tags': 'bildung,kreativität,problemlösung,lernen',
+    'prompts.5.text': 'Entwirf ein Wellness-Programm für digitale Nomaden',
+    'prompts.5.tags': 'wellness,digital,nomaden,gesundheit',
   },
 
   fr: {
@@ -705,6 +780,19 @@ const translations = {
     'prompts.predefined': 'Prompts Prédéfinis',
     'prompts.selectPrompt': 'Sélectionner un Prompt',
     'prompts.allCategories': 'Toutes les Catégories',
+    
+    // Advanced Prompt Settings
+    'advanced.settings': 'Paramètres Avancés',
+    'advanced.basicSettings': 'Paramètres de Base',
+    'advanced.defaultCategory': 'Catégorie par Défaut',
+    'advanced.defaultCreativity': 'Niveau de Créativité par Défaut',
+    'advanced.preferredTags': 'Tags Préférés',
+    'advanced.addTag': 'Ajouter Tag',
+    'advanced.promptSuggestions': 'Suggestions de Prompts',
+    'advanced.addCustomPrompt': 'Ajouter Prompt Personnalisé',
+    'advanced.promptText': 'Texte du Prompt',
+    'advanced.saveSettings': 'Sauvegarder Paramètres',
+    'advanced.close': 'Fermer',
 
     // Categories
     'categories.general': 'Général',
@@ -715,6 +803,18 @@ const translations = {
     'categories.health': 'Santé',
     'categories.education': 'Éducation',
     'categories.entertainment': 'Divertissement',
+
+    // Prompt predefiniti
+    'prompts.1.text': 'Développez une solution innovante pour le transport durable urbain',
+    'prompts.1.tags': 'durabilité,transport,villes,innovation',
+    'prompts.2.text': 'Concevez un projet artistique qui connecte technologie et nature',
+    'prompts.2.tags': 'art,technologie,nature,connexion',
+    'prompts.3.text': 'Créez un modèle d\'affaires pour une app qui renforce les communautés locales',
+    'prompts.3.tags': 'app,communauté,local,business',
+    'prompts.4.text': 'Développez un concept éducatif pour la résolution créative de problèmes',
+    'prompts.4.tags': 'éducation,créativité,résolution-problèmes,apprentissage',
+    'prompts.5.text': 'Concevez un programme de bien-être pour nomades numériques',
+    'prompts.5.tags': 'bien-être,numérique,nomades,santé',
   },
 
   es: {
@@ -863,6 +963,19 @@ const translations = {
     'prompts.predefined': 'Prompts Predefinidos',
     'prompts.selectPrompt': 'Seleccionar un Prompt',
     'prompts.allCategories': 'Todas las Categorías',
+    
+    // Advanced Prompt Settings
+    'advanced.settings': 'Configuración Avanzada',
+    'advanced.basicSettings': 'Configuración Básica',
+    'advanced.defaultCategory': 'Categoría Predeterminada',
+    'advanced.defaultCreativity': 'Nivel de Creatividad Predeterminado',
+    'advanced.preferredTags': 'Tags Preferidos',
+    'advanced.addTag': 'Agregar Tag',
+    'advanced.promptSuggestions': 'Sugerencias de Prompts',
+    'advanced.addCustomPrompt': 'Agregar Prompt Personalizado',
+    'advanced.promptText': 'Texto del Prompt',
+    'advanced.saveSettings': 'Guardar Configuración',
+    'advanced.close': 'Cerrar',
 
     // Categories
     'categories.general': 'General',
@@ -873,6 +986,18 @@ const translations = {
     'categories.health': 'Salud',
     'categories.education': 'Educación',
     'categories.entertainment': 'Entretenimiento',
+
+    // Prompt predefiniti
+    'prompts.1.text': 'Desarrolla una solución innovadora para transporte sostenible urbano',
+    'prompts.1.tags': 'sostenibilidad,transporte,ciudades,innovación',
+    'prompts.2.text': 'Diseña un proyecto artístico que conecte tecnología y naturaleza',
+    'prompts.2.tags': 'arte,tecnología,naturaleza,conexión',
+    'prompts.3.text': 'Crea un modelo de negocio para una app que fortalezca comunidades locales',
+    'prompts.3.tags': 'app,comunidad,local,negocio',
+    'prompts.4.text': 'Desarrolla un concepto educativo para resolución creativa de problemas',
+    'prompts.4.tags': 'educación,creatividad,resolución-problemas,aprendizaje',
+    'prompts.5.text': 'Diseña un programa de bienestar para nómadas digitales',
+    'prompts.5.tags': 'bienestar,digital,nómadas,salud',
   },
 };
 

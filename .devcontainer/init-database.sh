@@ -37,9 +37,12 @@ CREATE TABLE IF NOT EXISTS stats (
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert initial stats
+-- Insert initial stats (clean database - no sample ideas)
 INSERT OR REPLACE INTO stats (id, total_ideas, today_generated, avg_rating, categories_count)
 VALUES (1, 0, 0, 0.0, 0);
+
+-- Note: This database starts completely clean with no sample ideas
+-- Users will start with an empty ideas table
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_ideas_category ON ideas(category);
