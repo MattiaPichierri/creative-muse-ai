@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,7 +31,7 @@ export default function IdeasPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadIdeas = useCallback(async () => {
+  const loadIdeas = async () => {
     setIsLoading(true);
     const result = await apiService.getAllIdeas();
 
@@ -47,9 +47,9 @@ export default function IdeasPage() {
     }
 
     setIsLoading(false);
-  }, [localIdeas, setLocalIdeas]);
+  };
 
-  const filterAndSortIdeas = useCallback(() => {
+  const filterAndSortIdeas = () => {
     let filtered = [...ideas];
 
     // Filtro per ricerca testuale
@@ -94,12 +94,7 @@ export default function IdeasPage() {
     });
 
     setFilteredIdeas(filtered);
-  }, [ideas, searchTerm, selectedCategory, selectedRating, sortBy]);
-
-  // Carica le idee dal localStorage e API
-  useEffect(() => {
-    loadIdeas();
-  }, [loadIdeas]);
+  };
 
   // Carica idee dal localStorage all'avvio
   useEffect(() => {
@@ -109,10 +104,17 @@ export default function IdeasPage() {
     }
   }, [localIdeas]);
 
+  // Carica dall'API solo una volta al mount
+  useEffect(() => {
+    loadIdeas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Esegui solo una volta
+
   // Filtra e ordina le idee quando cambiano i filtri
   useEffect(() => {
     filterAndSortIdeas();
-  }, [filterAndSortIdeas]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ideas, searchTerm, selectedCategory, selectedRating, sortBy]);
 
   const handleRatingChange = (ideaId: string, newRating: number) => {
     const updatedIdeas = ideas.map((idea) =>

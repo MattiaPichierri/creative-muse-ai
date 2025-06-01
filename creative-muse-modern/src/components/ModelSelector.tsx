@@ -42,11 +42,32 @@ export function ModelSelector() {
     setLoading(true);
     setError(null);
 
+    console.log('🔍 Lade Modelle von API...');
+    
+    // Direkter Test der Verbindung
+    try {
+      console.log('🧪 Teste direkte Verbindung...');
+      const directResponse = await fetch('http://127.0.0.1:8000/api/v1/models');
+      console.log('🧪 Direkte Antwort:', directResponse.status);
+      const directData = await directResponse.json();
+      console.log('🧪 Direkte Daten:', directData);
+      
+      setModels(directData);
+      setLoading(false);
+      return;
+    } catch (directError) {
+      console.error('🧪 Direkter Test fehlgeschlagen:', directError);
+    }
+
+    // Fallback auf API Service
     const result = await apiService.getModels();
+    console.log('📡 API Response:', result);
 
     if (result.error) {
+      console.error('❌ API Fehler:', result.error);
       setError(result.error);
     } else if (result.data) {
+      console.log('✅ Modelle geladen:', result.data);
       setModels(result.data);
     }
 
@@ -57,13 +78,36 @@ export function ModelSelector() {
     setSwitching(modelKey);
     setError(null);
 
-    const result = await apiService.switchModel(modelKey);
+    console.log('🔄 Wechsle zu Modell:', modelKey);
 
-    if (result.error) {
-      setError(result.error);
-    } else {
-      // Aktualisiere Modell-Status
-      await loadModels();
+    // Direkter Switch-Call
+    try {
+      console.log('🧪 Teste direkten Model-Switch...');
+      const directResponse = await fetch('http://127.0.0.1:8000/api/v1/models/switch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model_key: modelKey }),
+      });
+      
+      console.log('🧪 Switch Response Status:', directResponse.status);
+      
+      if (directResponse.ok) {
+        const switchData = await directResponse.json();
+        console.log('✅ Model Switch erfolgreich:', switchData);
+        // Aktualisiere Modell-Status
+        await loadModels();
+        setSwitching(null);
+        return;
+      } else {
+        const errorData = await directResponse.text();
+        console.error('❌ Switch fehlgeschlagen:', errorData);
+        setError(`Switch fehlgeschlagen: ${directResponse.status}`);
+      }
+    } catch (directError) {
+      console.error('🧪 Direkter Switch fehlgeschlagen:', directError);
+      setError(`Verbindungsfehler: ${directError}`);
     }
 
     setSwitching(null);

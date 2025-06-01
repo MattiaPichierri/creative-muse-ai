@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,6 +17,25 @@ interface ExportButtonProps {
 
 export function ExportButton({ ideas }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Verhindere Hydration-Mismatch
+  if (!isMounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled
+        title="Lade..."
+      >
+        <Download className="h-4 w-4" />
+      </Button>
+    );
+  }
 
   const exportToJSON = () => {
     setIsExporting(true);

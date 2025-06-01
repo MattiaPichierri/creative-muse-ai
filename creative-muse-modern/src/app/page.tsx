@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,6 +41,56 @@ export default function Home() {
   const [customPrompt, setCustomPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Verhindere Hydration-Mismatch für framer-motion
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen gradient-bg">
+        <header className="border-b glass sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold gradient-text">
+                  {t('header.title')}
+                </h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <DesktopNavigation />
+                <div className="flex items-center space-x-2">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                    {t('header.aiPowered')}
+                  </Badge>
+                  <ModelSelector />
+                  <ExportButton ideas={ideas} />
+                  <LanguageSelector />
+                  <ThemeToggle />
+                </div>
+                <MobileNavigation />
+              </div>
+            </div>
+          </div>
+        </header>
+        <main className="container mx-auto px-4 py-8">
+          <section className="text-center mb-12">
+            <h2 className="text-4xl md:text-6xl font-bold mb-4 gradient-text">
+              {t('home.title')}
+            </h2>
+            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+              {t('home.subtitle')}
+            </p>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   const generateRandomIdea = async () => {
     setIsGenerating(true);

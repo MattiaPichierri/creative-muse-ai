@@ -1,26 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { type Idea } from '@/lib/api';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   // Stato per memorizzare il valore
-  const [storedValue, setStoredValue] = useState<T>(initialValue);
-
-  // Funzione per leggere dal localStorage
-  const getValue = useCallback((): T => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     try {
       if (typeof window === 'undefined') {
         return initialValue;
       }
-
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
-  }, [key, initialValue]);
+  });
 
   // Funzione per scrivere nel localStorage
   const setValue = (value: T | ((val: T) => T)) => {
@@ -40,12 +36,6 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       console.warn(`Error setting localStorage key "${key}":`, error);
     }
   };
-
-  // Carica il valore iniziale dal localStorage
-  useEffect(() => {
-    const value = getValue();
-    setStoredValue(value);
-  }, [getValue]);
 
   return [storedValue, setValue] as const;
 }

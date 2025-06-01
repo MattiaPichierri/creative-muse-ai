@@ -110,23 +110,12 @@ async def lifespan(app: FastAPI):
     
     model_manager = ModelManager(cache_dir=cache_dir, hf_token=hf_token)
     
-    # Versuche das beste verfügbare Modell zu laden
+    # Lazy Loading - Modelle werden bei Bedarf geladen (Speicher sparen)
     available_models = model_manager.get_available_models()
     if available_models:
-        # Priorisiere empfohlene Modelle
-        recommended_models = [
-            key for key in available_models
-            if model_manager.model_configs[key].recommended
-        ]
-        
-        target_model = recommended_models[0] if recommended_models else available_models[0]
-        logger.info(f"🤖 Lade Standard-Modell: {target_model}")
-        
-        success = await model_manager.load_model(target_model)
-        if success:
-            logger.info(f"✅ Multi-Model Backend bereit mit {target_model}")
-        else:
-            logger.warning("⚠️  Fallback auf Mock-Implementation")
+        logger.info(f"💡 Lazy Loading aktiviert - Modelle werden bei Bedarf geladen")
+        logger.info(f"📋 Verfügbare Modelle: {', '.join(available_models)}")
+        logger.info(f"✅ Multi-Model Backend bereit (kein Modell geladen)")
     else:
         logger.warning("⚠️  Keine Modelle gefunden - verwende Mock-Implementation")
     
@@ -178,6 +167,21 @@ def init_simple_db():
             )
         """
         )
+        
+        # Prüfe und füge fehlende Spalten hinzu
+        try:
+            cursor.execute("ALTER TABLE simple_ideas ADD COLUMN model_used TEXT DEFAULT 'unknown'")
+            logger.info("✅ Spalte model_used hinzugefügt")
+        except sqlite3.OperationalError:
+            # Spalte existiert bereits
+            pass
+            
+        try:
+            cursor.execute("ALTER TABLE simple_ideas ADD COLUMN generation_method TEXT DEFAULT 'mock'")
+            logger.info("✅ Spalte generation_method hinzugefügt")
+        except sqlite3.OperationalError:
+            # Spalte existiert bereits
+            pass
 
         conn.commit()
         conn.close()
@@ -447,6 +451,41 @@ async def generate_random_idea(request: RandomIdeaRequest):
     return await generate_idea(idea_request)
 
 
+@app.get("/api/v1/ideas", response_model=List[IdeaResponse])
+async def get_all_ideas():
+    """Hole alle gespeicherten Ideen"""
+    try:
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT id, title, content, category, rating, generation_method,
+                   model_used, created_at
+            FROM simple_ideas
+            ORDER BY created_at DESC
+        """)
+        
+        ideas = []
+        for row in cursor.fetchall():
+            ideas.append(IdeaResponse(
+                id=row[0],
+                title=row[1],
+                content=row[2],
+                category=row[3],
+                rating=row[4],
+                generation_method=row[5],
+                model_used=row[6],
+                created_at=row[7]
+            ))
+        
+        conn.close()
+        return ideas
+        
+    except Exception as e:
+        logger.error(f"❌ Fehler beim Laden der Ideen: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/v1/stats", response_model=Stats)
 async def get_stats():
     """Hole erweiterte Statistiken"""
@@ -509,8 +548,8 @@ def main():
     try:
         logger.info("🚀 Starte Creative Muse AI Multi-Model Backend...")
         
-        # Server-Konfiguration
-        host = os.getenv("API_HOST", "localhost")
+        # Server-Konfiguration - auf allen Interfaces
+        host = os.getenv("API_HOST", "0.0.0.0")
         port = int(os.getenv("API_PORT", 8000))
         
         uvicorn.run(
