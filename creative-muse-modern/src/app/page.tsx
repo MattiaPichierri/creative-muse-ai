@@ -1,0 +1,322 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { apiService, type Idea } from '@/lib/api'
+import { MobileNavigation, DesktopNavigation } from '@/components/Navigation'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { ExportButton } from '@/components/ExportButton'
+import { PredefinedPrompts } from '@/components/PredefinedPrompts'
+import { useIdeasStorage } from '@/hooks/useLocalStorage'
+import {
+  Lightbulb,
+  Sparkles,
+  Brain,
+  Zap,
+  Star,
+  ArrowRight,
+  Shuffle,
+  Plus,
+  AlertCircle
+} from 'lucide-react'
+
+export default function Home() {
+  const [localIdeas, setLocalIdeas] = useIdeasStorage()
+  const [ideas, setIdeas] = useState<Idea[]>([])
+  const [customPrompt, setCustomPrompt] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Carica le idee dal localStorage all'avvio
+  useEffect(() => {
+    if (localIdeas && Array.isArray(localIdeas)) {
+      setIdeas(localIdeas)
+    }
+  }, [localIdeas])
+
+  // Salva le idee nel localStorage quando cambiano
+  useEffect(() => {
+    if (ideas.length > 0) {
+      setLocalIdeas(ideas)
+    }
+  }, [ideas, setLocalIdeas])
+
+  const generateRandomIdea = async () => {
+    setIsGenerating(true)
+    setError(null)
+    
+    const result = await apiService.generateRandomIdea()
+    
+    if (result.error) {
+      setError(result.error)
+    } else if (result.data) {
+      setIdeas(prev => [result.data!, ...prev])
+    }
+    
+    setIsGenerating(false)
+  }
+
+  const generateCustomIdea = async () => {
+    if (!customPrompt.trim()) return
+    
+    setIsGenerating(true)
+    setError(null)
+    
+    const result = await apiService.generateCustomIdea(customPrompt)
+    
+    if (result.error) {
+      setError(result.error)
+    } else if (result.data) {
+      setIdeas(prev => [result.data!, ...prev])
+      setCustomPrompt('')
+    }
+    
+    setIsGenerating(false)
+  }
+
+  return (
+    <div className="min-h-screen gradient-bg">
+      {/* Header */}
+      <header className="border-b glass sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <motion.div 
+              className="flex items-center space-x-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold gradient-text">
+                Creative Muse
+              </h1>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex items-center space-x-4"
+            >
+              <DesktopNavigation />
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  AI-Powered
+                </Badge>
+                <ExportButton ideas={ideas} />
+                <ThemeToggle />
+              </div>
+              <MobileNavigation />
+            </motion.div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <motion.section 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-4xl md:text-6xl font-bold mb-4 gradient-text">
+            Libera la tua creatività
+          </h2>
+          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+            Genera idee innovative con l&apos;intelligenza artificiale.
+            Trasforma i tuoi pensieri in progetti straordinari.
+          </p>
+        </motion.section>
+
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Action Cards */}
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
+          {/* Random Idea Generator */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Card className="h-full card-gradient card-hover shadow-lg">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Shuffle className="h-6 w-6 text-blue-600" />
+                  <CardTitle className="text-xl">Idea Casuale</CardTitle>
+                </div>
+                <CardDescription>
+                  Lascia che l&apos;AI generi un&apos;idea completamente nuova per te
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={generateRandomIdea}
+                  disabled={isGenerating}
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white btn-hover shadow-glow"
+                  size="lg"
+                >
+                  {isGenerating ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Sparkles className="h-5 w-5 mr-2" />
+                    </motion.div>
+                  ) : (
+                    <Zap className="h-5 w-5 mr-2" />
+                  )}
+                  {isGenerating ? 'Generando...' : 'Genera Idea'}
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Custom Prompt */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Card className="h-full card-gradient card-hover shadow-lg">
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Plus className="h-6 w-6 text-purple-600" />
+                  <CardTitle className="text-xl">Idea Personalizzata</CardTitle>
+                </div>
+                <CardDescription>
+                  Descrivi quello che hai in mente e lascia che l&apos;AI lo sviluppi
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center mb-2">
+                  <PredefinedPrompts onSelectPrompt={setCustomPrompt} />
+                </div>
+                <Textarea
+                  placeholder="Descrivi la tua idea o il tema che ti interessa..."
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  className="min-h-[100px] border-purple-200 focus:border-purple-400"
+                />
+                <Button
+                  onClick={generateCustomIdea}
+                  disabled={isGenerating || !customPrompt.trim()}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white btn-hover shadow-glow"
+                  size="lg"
+                >
+                  {isGenerating ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Sparkles className="h-5 w-5 mr-2" />
+                    </motion.div>
+                  ) : (
+                    <ArrowRight className="h-5 w-5 mr-2" />
+                  )}
+                  {isGenerating ? 'Generando...' : 'Sviluppa Idea'}
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Ideas Grid */}
+        {ideas.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-slate-800">Le tue idee</h3>
+              {ideas.length > 3 && (
+                <a
+                  href="/ideas"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                >
+                  Visualizza tutte →
+                </a>
+              )}
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {ideas.slice(0, 6).map((idea, index) => (
+                <motion.div
+                  key={idea.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                >
+                  <Card className="h-full card-gradient card-hover shadow-md">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Lightbulb className="h-5 w-5 text-yellow-500" />
+                          <Badge variant="outline" className="text-xs">
+                            {idea.category}
+                          </Badge>
+                        </div>
+                        {idea.rating && (
+                          <div className="flex items-center space-x-1">
+                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                            <span className="text-sm text-slate-600">{idea.rating}</span>
+                          </div>
+                        )}
+                      </div>
+                      <CardTitle className="text-lg leading-tight">{idea.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-slate-600 text-sm leading-relaxed">{idea.content}</p>
+                      <div className="mt-4 text-xs text-slate-400">
+                        {new Date(idea.created_at).toLocaleDateString('it-IT')}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+        )}
+
+        {/* Empty State */}
+        {ideas.length === 0 && (
+          <motion.div 
+            className="text-center py-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            <div className="p-6 card-gradient rounded-2xl shadow-sm max-w-md mx-auto">
+              <Lightbulb className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-600 mb-2">
+                Inizia a generare idee
+              </h3>
+              <p className="text-slate-500 text-sm">
+                Clicca su uno dei pulsanti sopra per iniziare il tuo viaggio creativo
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </main>
+    </div>
+  )
+}
