@@ -1,13 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AppProvider } from './context/AppContext';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import './App.css';
 import Header from './components/Layout/Header';
-import Home from './pages/Home';
-import Ideas from './pages/Ideas';
-import IdeaDetail from './pages/IdeaDetail';
-import Stats from './pages/Stats';
-import About from './pages/About';
+import { AppProvider } from './context/AppContext';
 import './index.css';
+import About from './pages/About';
+import Home from './pages/Home';
+import IdeaDetail from './pages/IdeaDetail';
+import Ideas from './pages/Ideas';
+import Stats from './pages/Stats';
 
 // Create a client
 const queryClient = new QueryClient({

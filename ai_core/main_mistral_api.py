@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Creative Muse AI - Backend mit echtem Mistral-7B-Instruct-v0.3 Modell
+Creative Muse AI - Backend mit Mistral API (speicherschonend)
 """
 
 import os
@@ -9,26 +9,17 @@ import logging
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import List, Optional, AsyncGenerator
+from typing import List, Optional
 import uvicorn
 import json
 import sqlite3
 from datetime import datetime
 import uuid
 import asyncio
+import httpx
 from contextlib import asynccontextmanager
-
-# Transformers und Torch für Mistral
-try:
-    import torch
-    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-    from transformers import TextStreamer
-    HAS_TRANSFORMERS = True
-except ImportError:
-    HAS_TRANSFORMERS = False
-    print("⚠️  Transformers nicht installiert. Verwende Mock-Implementation.")
 
 # Logging konfigurieren
 logging.basicConfig(
@@ -36,76 +27,57 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Globale Variablen für das Modell
-tokenizer = None
-model = None
-text_generator = None
+# Globale Variablen
+mistral_client = None
 
-async def load_mistral_model():
-    """Lade Mistral-7B-Instruct-v0.3 Modell"""
-    global tokenizer, model, text_generator
-    
-    if not HAS_TRANSFORMERS:
-        logger.warning("⚠️  Transformers nicht verfügbar - verwende Mock-Implementation")
-        return False
+async def init_mistral_api():
+    """Initialisiere Mistral API Client"""
+    global mistral_client
     
     try:
-        # Verwende das Mistral-7B-Instruct-v0.3 Modell
-        model_name = "mistralai/Mistral-7B-Instruct-v0.3"
-        logger.info(f"🤖 Lade Mistral-7B-Instruct-v0.3 Modell: {model_name}")
-        logger.info("📥 Download kann einige Minuten dauern (ca. 1.5GB)...")
+        # Verwende Hugging Face Inference API für Mistral
+        api_token = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_TOKEN")
         
-        # Tokenizer laden
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        if tokenizer.pad_token is None:
-            tokenizer.pad_token = tokenizer.eos_token
+        if not api_token:
+            logger.warning("⚠️  Kein Hugging Face Token gefunden. Verwende Mock-Implementation.")
+            return False
         
-        # Modell laden mit maximaler Speicher-Optimierung (ohne bitsandbytes)
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        logger.info(f"🔧 Verwende Device: {device}")
-        logger.info("💾 Verwende aggressive Speicher-Optimierung ohne Quantisierung...")
-        
-        # Maximale Speicher-Optimierung für Mistral-7B ohne bitsandbytes
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-            device_map="cpu",  # Forciere CPU um OOM zu vermeiden
-            low_cpu_mem_usage=True,
-            trust_remote_code=True,
-            use_cache=False,  # Cache deaktivieren spart Speicher
-            max_memory={"cpu": "6GB"},  # Speicher-Limit für CPU
-            offload_folder="./temp_offload"  # Offload auf Festplatte
+        mistral_client = httpx.AsyncClient(
+            base_url="https://api-inference.huggingface.co/models",
+            headers={"Authorization": f"Bearer {api_token}"},
+            timeout=30.0
         )
         
-        # Text-Generator Pipeline
-        text_generator = pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            device=0 if device == "cuda" else -1,
-            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
+        # Test API Verbindung
+        response = await mistral_client.post(
+            "/mistralai/Mistral-7B-Instruct-v0.3",
+            json={"inputs": "Test", "parameters": {"max_new_tokens": 10}}
         )
         
-        logger.info("✅ Mistral-Modell erfolgreich geladen")
-        return True
-        
+        if response.status_code == 200:
+            logger.info("✅ Mistral API erfolgreich verbunden")
+            return True
+        else:
+            logger.warning(f"⚠️  Mistral API Test fehlgeschlagen: {response.status_code}")
+            return False
+            
     except Exception as e:
-        logger.error(f"❌ Fehler beim Laden des Mistral-Modells: {e}")
+        logger.error(f"❌ Fehler bei Mistral API Initialisierung: {e}")
         return False
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup und Shutdown Events"""
     # Startup
-    logger.info("🚀 Starte Creative Muse AI Backend mit Mistral-7B...")
+    logger.info("🚀 Starte Creative Muse AI Backend mit Mistral API...")
     
     # Datenbank initialisieren
     init_simple_db()
     
-    # Mistral-Modell laden
-    model_loaded = await load_mistral_model()
-    if model_loaded:
-        logger.info("✅ Mistral-7B-Instruct-v0.3 bereit")
+    # Mistral API initialisieren
+    api_ready = await init_mistral_api()
+    if api_ready:
+        logger.info("✅ Mistral API bereit")
     else:
         logger.warning("⚠️  Fallback auf Mock-Implementation")
     
@@ -113,11 +85,13 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("🛑 Backend wird beendet...")
+    if mistral_client:
+        await mistral_client.aclose()
 
 # FastAPI App
 app = FastAPI(
     title="Creative Muse AI",
-    description="AI-powered Creative Idea Generation Platform with Mistral-7B-Instruct-v0.3",
+    description="AI-powered Creative Idea Generation Platform with Mistral API",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -196,7 +170,7 @@ def init_simple_db():
         return False
 
 def create_mistral_prompt(prompt: str, category: str, language: str, creativity_level: int) -> str:
-    """Erstelle optimierten Prompt für Mistral-7B"""
+    """Erstelle optimierten Prompt für Mistral API"""
     
     language_prompts = {
         "de": {
@@ -221,25 +195,15 @@ def create_mistral_prompt(prompt: str, category: str, language: str, creativity_
     
     lang_config = language_prompts.get(language, language_prompts["de"])
     
-    # Mistral-Chat-Format
-    messages = [
-        {"role": "system", "content": lang_config["system"]},
-        {"role": "user", "content": lang_config["instruction"]}
-    ]
-    
-    # Format für Mistral-Instruct
-    formatted_prompt = tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,
-        add_generation_prompt=True
-    ) if tokenizer else f"{lang_config['system']}\n\n{lang_config['instruction']}"
+    # Mistral-Chat-Format für API
+    formatted_prompt = f"<s>[INST] {lang_config['system']}\n\n{lang_config['instruction']} [/INST]"
     
     return formatted_prompt
 
-async def generate_with_mistral(prompt: str, category: str, language: str, creativity_level: int) -> dict:
-    """Generiere Idee mit Mistral-7B-Instruct-v0.3"""
+async def generate_with_mistral_api(prompt: str, category: str, language: str, creativity_level: int) -> dict:
+    """Generiere Idee mit Mistral API"""
     
-    if not text_generator:
+    if not mistral_client:
         # Fallback auf Mock-Implementation
         return generate_mock_idea(prompt, category, language, creativity_level)
     
@@ -251,19 +215,27 @@ async def generate_with_mistral(prompt: str, category: str, language: str, creat
         temperature = 0.3 + (creativity_level / 10) * 0.7  # 0.3 bis 1.0
         top_p = 0.8 + (creativity_level / 10) * 0.2  # 0.8 bis 1.0
         
-        # Text generieren
-        response = text_generator(
-            formatted_prompt,
-            max_new_tokens=512,
-            temperature=temperature,
-            top_p=top_p,
-            do_sample=True,
-            pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=tokenizer.eos_token_id,
-            return_full_text=False
+        # API Request
+        response = await mistral_client.post(
+            "/mistralai/Mistral-7B-Instruct-v0.3",
+            json={
+                "inputs": formatted_prompt,
+                "parameters": {
+                    "max_new_tokens": 512,
+                    "temperature": temperature,
+                    "top_p": top_p,
+                    "do_sample": True,
+                    "return_full_text": False
+                }
+            }
         )
         
-        generated_text = response[0]['generated_text'].strip()
+        if response.status_code != 200:
+            logger.error(f"❌ Mistral API Fehler: {response.status_code}")
+            return generate_mock_idea(prompt, category, language, creativity_level)
+        
+        result = response.json()
+        generated_text = result[0]['generated_text'].strip()
         
         # Parse Titel und Inhalt
         lines = generated_text.split('\n', 1)
@@ -277,11 +249,11 @@ async def generate_with_mistral(prompt: str, category: str, language: str, creat
         return {
             "title": title[:200],  # Titel begrenzen
             "content": content[:2000],  # Inhalt begrenzen
-            "generation_method": "mistral-7b-instruct-v0.3"
+            "generation_method": "mistral-7b-api"
         }
         
     except Exception as e:
-        logger.error(f"❌ Fehler bei Mistral-Generierung: {e}")
+        logger.error(f"❌ Fehler bei Mistral API Generierung: {e}")
         # Fallback auf Mock
         return generate_mock_idea(prompt, category, language, creativity_level)
 
@@ -338,10 +310,9 @@ async def root():
         "message": "Creative Muse AI Backend",
         "version": "1.0.0",
         "status": "running",
-        "model": "mistral-7b-instruct-v0.3" if text_generator else "mock",
+        "model": "mistral-7b-api" if mistral_client else "mock",
         "endpoints": {
             "generate": "/api/v1/generate",
-            "generate_stream": "/api/v1/generate/stream",
             "random": "/api/v1/random",
             "ideas": "/api/v1/ideas",
             "stats": "/api/v1/stats",
@@ -353,11 +324,11 @@ async def root():
 async def generate_idea(request: IdeaRequest):
     """Generiere neue Idee"""
     try:
-        if request.use_llm and text_generator:
-            idea_data = await generate_with_mistral(
-                request.prompt,
-                request.category,
-                request.language,
+        if request.use_llm and mistral_client:
+            idea_data = await generate_with_mistral_api(
+                request.prompt, 
+                request.category, 
+                request.language, 
                 request.creativity_level
             )
         else:
@@ -502,14 +473,14 @@ async def health_check():
     """Health Check"""
     return {
         "status": "healthy",
-        "llm_status": "ready" if text_generator else "mock",
-        "model": "mistral-7b-instruct-v0.3" if text_generator else "mock",
+        "llm_status": "api-ready" if mistral_client else "mock",
+        "model": "mistral-7b-api" if mistral_client else "mock",
         "database": "connected"
     }
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main_llm:app",
+        "main_mistral_api:app",
         host="0.0.0.0",
         port=8000,
         reload=False,

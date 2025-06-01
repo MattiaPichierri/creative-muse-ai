@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Idea, IdeaRequest, RandomIdeaRequest, IdeaRating, Stats, StreamingData } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

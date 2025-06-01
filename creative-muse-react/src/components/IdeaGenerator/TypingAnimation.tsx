@@ -64,7 +64,7 @@ const TypingAnimation: React.FC<TypingAnimationProps> = ({ isVisible, onComplete
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
             {displayText}
             {showCursor && (
-              <span className="inline-block w-0.5 h-5 bg-purple-600 ml-1 animate-pulse"></span>
+              <span className="typing-cursor"></span>
             )}
           </p>
         </div>
