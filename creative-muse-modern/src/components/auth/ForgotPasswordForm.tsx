@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '../ui/card';
 import { Alert } from '../ui/alert';
+import { apiClient } from '../../lib/api-client';
 
 export const ForgotPasswordForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -25,28 +26,12 @@ export const ForgotPasswordForm: React.FC = () => {
     setMessage('');
 
     try {
-      const response = await fetch(
-        'http://localhost:8000/api/v1/auth/forgot-password',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage(data.message);
-        setEmail(''); // Clear form
-      } else {
-        setError(data.detail || 'Errore durante la richiesta');
-      }
-    } catch (error) {
+      const response = await apiClient.forgotPassword(email);
+      setMessage(response.message || 'Email di reset inviata con successo!');
+      setEmail(''); // Clear form
+    } catch (error: unknown) {
       console.error('Forgot password error:', error);
-      setError('Errore di connessione al server');
+      setError(error instanceof Error ? error.message : 'Errore durante la richiesta');
     } finally {
       setLoading(false);
     }

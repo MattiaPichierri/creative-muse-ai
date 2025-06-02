@@ -7,17 +7,7 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-
-export interface User {
-  id: string;
-  email: string;
-  username?: string;
-  subscription_tier: string;
-  first_name?: string;
-  last_name?: string;
-  is_active: boolean;
-  email_verified: boolean;
-}
+import { apiClient, User } from '../lib/api-client';
 
 interface SubscriptionLimits {
   daily_ideas_limit: number;
@@ -35,7 +25,7 @@ interface SubscriptionLimits {
   };
 }
 
-interface SubscriptionInfo {
+interface EnhancedSubscriptionInfo {
   plan: {
     name: string;
     display_name: string;
@@ -48,33 +38,11 @@ interface SubscriptionInfo {
   };
 }
 
-interface BackendSubscriptionResponse {
-  tier: string;
-  limits: {
-    daily_ideas: number;
-    monthly_ideas: number;
-    team_members: number;
-    projects: number;
-  };
-  usage: {
-    daily_ideas: number;
-    monthly_ideas: number;
-  };
-  features: {
-    ai_models: string[];
-    export_formats: string[];
-    collaboration: boolean;
-    priority_support: boolean;
-    api_access: boolean;
-    white_label: boolean;
-    analytics: boolean;
-  };
-}
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  subscriptionInfo: SubscriptionInfo | null;
+  subscriptionInfo: EnhancedSubscriptionInfo | null;
   isLoading: boolean;
   login: (token: string, user: User) => void;
   logout: () => void;
@@ -87,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [subscriptionInfo, setSubscriptionInfo] =
-    useState<SubscriptionInfo | null>(null);
+    useState<EnhancedSubscriptionInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Carica i dati dal localStorage all'avvio
@@ -135,24 +103,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!currentToken) return;
 
     try {
-      const response = await fetch(
-        'http://localhost:8000/api/v1/subscription/info',
-        {
-          headers: {
-            Authorization: `Bearer ${currentToken}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data: BackendSubscriptionResponse = await response.json();
-
-        // Transform backend response to frontend format
-        const transformedData: SubscriptionInfo = {
+      // Set token for API client
+      apiClient.setToken(currentToken);
+      const response = await apiClient.getSubscriptionInfo();
+      
+      // Transform the basic SubscriptionInfo to EnhancedSubscriptionInfo
+      if (response.data) {
+        const data = response.data;
+        const transformedData: EnhancedSubscriptionInfo = {
           plan: {
             name: data.tier,
-            display_name:
-              data.tier.charAt(0).toUpperCase() + data.tier.slice(1),
+            display_name: data.tier.charAt(0).toUpperCase() + data.tier.slice(1),
             price_monthly:
               data.tier === 'free'
                 ? 0
@@ -163,29 +124,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     : 99.99,
           },
           limits: {
-            daily_ideas_limit: data.limits.daily_ideas,
-            monthly_ideas_limit: data.limits.monthly_ideas,
-            max_team_members: data.limits.team_members,
-            max_projects: data.limits.projects,
+            daily_ideas_limit: (data.limits as Record<string, unknown>)?.daily_ideas as number || 0,
+            monthly_ideas_limit: (data.limits as Record<string, unknown>)?.monthly_ideas as number || 0,
+            max_team_members: (data.limits as Record<string, unknown>)?.team_members as number || 0,
+            max_projects: (data.limits as Record<string, unknown>)?.projects as number || 0,
             features: {
-              ai_models: data.features.ai_models,
-              export_formats: data.features.export_formats,
-              collaboration: data.features.collaboration,
-              priority_support: data.features.priority_support,
-              api_access: data.features.api_access,
-              white_label: data.features.white_label,
-              analytics: data.features.analytics,
+              ai_models: (data.features as Record<string, unknown>)?.ai_models as string[] || [],
+              export_formats: (data.features as Record<string, unknown>)?.export_formats as string[] || [],
+              collaboration: (data.features as Record<string, unknown>)?.collaboration as boolean || false,
+              priority_support: (data.features as Record<string, unknown>)?.priority_support as boolean || false,
+              api_access: (data.features as Record<string, unknown>)?.api_access as boolean || false,
+              white_label: (data.features as Record<string, unknown>)?.white_label as boolean || false,
+              analytics: (data.features as Record<string, unknown>)?.analytics as boolean || false,
             },
           },
           usage: {
-            daily_ideas: data.usage.daily_ideas,
-            monthly_ideas: data.usage.monthly_ideas,
+            daily_ideas: (data.usage as Record<string, unknown>)?.daily_ideas as number || 0,
+            monthly_ideas: (data.usage as Record<string, unknown>)?.monthly_ideas as number || 0,
           },
         };
-
+        
         setSubscriptionInfo(transformedData);
-      } else {
-        console.error('Errore nel caricamento info sottoscrizione');
       }
     } catch (error) {
       console.error('Errore nella richiesta info sottoscrizione:', error);

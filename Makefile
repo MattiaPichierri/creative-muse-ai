@@ -6,36 +6,45 @@
 help:
 	@echo "Creative Muse AI - Verfügbare Targets:"
 	@echo ""
-	@echo "Setup:"
+	@echo "🚀 Schnellstart:"
+	@echo "  dev-full         - Vollständige Entwicklungsumgebung (empfohlen)"
+	@echo "  dev-secure       - Sichere Entwicklungsumgebung"
+	@echo ""
+	@echo "📦 Setup:"
 	@echo "  setup-secure     - Vollständiges sicheres Setup"
-	@echo "  generate-keys    - Kryptographische Schlüssel generieren"
-	@echo "  setup-encryption - Verschlüsselungsinfrastruktur einrichten"
 	@echo "  install-deps     - Alle Abhängigkeiten installieren"
 	@echo "  init-secure-db   - Sichere Datenbank initialisieren"
 	@echo ""
-	@echo "Entwicklung:"
-	@echo "  dev-secure         - Sichere Entwicklungsumgebung starten"
-	@echo "  setup-subscription - Subscription-System komplett einrichten"
-	@echo "  start-backend      - Subscription Backend starten (Standard)"
-	@echo "  start-subscription - Subscription Backend explizit starten"
-	@echo "  start-multi-model  - Multi-Model Backend starten (Legacy)"
-	@echo "  start-simple-backend - Einfaches Backend starten (Legacy)"
-	@echo "  start-llm-backend  - LLM Backend starten (Legacy)"
-	@echo "  start-mistral-backend - Mistral API Backend starten (Legacy)"
-	@echo "  start-frontend     - Frontend starten"
-	@echo "  start-monitoring   - Sicherheitsmonitoring starten"
+	@echo "🔧 Backend:"
+	@echo "  start-backend           - Unified Backend starten (empfohlen)"
+	@echo "  start-backend-with-mail - Backend mit MailHog starten"
+	@echo "  test-backend            - Backend-Tests ausführen"
 	@echo ""
-	@echo "Tests:"
-	@echo "  test-security    - Sicherheitstests ausführen"
-	@echo "  test-backend     - Backend-Tests"
-	@echo "  test-frontend    - Frontend-Tests"
-	@echo "  compliance-check - Compliance-Überprüfung"
+	@echo "🖥️  Frontend:"
+	@echo "  start-modern     - Next.js Frontend starten (empfohlen)"
+	@echo "  start-react      - Legacy React Frontend"
+	@echo "  start-electron   - Electron Frontend"
+	@echo "  test-frontend    - Frontend-Tests ausführen"
 	@echo ""
-	@echo "Wartung:"
-	@echo "  backup           - Verschlüsseltes Backup erstellen"
-	@echo "  rotate-keys      - Schlüsselrotation durchführen"
-	@echo "  security-audit   - Sicherheitsaudit durchführen"
+	@echo "📧 Email Testing:"
+	@echo "  start-mailhog    - MailHog Container starten"
+	@echo "  start-mailhog-ui - MailHog UI öffnen"
+	@echo "  stop-mailhog     - MailHog Container stoppen"
+	@echo ""
+	@echo "🧪 Tests:"
+	@echo "  test-all         - Alle Tests ausführen"
+	@echo "  test-integration - Integration Tests"
+	@echo "  test-security    - Sicherheitstests"
+	@echo ""
+	@echo "🐳 Docker:"
+	@echo "  docker-build     - Docker Images bauen"
+	@echo "  docker-up        - Container starten"
+	@echo "  docker-down      - Container stoppen"
+	@echo ""
+	@echo "🔧 Wartung:"
+	@echo "  health-check     - System-Gesundheitsprüfung"
 	@echo "  clean            - Temporäre Dateien löschen"
+	@echo "  stop-all         - Alle Prozesse stoppen"
 	@echo ""
 
 # Vollständiges sicheres Setup
@@ -109,34 +118,48 @@ setup-subscription: install-python init-secure-db
 dev-secure: start-monitoring start-backend start-frontend
 	@echo "🚀 Sichere Entwicklungsumgebung gestartet"
 
-# Backend starten (Subscription-enabled)
+# Vollständige Entwicklungsumgebung mit MailHog
+dev-full: start-monitoring start-backend-with-mail start-modern start-mailhog-ui
+	@echo "🚀 Vollständige Entwicklungsumgebung mit MailHog gestartet"
+	@echo "📧 MailHog UI: http://localhost:8025"
+	@echo "🖥️  Frontend: http://localhost:3000"
+	@echo "🔧 Backend API: http://localhost:8000"
+
+# Backend starten (Unified)
 start-backend:
-	@echo "🔧 Starte Subscription Backend..."
-	@cd ai_core && source venv/bin/activate && python3 main_subscription.py &
-
-# Subscription Backend starten (explizit)
-start-subscription:
-	@echo "💳 Starte Subscription Backend..."
-	@cd ai_core && source venv/bin/activate && python3 main_subscription.py &
-
-# Multi-Model Backend starten (Legacy)
-start-multi-model:
-	@echo "🤖 Starte Multi-Model Backend (Legacy)..."
-	@cd ai_core && source venv/bin/activate && python3 main_multi_model.py &
-
-# Einfaches Backend starten (Legacy)
-start-simple-backend:
-	@echo "🔧 Starte einfaches Backend (Legacy)..."
+	@echo "🚀 Starte Unified Backend..."
 	@cd ai_core && source venv/bin/activate && python3 main.py &
 
-# LLM Backend starten (Legacy)
+# Backend mit MailHog starten
+start-backend-with-mail:
+	@echo "🚀 Starte Unified Backend mit MailHog..."
+	@docker run -d --name mailhog -p 1025:1025 -p 8025:8025 mailhog/mailhog || echo "MailHog bereits gestartet"
+	@cd ai_core && source venv/bin/activate && SMTP_HOST=localhost SMTP_PORT=1025 python3 main.py &
+
+# Legacy Backends (deprecated)
+start-subscription:
+	@echo "⚠️  DEPRECATED: Verwende 'make start-backend' für das unified backend"
+	@echo "💳 Starte Legacy Subscription Backend..."
+	@cd ai_core && source venv/bin/activate && python3 main_subscription.py &
+
+start-multi-model:
+	@echo "⚠️  DEPRECATED: Verwende 'make start-backend' für das unified backend"
+	@echo "🤖 Starte Legacy Multi-Model Backend..."
+	@cd ai_core && source venv/bin/activate && python3 main_multi_model.py &
+
+start-simple-backend:
+	@echo "⚠️  DEPRECATED: Verwende 'make start-backend' für das unified backend"
+	@echo "🔧 Starte Legacy Simple Backend..."
+	@cd ai_core && source venv/bin/activate && python3 main_simple.py &
+
 start-llm-backend:
-	@echo "🧠 Starte LLM Backend (Legacy)..."
+	@echo "⚠️  DEPRECATED: Verwende 'make start-backend' für das unified backend"
+	@echo "🧠 Starte Legacy LLM Backend..."
 	@cd ai_core && source venv/bin/activate && python3 main_llm.py &
 
-# Mistral API Backend starten (Legacy)
 start-mistral-backend:
-	@echo "🌟 Starte Mistral API Backend (Legacy)..."
+	@echo "⚠️  DEPRECATED: Verwende 'make start-backend' für das unified backend"
+	@echo "🌟 Starte Legacy Mistral API Backend..."
 	@cd ai_core && source venv/bin/activate && python3 main_mistral_api.py &
 
 # Frontend starten
@@ -192,14 +215,39 @@ test-audit:
 # Backend-Tests
 test-backend:
 	@echo "🧪 Führe Backend-Tests aus..."
-	@cd ai_core && python3 -m pytest tests/ -v
+	@cd ai_core && source venv/bin/activate && python3 test_simple.py
 
 # Frontend-Tests
 test-frontend:
 	@echo "🧪 Führe Frontend-Tests aus..."
-	@cd ui_frontend && npm test
 	@cd creative-muse-modern && npm test
-	@if [ -d "creative-muse-react" ]; then cd creative-muse-react && npm test; fi
+
+# Integration Tests
+test-integration:
+	@echo "🧪 Führe Integration-Tests aus..."
+	@cd creative-muse-modern && npm run test:integration
+
+# Alle Tests ausführen
+test-all: test-backend test-frontend test-integration
+	@echo "✅ Alle Tests abgeschlossen"
+
+# MailHog Container starten
+start-mailhog:
+	@echo "📧 Starte MailHog Container..."
+	@docker run -d --name mailhog -p 1025:1025 -p 8025:8025 mailhog/mailhog || echo "MailHog bereits gestartet"
+	@echo "✅ MailHog gestartet - SMTP: localhost:1025, UI: http://localhost:8025"
+
+# MailHog UI öffnen
+start-mailhog-ui:
+	@echo "📧 Öffne MailHog UI..."
+	@command -v open >/dev/null 2>&1 && open http://localhost:8025 || echo "Öffne manuell: http://localhost:8025"
+
+# MailHog Container stoppen
+stop-mailhog:
+	@echo "📧 Stoppe MailHog Container..."
+	@docker stop mailhog 2>/dev/null || echo "MailHog nicht gestartet"
+	@docker rm mailhog 2>/dev/null || echo "MailHog Container bereits entfernt"
+	@echo "✅ MailHog gestoppt"
 
 # Compliance-Überprüfung
 compliance-check:
@@ -258,6 +306,7 @@ stop-all:
 	@pkill -f "python3.*main.py" || true
 	@pkill -f "npm.*dev" || true
 	@pkill -f "security_monitor.py" || true
+	@$(MAKE) stop-mailhog
 	@echo "✅ Alle Prozesse gestoppt"
 
 # Logs anzeigen

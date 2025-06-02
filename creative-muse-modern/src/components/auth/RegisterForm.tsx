@@ -13,6 +13,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock, User as UserIcon } from 'lucide-react';
 import { User } from '@/contexts/AuthContext';
+import apiClient from '@/lib/api-client';
 
 interface RegisterFormProps {
   onSuccess?: (token: string, user: User) => void;
@@ -53,32 +54,24 @@ export default function RegisterForm({
     }
 
     try {
-      const response = await fetch(
-        'http://localhost:8001/api/v1/auth/register',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-            username: formData.username || undefined,
-          }),
-        }
-      );
+      const response = await apiClient.register({
+        email: formData.email,
+        password: formData.password,
+        username: formData.username || undefined,
+      });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Errore durante la registrazione');
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Errore durante la registrazione');
       }
 
-      // Salva il token nel localStorage
-      localStorage.setItem('auth_token', data.access_token);
-      localStorage.setItem('user_data', JSON.stringify(data.user));
+      const data = response.data;
 
-      if (onSuccess) {
+      // Imposta il token nel client API
+      if (data.access_token) {
+        apiClient.setToken(data.access_token);
+      }
+
+      if (onSuccess && data.access_token && data.user) {
         onSuccess(data.access_token, data.user);
       }
     } catch (err: unknown) {

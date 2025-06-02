@@ -156,7 +156,7 @@ class APIConfig(BaseSettings):
     )
 
     # CORS-Einstellungen
-    cors_origins: list = Field(
+    cors_origins: list[str] = Field(
         default=["http://localhost:3000", "https://localhost:3000"],
         description="Erlaubte CORS-Origins",
     )

@@ -14,6 +14,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth, User } from '@/contexts/AuthContext';
+import apiClient from '@/lib/api-client';
 
 interface LoginFormProps {
   onSuccess?: (token: string, user: User) => void;
@@ -40,19 +41,13 @@ export default function LoginForm({
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await apiClient.login(formData.email, formData.password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Errore durante il login');
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Errore durante il login');
       }
+
+      const data = response.data;
 
       // Crea l'oggetto user con la struttura corretta
       const user = {
@@ -65,6 +60,9 @@ export default function LoginForm({
         is_active: true,
         email_verified: data.email_verified === 1,
       };
+
+      // Imposta il token nel client API
+      apiClient.setToken(data.token);
 
       // Usa il login del AuthContext
       login(data.token, user);

@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '../ui/card';
 import { Alert } from '../ui/alert';
+import { apiClient } from '../../lib/api-client';
 
 export const ResetPasswordForm: React.FC = () => {
   const router = useRouter();
@@ -69,34 +70,15 @@ export const ResetPasswordForm: React.FC = () => {
     }
 
     try {
-      const response = await fetch(
-        'http://localhost:8000/api/v1/auth/reset-password',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token,
-            new_password: newPassword,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage(data.message);
-        // Redirect al login dopo 3 secondi
-        setTimeout(() => {
-          router.push('/auth');
-        }, 3000);
-      } else {
-        setError(data.detail || 'Errore durante il reset della password');
-      }
-    } catch (error) {
+      const response = await apiClient.resetPassword(token, newPassword);
+      setMessage(response.message || 'Password resettata con successo!');
+      // Redirect al login dopo 3 secondi
+      setTimeout(() => {
+        router.push('/auth');
+      }, 3000);
+    } catch (error: unknown) {
       console.error('Reset password error:', error);
-      setError('Errore di connessione al server');
+      setError(error instanceof Error ? error.message : 'Errore durante il reset della password');
     } finally {
       setLoading(false);
     }

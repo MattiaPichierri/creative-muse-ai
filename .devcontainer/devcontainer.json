@@ -62,7 +62,7 @@
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally
-  "forwardPorts": [80, 443, 8000, 8001, 8080, 8081, 8082, 3000, 5001, 5173],
+  "forwardPorts": [80, 443, 8000, 8001, 8080, 8081, 8082, 3000, 5001, 5173, 1025, 8025],
   "portsAttributes": {
     "80": {
       "label": "Traefik HTTP",
@@ -73,11 +73,11 @@
       "onAutoForward": "silent"
     },
     "8000": {
-      "label": "Creative Muse AI Backend (Legacy)",
+      "label": "Creative Muse AI Backend (Unified)",
       "onAutoForward": "silent"
     },
     "8001": {
-      "label": "Creative Muse AI Backend (LLM)",
+      "label": "Creative Muse AI Backend (Legacy)",
       "onAutoForward": "silent"
     },
     "8080": {
@@ -103,6 +103,14 @@
     "5173": {
       "label": "Vite Development Server",
       "onAutoForward": "silent"
+    },
+    "1025": {
+      "label": "MailHog SMTP Server",
+      "onAutoForward": "silent"
+    },
+    "8025": {
+      "label": "MailHog Web UI",
+      "onAutoForward": "notify"
     }
   },
 
