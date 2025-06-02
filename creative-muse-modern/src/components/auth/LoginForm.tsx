@@ -4,20 +4,29 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, User } from '@/contexts/AuthContext';
 
 interface LoginFormProps {
-  onSuccess?: (token: string, user: any) => void;
+  onSuccess?: (token: string, user: User) => void;
   onSwitchToRegister?: () => void;
 }
 
-export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
+export default function LoginForm({
+  onSuccess,
+  onSwitchToRegister,
+}: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,7 +63,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
         first_name: data.first_name,
         last_name: data.last_name,
         is_active: true,
-        email_verified: data.email_verified === 1
+        email_verified: data.email_verified === 1,
       };
 
       // Usa il login del AuthContext
@@ -66,9 +75,9 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
 
       // Redirect alla homepage dopo il login
       router.push('/');
-
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Errore durante il login';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Errore durante il login';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -78,7 +87,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -145,13 +154,18 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Accesso in corso...' : 'Accedi'}
           </Button>
+
+          <div className="text-center text-sm">
+            <a
+              href="/forgot-password"
+              className="text-blue-600 hover:text-blue-800 font-medium block mb-2"
+            >
+              Password dimenticata?
+            </a>
+          </div>
 
           <div className="text-center text-sm">
             <span className="text-gray-600">Non hai un account? </span>

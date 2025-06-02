@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LoginForm from '@/components/auth/LoginForm';
 import RegisterForm from '@/components/auth/RegisterForm';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, User } from '@/contexts/AuthContext';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,7 +18,7 @@ export default function AuthPage() {
     }
   }, [user, router]);
 
-  const handleAuthSuccess = (token: string, userData: any) => {
+  const handleAuthSuccess = (token: string, userData: User) => {
     login(token, userData);
     router.push('/');
   };

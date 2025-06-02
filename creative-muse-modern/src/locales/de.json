@@ -1,0 +1,54 @@
+{
+  "featureGate": {
+    "premiumFeature": "Premium-Feature",
+    "upgradePrompt": "Upgrade dein Abonnement, um auf diese Funktion zuzugreifen.",
+    "upgrade": "Upgrade"
+  },
+  "features": {
+    "aiModelSelection": {
+      "name": "KI-Modell Auswahl",
+      "description": "Wähle verschiedene KI-Modelle für die Ideengenerierung"
+    },
+    "advancedAnalytics": {
+      "name": "Erweiterte Analytik",
+      "description": "Zugang zu detaillierten Analysen und Nutzungsstatistiken"
+    },
+    "bulkIdeaGeneration": {
+      "name": "Massen-Ideengenerierung",
+      "description": "Generiere mehrere Ideen in einer einzigen Anfrage"
+    },
+    "exportFormats": {
+      "name": "Export-Formate",
+      "description": "Exportiere Ideen in verschiedenen Formaten (PDF, DOCX, etc.)"
+    },
+    "apiAccess": {
+      "name": "API-Zugang",
+      "description": "Zugang zur REST-API für externe Integrationen"
+    },
+    "teamCollaboration": {
+      "name": "Team-Zusammenarbeit",
+      "description": "Teile und arbeite an Ideen mit Teammitgliedern zusammen"
+    },
+    "customPrompts": {
+      "name": "Benutzerdefinierte Prompts",
+      "description": "Erstelle und speichere benutzerdefinierte Prompt-Vorlagen"
+    },
+    "prioritySupport": {
+      "name": "Prioritäts-Support",
+      "description": "Zugang zu priorisiertem Kundensupport"
+    }
+  },
+  "subscription": {
+    "tiers": {
+      "free": "Kostenlos",
+      "creator": "Creator",
+      "pro": "Pro",
+      "enterprise": "Enterprise"
+    },
+    "upgradeRequired": "Upgrade erforderlich",
+    "currentPlan": "Aktueller Plan",
+    "upgradeTo": "Upgrade auf {{tier}}",
+    "features": "Features",
+    "unlimited": "Unbegrenzt"
+  }
+}

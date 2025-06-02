@@ -2,14 +2,20 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from '@/components/ui/dialog';
 import {
   CreditCard,
@@ -17,7 +23,7 @@ import {
   X,
   Shield,
   AlertCircle,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { apiService } from '@/lib/api';
 
@@ -34,24 +40,26 @@ interface PaymentModalProps {
   onPaymentSuccess: (newPlan: string) => void;
 }
 
-export default function PaymentModal({ 
-  isOpen, 
-  onClose, 
-  selectedPlan, 
+export default function PaymentModal({
+  isOpen,
+  onClose,
+  selectedPlan,
   currentPlan,
-  onPaymentSuccess 
+  onPaymentSuccess,
 }: PaymentModalProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentStep, setPaymentStep] = useState<'plan' | 'payment' | 'success' | 'error'>('plan');
+  const [, setIsProcessing] = useState(false); // isProcessing not used but setIsProcessing is
+  const [paymentStep, setPaymentStep] = useState<
+    'plan' | 'payment' | 'success' | 'error'
+  >('plan');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Simulazione dati carta di credito per sandbox
-  const [cardData, setCardData] = useState({
-    number: '4242424242424242', // Stripe test card
-    expiry: '12/25',
-    cvc: '123',
-    name: 'Test User'
-  });
+  // Simulazione dati carta di credito per sandbox - currently not used
+  // const cardData = {
+  //   number: '4242424242424242', // Stripe test card
+  //   expiry: '12/25',
+  //   cvc: '123',
+  //   name: 'Test User',
+  // };
 
   const handlePayment = async () => {
     if (!selectedPlan) return;
@@ -61,7 +69,7 @@ export default function PaymentModal({
 
     try {
       // Simulazione chiamata API di pagamento (Stripe Sandbox)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Simulazione successo pagamento
       const success = Math.random() > 0.1; // 90% successo per demo
@@ -69,14 +77,17 @@ export default function PaymentModal({
       if (success) {
         // Genera un payment ID sandbox
         const paymentId = `sandbox_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         // Chiama l'API per aggiornare la subscription
-        const upgradeResult = await apiService.upgradeSubscription(selectedPlan.name, paymentId);
-        
+        const upgradeResult = await apiService.upgradeSubscription(
+          selectedPlan.name,
+          paymentId
+        );
+
         if (upgradeResult.error) {
           throw new Error(upgradeResult.error);
         }
-        
+
         setPaymentStep('success');
         // Aggiorna la subscription nel frontend
         setTimeout(() => {
@@ -88,7 +99,9 @@ export default function PaymentModal({
         throw new Error('Pagamento rifiutato dalla banca');
       }
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Errore durante il pagamento');
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Errore durante il pagamento'
+      );
       setPaymentStep('error');
     } finally {
       setIsProcessing(false);
@@ -125,7 +138,9 @@ export default function PaymentModal({
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{selectedPlan.display_name}</CardTitle>
+                  <CardTitle className="text-lg">
+                    {selectedPlan.display_name}
+                  </CardTitle>
                   <Badge className="bg-blue-100 text-blue-800">
                     €{selectedPlan.price_monthly}/mese
                   </Badge>
@@ -139,7 +154,10 @@ export default function PaymentModal({
                   <h4 className="font-medium text-sm">Funzionalità incluse:</h4>
                   <ul className="space-y-1">
                     {selectedPlan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center space-x-2 text-sm">
+                      <li
+                        key={index}
+                        className="flex items-center space-x-2 text-sm"
+                      >
                         <Check className="h-3 w-3 text-green-600" />
                         <span>{feature}</span>
                       </li>
@@ -153,16 +171,21 @@ export default function PaymentModal({
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <div className="flex items-center space-x-2">
                 <Shield className="h-4 w-4 text-yellow-600" />
-                <span className="text-sm font-medium text-yellow-800">Modalità Sandbox</span>
+                <span className="text-sm font-medium text-yellow-800">
+                  Modalità Sandbox
+                </span>
               </div>
               <p className="text-xs text-yellow-700 mt-1">
-                Questo è un pagamento di test. Nessun addebito reale verrà effettuato.
+                Questo è un pagamento di test. Nessun addebito reale verrà
+                effettuato.
               </p>
             </div>
 
             {/* Test Card Info */}
             <div className="bg-gray-50 rounded-lg p-3">
-              <h4 className="font-medium text-sm mb-2">Carta di test precompilata:</h4>
+              <h4 className="font-medium text-sm mb-2">
+                Carta di test precompilata:
+              </h4>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="text-gray-600">Numero:</span>
@@ -236,7 +259,7 @@ export default function PaymentModal({
             </div>
             <h3 className="font-medium mb-2">Errore nel Pagamento</h3>
             <p className="text-sm text-gray-600 mb-4">{errorMessage}</p>
-            
+
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
               <div className="flex items-center space-x-2">
                 <AlertCircle className="h-4 w-4 text-red-600" />

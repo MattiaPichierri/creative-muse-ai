@@ -26,8 +26,8 @@ export default function NotFound() {
                 Zur Startseite
               </Button>
             </Link>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => window.history.back()}
               className="w-full sm:w-auto"
             >

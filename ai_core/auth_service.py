@@ -70,7 +70,7 @@ class SubscriptionLimits:
 class AuthService:
     """Servizio di autenticazione e gestione utenti"""
     
-    def __init__(self, db_path: str = "../database/creative_muse.db"):
+    def __init__(self, db_path: str = "database/creative_muse.db"):
         self.db_path = db_path
         self._init_database()
     
@@ -214,15 +214,12 @@ class AuthService:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
-                # Trova utente per email
+                # Trova utente per email (query semplificata senza JOIN)
                 cursor.execute("""
-                    SELECT u.id, u.uuid, u.email, u.username, u.password_hash, 
-                           u.first_name, u.last_name, u.is_active, u.email_verified,
-                           sp.plan_code
-                    FROM users u
-                    LEFT JOIN user_subscriptions us ON u.id = us.user_id AND us.status = 'active'
-                    LEFT JOIN subscription_plans sp ON us.plan_id = sp.id
-                    WHERE u.email = ?
+                    SELECT id, uuid, email, username, password_hash,
+                           first_name, last_name, is_active, email_verified, subscription_tier
+                    FROM users
+                    WHERE email = ?
                 """, (email,))
                 
                 user_data = cursor.fetchone()
@@ -233,7 +230,7 @@ class AuthService:
                     )
                 
                 user_id, user_uuid, user_email, username, password_hash, \
-                first_name, last_name, is_active, email_verified, plan_code = user_data
+                first_name, last_name, is_active, email_verified, subscription_tier = user_data
                 
                 # Verifica password
                 if not self._verify_password(password, password_hash):
@@ -251,8 +248,8 @@ class AuthService:
                 
                 # Aggiorna ultimo login
                 cursor.execute("""
-                    UPDATE users 
-                    SET last_login_at = CURRENT_TIMESTAMP, login_count = login_count + 1
+                    UPDATE users
+                    SET last_login_at = CURRENT_TIMESTAMP
                     WHERE id = ?
                 """, (user_id,))
                 
@@ -270,7 +267,7 @@ class AuthService:
                     "first_name": first_name,
                     "last_name": last_name,
                     "token": token,
-                    "subscription_tier": plan_code or "free",
+                    "subscription_tier": subscription_tier or "free",
                     "email_verified": email_verified,
                     "message": "Login effettuato con successo"
                 }
@@ -295,13 +292,11 @@ class AuthService:
                 cursor = conn.cursor()
                 
                 cursor.execute("""
-                    SELECT u.id, u.uuid, u.email, u.username, u.first_name, u.last_name,
-                           u.is_active, u.email_verified, u.created_at, u.last_login_at,
-                           sp.plan_code
-                    FROM users u
-                    LEFT JOIN user_subscriptions us ON u.id = us.user_id AND us.status = 'active'
-                    LEFT JOIN subscription_plans sp ON us.plan_id = sp.id
-                    WHERE u.id = ? AND u.is_active = TRUE
+                    SELECT id, uuid, email, username, first_name, last_name,
+                           is_active, email_verified, created_at, last_login_at,
+                           subscription_tier
+                    FROM users
+                    WHERE id = ? AND is_active = TRUE
                 """, (user_id,))
                 
                 user_data = cursor.fetchone()
@@ -447,6 +442,140 @@ class AuthService:
                 
         except Exception as e:
             logger.error(f"❌ Errore track_usage: {e}")
+    
+    def generate_reset_token(self, email: str) -> Optional[str]:
+        """Genera un token di reset password per l'utente"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Verifica se l'utente esiste
+                cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+                user = cursor.fetchone()
+                if not user:
+                    return None
+                
+                user_id = user[0]
+                
+                # Genera token sicuro
+                token = secrets.token_urlsafe(32)
+                
+                # Imposta scadenza a 1 ora
+                expires_at = datetime.utcnow() + timedelta(hours=1)
+                
+                # Invalida eventuali token precedenti
+                cursor.execute("""
+                    UPDATE password_reset_tokens
+                    SET used = 1
+                    WHERE user_id = ? AND used = 0
+                """, (user_id,))
+                
+                # Inserisci nuovo token
+                cursor.execute("""
+                    INSERT INTO password_reset_tokens (user_id, token, expires_at)
+                    VALUES (?, ?, ?)
+                """, (user_id, token, expires_at))
+                
+                conn.commit()
+                logger.info(f"✅ Token reset generato per utente {email}")
+                return token
+                
+        except Exception as e:
+            logger.error(f"❌ Errore generate_reset_token: {e}")
+            return None
+    
+    def verify_reset_token(self, token: str) -> Optional[int]:
+        """Verifica un token di reset e restituisce l'user_id se valido"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Verifica token
+                cursor.execute("""
+                    SELECT user_id, expires_at
+                    FROM password_reset_tokens
+                    WHERE token = ? AND used = 0
+                """, (token,))
+                
+                result = cursor.fetchone()
+                if not result:
+                    return None
+                
+                user_id, expires_at = result
+                
+                # Verifica scadenza
+                if datetime.utcnow() > datetime.fromisoformat(expires_at):
+                    # Token scaduto, marcalo come usato
+                    cursor.execute("""
+                        UPDATE password_reset_tokens
+                        SET used = 1
+                        WHERE token = ?
+                    """, (token,))
+                    conn.commit()
+                    return None
+                
+                return user_id
+                
+        except Exception as e:
+            logger.error(f"❌ Errore verify_reset_token: {e}")
+            return None
+    
+    def reset_password(self, token: str, new_password: str) -> bool:
+        """Reset password usando un token valido"""
+        try:
+            # Verifica token
+            user_id = self.verify_reset_token(token)
+            if not user_id:
+                return False
+            
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Hash nuova password
+                password_hash, salt = self._hash_password(new_password)
+                
+                # Aggiorna password
+                cursor.execute("""
+                    UPDATE users
+                    SET password_hash = ?, salt = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (password_hash, salt, user_id))
+                
+                # Marca token come usato
+                cursor.execute("""
+                    UPDATE password_reset_tokens
+                    SET used = 1
+                    WHERE token = ?
+                """, (token,))
+                
+                conn.commit()
+                logger.info(f"✅ Password reset completato per utente {user_id}")
+                return True
+                
+        except Exception as e:
+            logger.error(f"❌ Errore reset_password: {e}")
+            return False
+    
+    def send_reset_email(self, email: str, token: str) -> bool:
+        """Invia email di reset password (simulato per ora)"""
+        try:
+            # Per ora solo log - in produzione usare un servizio email reale
+            reset_url = f"http://localhost:3000/reset-password?token={token}"
+            
+            logger.info(f"📧 Email reset password per {email}:")
+            logger.info(f"   Link: {reset_url}")
+            logger.info(f"   Token: {token}")
+            
+            # TODO: Implementare invio email reale con servizio come SendGrid, AWS SES, etc.
+            # import smtplib
+            # from email.mime.text import MIMEText
+            # ...
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Errore send_reset_email: {e}")
+            return False
 
 
 # Istanza globale del servizio

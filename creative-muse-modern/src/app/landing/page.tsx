@@ -2,47 +2,56 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { 
-  Lightbulb, 
-  Zap, 
-  Users, 
-  Crown, 
-  CheckCircle, 
+import {
+  Lightbulb,
+  Zap,
+  Users,
+  Crown,
+  CheckCircle,
   ArrowRight,
   Sparkles,
   Brain,
   Rocket,
-  Shield
+  Shield,
 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LandingPage() {
-  const { t } = useLanguage();
+  // const { t } = useLanguage(); // Currently not used
 
   const features = [
     {
       icon: Brain,
       title: 'AI Avanzata',
-      description: 'Intelligenza artificiale all\'avanguardia per generare idee innovative e creative'
+      description:
+        "Intelligenza artificiale all'avanguardia per generare idee innovative e creative",
     },
     {
       icon: Zap,
       title: 'Generazione Rapida',
-      description: 'Ottieni idee creative in pochi secondi con i nostri algoritmi ottimizzati'
+      description:
+        'Ottieni idee creative in pochi secondi con i nostri algoritmi ottimizzati',
     },
     {
       icon: Users,
       title: 'Collaborazione Team',
-      description: 'Lavora insieme al tuo team per sviluppare progetti straordinari'
+      description:
+        'Lavora insieme al tuo team per sviluppare progetti straordinari',
     },
     {
       icon: Shield,
       title: 'Sicuro e Privato',
-      description: 'Le tue idee sono protette con crittografia di livello enterprise'
-    }
+      description:
+        'Le tue idee sono protette con crittografia di livello enterprise',
+    },
   ];
 
   const plans = [
@@ -55,10 +64,10 @@ export default function LandingPage() {
         '5 idee al giorno',
         '3 progetti',
         '1 membro team',
-        'Modelli AI base'
+        'Modelli AI base',
       ],
       color: 'border-gray-200',
-      buttonVariant: 'outline' as const
+      buttonVariant: 'outline' as const,
     },
     {
       name: 'Creator',
@@ -71,11 +80,11 @@ export default function LandingPage() {
         '3 membri team',
         'AI avanzata',
         'Collaborazione',
-        'Analytics'
+        'Analytics',
       ],
       color: 'border-blue-200 bg-blue-50',
       buttonVariant: 'default' as const,
-      popular: true
+      popular: true,
     },
     {
       name: 'Pro',
@@ -88,10 +97,10 @@ export default function LandingPage() {
         '10 membri team',
         'AI premium',
         'API access',
-        'Supporto prioritario'
+        'Supporto prioritario',
       ],
       color: 'border-purple-200',
-      buttonVariant: 'outline' as const
+      buttonVariant: 'outline' as const,
     },
     {
       name: 'Enterprise',
@@ -104,11 +113,11 @@ export default function LandingPage() {
         'Team illimitato',
         'White-label',
         'Supporto dedicato',
-        'SLA garantito'
+        'SLA garantito',
       ],
       color: 'border-yellow-200',
-      buttonVariant: 'outline' as const
-    }
+      buttonVariant: 'outline' as const,
+    },
   ];
 
   return (
@@ -124,10 +133,16 @@ export default function LandingPage() {
               </span>
             </div>
             <nav className="hidden md:flex items-center space-x-6">
-              <Link href="#features" className="text-gray-600 hover:text-blue-600">
+              <Link
+                href="#features"
+                className="text-gray-600 hover:text-blue-600"
+              >
                 Funzionalità
               </Link>
-              <Link href="#pricing" className="text-gray-600 hover:text-blue-600">
+              <Link
+                href="#pricing"
+                className="text-gray-600 hover:text-blue-600"
+              >
                 Prezzi
               </Link>
               <Link href="/about" className="text-gray-600 hover:text-blue-600">
@@ -139,9 +154,7 @@ export default function LandingPage() {
                 </Button>
               </Link>
               <Link href="/auth">
-                <Button size="sm">
-                  Inizia Gratis
-                </Button>
+                <Button size="sm">Inizia Gratis</Button>
               </Link>
             </nav>
           </div>
@@ -160,8 +173,9 @@ export default function LandingPage() {
             Creatività
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Genera idee innovative con l&apos;intelligenza artificiale più avanzata. 
-            Trasforma i tuoi pensieri in progetti straordinari e porta la tua creatività al livello successivo.
+            Genera idee innovative con l&apos;intelligenza artificiale più
+            avanzata. Trasforma i tuoi pensieri in progetti straordinari e porta
+            la tua creatività al livello successivo.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth">
@@ -186,16 +200,19 @@ export default function LandingPage() {
               Perché scegliere Creative Muse?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              La piattaforma più avanzata per la generazione di idee creative, 
+              La piattaforma più avanzata per la generazione di idee creative,
               progettata per professionisti e team innovativi.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                <Card
+                  key={index}
+                  className="text-center hover:shadow-lg transition-shadow"
+                >
                   <CardHeader>
                     <div className="mx-auto w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                       <Icon className="h-6 w-6 text-blue-600" />
@@ -222,13 +239,17 @@ export default function LandingPage() {
               Scegli il piano perfetto per te
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Inizia gratis e scala con le tue esigenze. Tutti i piani includono accesso all&apos;AI avanzata.
+              Inizia gratis e scala con le tue esigenze. Tutti i piani includono
+              accesso all&apos;AI avanzata.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {plans.map((plan, index) => (
-              <Card key={index} className={`relative ${plan.color} hover:shadow-lg transition-shadow`}>
+              <Card
+                key={index}
+                className={`relative ${plan.color} hover:shadow-lg transition-shadow`}
+              >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-blue-600 text-white">
@@ -241,7 +262,9 @@ export default function LandingPage() {
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <div className="text-3xl font-bold">
                     {plan.price}
-                    <span className="text-lg font-normal text-gray-600">{plan.period}</span>
+                    <span className="text-lg font-normal text-gray-600">
+                      {plan.period}
+                    </span>
                   </div>
                   <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>
@@ -274,8 +297,8 @@ export default function LandingPage() {
             Pronto a trasformare le tue idee?
           </h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Unisciti a migliaia di creativi che stanno già usando Creative Muse per 
-            generare idee innovative e portare i loro progetti al successo.
+            Unisciti a migliaia di creativi che stanno già usando Creative Muse
+            per generare idee innovative e portare i loro progetti al successo.
           </p>
           <Link href="/auth">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
@@ -302,25 +325,61 @@ export default function LandingPage() {
             <div>
               <h3 className="font-semibold mb-4">Prodotto</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="#features" className="hover:text-white">Funzionalità</Link></li>
-                <li><Link href="#pricing" className="hover:text-white">Prezzi</Link></li>
-                <li><Link href="/auth" className="hover:text-white">Inizia Gratis</Link></li>
+                <li>
+                  <Link href="#features" className="hover:text-white">
+                    Funzionalità
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#pricing" className="hover:text-white">
+                    Prezzi
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/auth" className="hover:text-white">
+                    Inizia Gratis
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Azienda</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white">Chi Siamo</Link></li>
-                <li><Link href="/contact" className="hover:text-white">Contatti</Link></li>
-                <li><Link href="/privacy" className="hover:text-white">Privacy</Link></li>
+                <li>
+                  <Link href="/about" className="hover:text-white">
+                    Chi Siamo
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="hover:text-white">
+                    Contatti
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="hover:text-white">
+                    Privacy
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Supporto</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/help" className="hover:text-white">Centro Aiuto</Link></li>
-                <li><Link href="/docs" className="hover:text-white">Documentazione</Link></li>
-                <li><Link href="/api" className="hover:text-white">API</Link></li>
+                <li>
+                  <Link href="/help" className="hover:text-white">
+                    Centro Aiuto
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/docs" className="hover:text-white">
+                    Documentazione
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/api" className="hover:text-white">
+                    API
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Home, Lightbulb, BarChart3, X } from 'lucide-react';
+import { Menu, Home, Lightbulb, BarChart3, Radio, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -26,6 +26,12 @@ export function MobileNavigation() {
       href: '/ideas',
       icon: Lightbulb,
       description: t('ideas.emptyDescription'),
+    },
+    {
+      name: 'Streaming',
+      href: '/streaming',
+      icon: Radio,
+      description: 'Erweiterte AI-Features',
     },
     {
       name: t('nav.stats'),
@@ -118,6 +124,12 @@ export function DesktopNavigation() {
       href: '/ideas',
       icon: Lightbulb,
       description: t('ideas.emptyDescription'),
+    },
+    {
+      name: 'Streaming',
+      href: '/streaming',
+      icon: Radio,
+      description: 'Erweiterte AI-Features',
     },
     {
       name: t('nav.stats'),

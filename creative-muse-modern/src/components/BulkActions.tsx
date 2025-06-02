@@ -22,13 +22,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
-import {
-  Trash2,
-  Download,
-  Star,
-  Archive,
-  Copy,
-} from 'lucide-react';
+import { Trash2, Download, Star, Archive, Copy } from 'lucide-react';
 
 export interface BulkActionsProps {
   selectedIds: string[];
@@ -108,7 +102,10 @@ export function BulkActions({
                     onCheckedChange={handleSelectAll}
                     className="data-[state=checked]:bg-blue-600"
                   />
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 text-blue-700"
+                  >
                     {selectedIds.length} {t('bulk.selected')}
                   </Badge>
                 </div>
@@ -140,7 +137,10 @@ export function BulkActions({
               </Button>
 
               {/* Rate */}
-              <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+              <Dialog
+                open={showRatingDialog}
+                onOpenChange={setShowRatingDialog}
+              >
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -155,7 +155,8 @@ export function BulkActions({
                   <DialogHeader>
                     <DialogTitle>{t('bulk.rateTitle')}</DialogTitle>
                     <DialogDescription>
-                      {t('bulk.rateDescription')} ({selectedIds.length} {t('bulk.items')})
+                      {t('bulk.rateDescription')} ({selectedIds.length}{' '}
+                      {t('bulk.items')})
                     </DialogDescription>
                   </DialogHeader>
                   <div className="flex justify-center space-x-2 py-4">
@@ -203,7 +204,10 @@ export function BulkActions({
               </Button>
 
               {/* Delete */}
-              <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <Dialog
+                open={showDeleteDialog}
+                onOpenChange={setShowDeleteDialog}
+              >
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -218,7 +222,8 @@ export function BulkActions({
                   <DialogHeader>
                     <DialogTitle>{t('bulk.deleteTitle')}</DialogTitle>
                     <DialogDescription>
-                      {t('bulk.deleteDescription')} ({selectedIds.length} {t('bulk.items')})
+                      {t('bulk.deleteDescription')} ({selectedIds.length}{' '}
+                      {t('bulk.items')})
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
@@ -228,10 +233,7 @@ export function BulkActions({
                     >
                       {t('common.cancel')}
                     </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={handleBulkDelete}
-                    >
+                    <Button variant="destructive" onClick={handleBulkDelete}>
                       {t('bulk.confirmDelete')}
                     </Button>
                   </DialogFooter>
@@ -262,11 +264,15 @@ export function SelectableIdeaCard({
       <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
         <Checkbox
           checked={isSelected}
-          onCheckedChange={(checked: boolean) => onSelectionChange(ideaId, !!checked)}
+          onCheckedChange={(checked: boolean) =>
+            onSelectionChange(ideaId, !!checked)
+          }
           className="bg-white shadow-md data-[state=checked]:bg-blue-600"
         />
       </div>
-      <div className={`transition-all ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}>
+      <div
+        className={`transition-all ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
+      >
         {children}
       </div>
     </div>

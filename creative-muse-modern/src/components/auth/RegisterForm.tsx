@@ -3,28 +3,31 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-
-interface User {
-  id: number;
-  email: string;
-  username?: string;
-  subscription_tier: string;
-}
+import { Eye, EyeOff, Mail, Lock, User as UserIcon } from 'lucide-react';
+import { User } from '@/contexts/AuthContext';
 
 interface RegisterFormProps {
   onSuccess?: (token: string, user: User) => void;
   onSwitchToLogin?: () => void;
 }
 
-export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) {
+export default function RegisterForm({
+  onSuccess,
+  onSwitchToLogin,
+}: RegisterFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
-    username: ''
+    username: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -50,17 +53,20 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
     }
 
     try {
-      const response = await fetch('http://localhost:8001/api/v1/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          username: formData.username || undefined
-        }),
-      });
+      const response = await fetch(
+        'http://localhost:8001/api/v1/auth/register',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            username: formData.username || undefined,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -75,9 +81,9 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
       if (onSuccess) {
         onSuccess(data.access_token, data.user);
       }
-
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Errore durante la registrazione';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Errore durante la registrazione';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -87,7 +93,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -133,7 +139,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
               Username (opzionale)
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <UserIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 id="username"
                 name="username"
@@ -171,9 +177,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
                 {showPassword ? <EyeOff /> : <Eye />}
               </button>
             </div>
-            <p className="text-xs text-gray-500">
-              Minimo 8 caratteri
-            </p>
+            <p className="text-xs text-gray-500">Minimo 8 caratteri</p>
           </div>
 
           <div className="space-y-2">
@@ -202,11 +206,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Registrazione in corso...' : 'Registrati'}
           </Button>
 

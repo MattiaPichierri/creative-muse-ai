@@ -17,7 +17,7 @@ import {
   Camera,
   Gamepad2,
   Utensils,
-  Filter
+  Filter,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useState, useMemo } from 'react';
@@ -144,7 +144,8 @@ export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
         id: 'game-concept',
         category: 'entertainment',
         title: 'Game Concept',
-        prompt: 'Design an innovative video game concept that combines education with entertainment, targeting a specific age group.',
+        prompt:
+          'Design an innovative video game concept that combines education with entertainment, targeting a specific age group.',
         icon: <Gamepad2 className="h-4 w-4" />,
         color: 'bg-cyan-500',
         difficulty: 'advanced',
@@ -157,7 +158,8 @@ export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
         id: 'food-innovation',
         category: 'general',
         title: 'Food Innovation',
-        prompt: 'Create a revolutionary food product or dining experience that addresses modern dietary needs and sustainability concerns.',
+        prompt:
+          'Create a revolutionary food product or dining experience that addresses modern dietary needs and sustainability concerns.',
         icon: <Utensils className="h-4 w-4" />,
         color: 'bg-yellow-500',
         difficulty: 'intermediate',
@@ -170,7 +172,8 @@ export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
         id: 'art-installation',
         category: 'art',
         title: 'Art Installation',
-        prompt: 'Design an interactive art installation that uses technology to create an immersive experience addressing social issues.',
+        prompt:
+          'Design an interactive art installation that uses technology to create an immersive experience addressing social issues.',
         icon: <Palette className="h-4 w-4" />,
         color: 'bg-rose-500',
         difficulty: 'advanced',
@@ -183,7 +186,8 @@ export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
         id: 'photography-project',
         category: 'art',
         title: 'Photography Project',
-        prompt: 'Conceptualize a photography project that tells a compelling story about your community or a global issue.',
+        prompt:
+          'Conceptualize a photography project that tells a compelling story about your community or a global issue.',
         icon: <Camera className="h-4 w-4" />,
         color: 'bg-slate-500',
         difficulty: 'intermediate',
@@ -197,21 +201,25 @@ export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
   );
 
   const categories = useMemo(() => {
-    const cats = ['all', ...new Set(predefinedPrompts.map(p => p.category))];
+    const cats = ['all', ...new Set(predefinedPrompts.map((p) => p.category))];
     return cats;
   }, [predefinedPrompts]);
 
   const filteredPrompts = useMemo(() => {
     if (selectedCategory === 'all') return predefinedPrompts;
-    return predefinedPrompts.filter(p => p.category === selectedCategory);
+    return predefinedPrompts.filter((p) => p.category === selectedCategory);
   }, [predefinedPrompts, selectedCategory]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-700';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-700';
-      case 'advanced': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'beginner':
+        return 'bg-green-100 text-green-700';
+      case 'intermediate':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'advanced':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
@@ -229,7 +237,9 @@ export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
       >
         <Lightbulb className="h-4 w-4" />
         <span>{t('prompts.predefined')}</span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </Button>
 
       <AnimatePresence>
@@ -246,18 +256,22 @@ export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
                   <Filter className="h-5 w-5 mr-2" />
                   {t('prompts.selectPrompt')}
                 </CardTitle>
-                
+
                 {/* Category Filter */}
                 <div className="flex flex-wrap gap-2">
                   {categories.map((category) => (
                     <Button
                       key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
+                      variant={
+                        selectedCategory === category ? 'default' : 'outline'
+                      }
                       size="sm"
                       onClick={() => setSelectedCategory(category)}
                       className="text-xs"
                     >
-                      {category === 'all' ? t('prompts.allCategories') : t(`categories.${category}`)}
+                      {category === 'all'
+                        ? t('prompts.allCategories')
+                        : t(`categories.${category}`)}
                     </Button>
                   ))}
                 </div>
@@ -276,30 +290,41 @@ export function PredefinedPrompts({ onSelectPrompt }: PredefinedPromptsProps) {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center space-x-2">
-                          <div className={`p-1 rounded ${config.color} text-white`}>
+                          <div
+                            className={`p-1 rounded ${config.color} text-white`}
+                          >
                             {config.icon}
                           </div>
-                          <h4 className="font-medium text-sm">{config.title}</h4>
+                          <h4 className="font-medium text-sm">
+                            {config.title}
+                          </h4>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <Badge className={getDifficultyColor(config.difficulty)} variant="secondary">
+                          <Badge
+                            className={getDifficultyColor(config.difficulty)}
+                            variant="secondary"
+                          >
                             {config.difficulty}
                           </Badge>
                         </div>
                       </div>
-                      
+
                       <p className="text-xs text-gray-600 mb-2 line-clamp-2">
                         {config.prompt}
                       </p>
-                      
+
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>⏱️ {config.estimatedTime}</span>
                         <span>🎨 {config.creativityLevel}/10</span>
                       </div>
-                      
+
                       <div className="flex flex-wrap gap-1 mt-2">
                         {config.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs px-1 py-0">
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs px-1 py-0"
+                          >
                             {tag}
                           </Badge>
                         ))}

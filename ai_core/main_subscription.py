@@ -8,12 +8,12 @@ import os
 import logging
 from pathlib import Path
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from datetime import datetime
 import uuid
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
@@ -21,9 +21,24 @@ from dotenv import load_dotenv
 # Import locali
 from model_manager import ModelManager
 from auth_service import (
-    AuthService, User, SubscriptionTier, 
+    AuthService, User, SubscriptionTier,
     get_current_user, check_user_limits, auth_service
 )
+from rate_limiter import rate_limiter, LimitType
+from training_service import training_service
+from rate_limit_admin import (
+    get_rate_limit_stats, unblock_identifier, get_rate_limit_overview,
+    cleanup_rate_limit_records, get_blocked_identifiers,
+    RateLimitStatsResponse, UnblockRequest, RateLimitOverview
+)
+from admin_service import AdminService, FeatureFlagUpdate, UserOverrideCreate
+from feature_flags_service import init_feature_flags_service, get_feature_flags_service
+from feature_middleware import (
+    require_feature, check_feature_access, get_user_features, FeatureGates,
+    require_ai_model_selection, require_advanced_analytics, require_bulk_generation,
+    require_export_formats, require_api_access
+)
+from admin_service import AdminService, FeatureFlagUpdate, UserOverrideCreate
 
 # Carica variabili d'ambiente
 load_dotenv("../.env")
@@ -55,6 +70,15 @@ class UserRegistration(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
 
 
 class IdeaRequest(BaseModel):
@@ -114,6 +138,9 @@ async def lifespan(app: FastAPI):
     # Inizializza database
     auth_service._init_database()
     
+    # Inizializza Feature Flags Service
+    init_feature_flags_service(auth_service.db_path)
+    
     # Model Manager
     hf_token = os.getenv("HF_TOKEN")
     cache_dir = os.getenv("MODEL_CACHE_DIR", "../models")
@@ -167,8 +194,29 @@ app.add_middleware(
 # ============================================================================
 
 @app.post("/api/v1/auth/register")
-async def register(user_data: UserRegistration):
-    """Registrazione nuovo utente"""
+async def register(user_data: UserRegistration, request: Request):
+    """Registrazione nuovo utente con rate limiting"""
+    
+    # Controlla rate limit per email e IP
+    email_allowed, email_error = rate_limiter.check_rate_limit(
+        user_data.email, LimitType.REGISTRATION_ATTEMPTS, request
+    )
+    if not email_allowed:
+        rate_limiter.record_attempt(
+            user_data.email, LimitType.REGISTRATION_ATTEMPTS, request, False
+        )
+        raise HTTPException(status_code=429, detail=email_error)
+    
+    ip_address = rate_limiter._get_client_ip(request)
+    ip_allowed, ip_error = rate_limiter.check_rate_limit(
+        ip_address, LimitType.REGISTRATION_ATTEMPTS, request
+    )
+    if not ip_allowed:
+        rate_limiter.record_attempt(
+            ip_address, LimitType.REGISTRATION_ATTEMPTS, request, False
+        )
+        raise HTTPException(status_code=429, detail=ip_error)
+    
     try:
         result = await auth_service.register_user(
             email=user_data.email,
@@ -177,11 +225,34 @@ async def register(user_data: UserRegistration):
             first_name=user_data.first_name,
             last_name=user_data.last_name
         )
+        
+        # Registra tentativo riuscito
+        rate_limiter.record_attempt(
+            user_data.email, LimitType.REGISTRATION_ATTEMPTS, request, True
+        )
+        rate_limiter.record_attempt(
+            ip_address, LimitType.REGISTRATION_ATTEMPTS, request, True
+        )
+        
         return result
-    except HTTPException:
+        
+    except HTTPException as e:
+        # Registra tentativo fallito
+        rate_limiter.record_attempt(
+            user_data.email, LimitType.REGISTRATION_ATTEMPTS, request, False
+        )
+        rate_limiter.record_attempt(
+            ip_address, LimitType.REGISTRATION_ATTEMPTS, request, False
+        )
         raise
     except Exception as e:
         logger.error(f"❌ Errore registrazione: {e}")
+        rate_limiter.record_attempt(
+            user_data.email, LimitType.REGISTRATION_ATTEMPTS, request, False
+        )
+        rate_limiter.record_attempt(
+            ip_address, LimitType.REGISTRATION_ATTEMPTS, request, False
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Errore interno del server"
@@ -189,18 +260,156 @@ async def register(user_data: UserRegistration):
 
 
 @app.post("/api/v1/auth/login")
-async def login(credentials: UserLogin):
-    """Login utente"""
+async def login(credentials: UserLogin, request: Request):
+    """Login utente con rate limiting"""
+    
+    # Controlla rate limit per email e IP
+    email_allowed, email_error = rate_limiter.check_rate_limit(
+        credentials.email, LimitType.LOGIN_ATTEMPTS, request
+    )
+    if not email_allowed:
+        rate_limiter.record_attempt(
+            credentials.email, LimitType.LOGIN_ATTEMPTS, request, False
+        )
+        raise HTTPException(status_code=429, detail=email_error)
+    
+    ip_address = rate_limiter._get_client_ip(request)
+    ip_allowed, ip_error = rate_limiter.check_rate_limit(
+        ip_address, LimitType.LOGIN_ATTEMPTS, request
+    )
+    if not ip_allowed:
+        rate_limiter.record_attempt(
+            ip_address, LimitType.LOGIN_ATTEMPTS, request, False
+        )
+        raise HTTPException(status_code=429, detail=ip_error)
+    
     try:
         result = await auth_service.login_user(
             email=credentials.email,
             password=credentials.password
         )
+        
+        # Registra tentativo riuscito
+        rate_limiter.record_attempt(
+            credentials.email, LimitType.LOGIN_ATTEMPTS, request, True
+        )
+        rate_limiter.record_attempt(
+            ip_address, LimitType.LOGIN_ATTEMPTS, request, True
+        )
+        
         return result
-    except HTTPException:
+        
+    except HTTPException as e:
+        # Registra tentativo fallito
+        rate_limiter.record_attempt(
+            credentials.email, LimitType.LOGIN_ATTEMPTS, request, False
+        )
+        rate_limiter.record_attempt(
+            ip_address, LimitType.LOGIN_ATTEMPTS, request, False
+        )
         raise
     except Exception as e:
         logger.error(f"❌ Errore login: {e}")
+        rate_limiter.record_attempt(
+            credentials.email, LimitType.LOGIN_ATTEMPTS, request, False
+        )
+        rate_limiter.record_attempt(
+            ip_address, LimitType.LOGIN_ATTEMPTS, request, False
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore interno del server"
+        )
+
+
+@app.post("/api/v1/auth/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest, req: Request):
+    """Richiesta reset password con rate limiting"""
+    
+    # Controlla rate limit per email e IP
+    email_allowed, email_error = rate_limiter.check_rate_limit(
+        request.email, LimitType.PASSWORD_RESET, req
+    )
+    if not email_allowed:
+        rate_limiter.record_attempt(
+            request.email, LimitType.PASSWORD_RESET, req, False
+        )
+        raise HTTPException(status_code=429, detail=email_error)
+    
+    ip_address = rate_limiter._get_client_ip(req)
+    ip_allowed, ip_error = rate_limiter.check_rate_limit(
+        ip_address, LimitType.PASSWORD_RESET, req
+    )
+    if not ip_allowed:
+        rate_limiter.record_attempt(
+            ip_address, LimitType.PASSWORD_RESET, req, False
+        )
+        raise HTTPException(status_code=429, detail=ip_error)
+    
+    try:
+        # Genera token di reset
+        token = auth_service.generate_reset_token(request.email)
+        
+        # Registra tentativo (sempre come successo per sicurezza)
+        rate_limiter.record_attempt(
+            request.email, LimitType.PASSWORD_RESET, req, True
+        )
+        rate_limiter.record_attempt(
+            ip_address, LimitType.PASSWORD_RESET, req, True
+        )
+        
+        if token:
+            # Invia email (per ora solo log)
+            success = auth_service.send_reset_email(request.email, token)
+            if success:
+                return {
+                    "success": True,
+                    "message": "Se l'email esiste, riceverai un link per il reset della password"
+                }
+        
+        # Sempre restituire successo per sicurezza (non rivelare se email esiste)
+        return {
+            "success": True,
+            "message": "Se l'email esiste, riceverai un link per il reset della password"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Errore forgot password: {e}")
+        # Anche in caso di errore, registra come successo per sicurezza
+        rate_limiter.record_attempt(
+            request.email, LimitType.PASSWORD_RESET, req, True
+        )
+        rate_limiter.record_attempt(
+            ip_address, LimitType.PASSWORD_RESET, req, True
+        )
+        return {
+            "success": True,
+            "message": "Se l'email esiste, riceverai un link per il reset della password"
+        }
+
+
+@app.post("/api/v1/auth/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    """Reset password con token"""
+    try:
+        # Verifica token e reset password
+        success = auth_service.reset_password(request.token, request.new_password)
+        
+        if success:
+            return {
+                "success": True,
+                "message": "Password aggiornata con successo"
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Token non valido o scaduto"
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore reset password: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Errore interno del server"
@@ -355,20 +564,22 @@ async def generate_custom_idea(
         )
         
         # Salva nel database con user_id
-        idea_id = str(uuid.uuid4())
+        idea_uuid = str(uuid.uuid4())
         
         import sqlite3
         with sqlite3.connect(auth_service.db_path) as conn:
             cursor = conn.cursor()
             
             cursor.execute("""
-                INSERT INTO ideas (id, user_id, title, content, category, 
-                                 generation_method, model_used, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO ideas (uuid, user_id, title, content, category,
+                                 generation_method, model_used, prompt_used,
+                                 language, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                idea_id, current_user.id, idea_data["title"], idea_data["content"],
-                request.category, idea_data["generation_method"], 
-                idea_data["model_used"], datetime.now().isoformat()
+                idea_uuid, current_user.id, idea_data["title"], idea_data["content"],
+                request.category, idea_data["generation_method"],
+                idea_data["model_used"], request.prompt, request.language,
+                datetime.now().isoformat()
             ))
             
             conn.commit()
@@ -377,7 +588,7 @@ async def generate_custom_idea(
         await auth_service.track_usage(current_user, "generate_idea")
         
         return IdeaResponse(
-            id=idea_id,
+            id=idea_uuid,
             title=idea_data["title"],
             content=idea_data["content"],
             category=request.category,
@@ -862,6 +1073,137 @@ async def health_check():
 
 
 # ============================================================================
+# FEATURE-FLAG-GESCHÜTZTE ENDPOINTS
+# ============================================================================
+
+@app.get("/api/v1/features")
+async def get_user_features_endpoint(
+    features: dict = Depends(get_user_features),
+    current_user: User = Depends(get_current_user)
+):
+    """Holt alle verfügbaren Features für den aktuellen Benutzer"""
+    return {
+        "features": features,
+        "user_tier": current_user.subscription_tier or "free"
+    }
+
+
+@app.post("/api/v1/ideas/bulk")
+@require_bulk_generation("Bulk-Generierung nur für Pro/Enterprise verfügbar")
+async def bulk_generate_ideas(
+    prompts: List[str],
+    category: str = "general",
+    language: str = "it",
+    current_user: User = Depends(check_user_limits)
+):
+    """Generiert mehrere Ideen in einem Request (Pro/Enterprise Feature)"""
+    try:
+        # Feature-Konfiguration holen
+        feature_service = get_feature_flags_service()
+        config = feature_service.get_feature_config("bulk_idea_generation")
+        max_batch_size = config.get("max_batch_size", 5)
+        
+        if len(prompts) > max_batch_size:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Maximal {max_batch_size} Prompts pro Request erlaubt"
+            )
+        
+        ideas = []
+        for prompt in prompts:
+            idea_data = await generate_with_model(
+                prompt=prompt,
+                category=category,
+                language=language,
+                creativity_level=7,
+                model_key="mock"
+            )
+            
+            # Speichere in Datenbank
+            idea_uuid = str(uuid.uuid4())
+            import sqlite3
+            with sqlite3.connect(auth_service.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO ideas (uuid, user_id, title, content, category,
+                                     generation_method, model_used, prompt_used,
+                                     language, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    idea_uuid, current_user.id, idea_data["title"], idea_data["content"],
+                    category, idea_data["generation_method"],
+                    idea_data["model_used"], prompt, language,
+                    datetime.now().isoformat()
+                ))
+                conn.commit()
+            
+            ideas.append({
+                "id": idea_uuid,
+                "title": idea_data["title"],
+                "content": idea_data["content"],
+                "prompt": prompt
+            })
+        
+        # Tracke Usage für alle generierten Ideen
+        for _ in prompts:
+            await auth_service.track_usage(current_user, "generate_idea")
+        
+        return {"ideas": ideas, "count": len(ideas)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore bulk_generate_ideas: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore interno del server"
+        )
+
+
+@app.get("/api/v1/analytics/advanced")
+@require_advanced_analytics("Erweiterte Analytics nur für Enterprise verfügbar")
+async def get_advanced_analytics(current_user: User = Depends(get_current_user)):
+    """Erweiterte Analytics (Enterprise Feature)"""
+    try:
+        import sqlite3
+        with sqlite3.connect(auth_service.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Detaillierte Statistiken
+            cursor.execute("""
+                SELECT
+                    DATE(created_at) as date,
+                    COUNT(*) as ideas_count,
+                    AVG(LENGTH(content)) as avg_content_length
+                FROM ideas
+                WHERE user_id = ?
+                GROUP BY DATE(created_at)
+                ORDER BY date DESC
+                LIMIT 30
+            """, (current_user.id,))
+            
+            daily_stats = []
+            for row in cursor.fetchall():
+                daily_stats.append({
+                    "date": row[0],
+                    "ideas_count": row[1],
+                    "avg_content_length": round(row[2], 2) if row[2] else 0
+                })
+            
+            return {
+                "daily_stats": daily_stats,
+                "retention_days": 365
+            }
+        
+    except Exception as e:
+        logger.error(f"❌ Errore advanced_analytics: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore interno del server"
+        )
+
+
+# ============================================================================
 # MAIN
 # ============================================================================
 
@@ -887,6 +1229,425 @@ def main():
         logger.error(f"❌ Errore inaspettato: {e}")
         raise
 
+# ============================================================================
+# RATE LIMITING ADMIN ENDPOINTS
+# ============================================================================
+
 
 if __name__ == "__main__":
     main()
+# ============================================================================
+# ADMIN ENDPOINTS - FEATURE FLAGS MANAGEMENT
+# ============================================================================
+
+# Inizializza admin service
+admin_service = AdminService('database/creative_muse.db')
+
+def require_admin(current_user: User = Depends(get_current_user)):
+    """Dependency per verificare che l'utente sia admin"""
+    # Semplice controllo admin basato su email
+    if not current_user.email.endswith("@creativemuse.com"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accesso negato: privilegi admin richiesti"
+        )
+    return current_user
+
+
+@app.get("/api/v1/admin/stats")
+async def get_admin_stats(admin_user: User = Depends(require_admin)):
+    """Ottieni statistiche per l'admin dashboard"""
+    try:
+        stats = admin_service.get_admin_stats()
+        return {"success": True, "stats": stats}
+    except Exception as e:
+        logger.error(f"❌ Errore admin stats: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore nel recupero delle statistiche"
+        )
+
+
+@app.get("/api/v1/admin/feature-flags")
+async def get_admin_feature_flags(admin_user: User = Depends(require_admin)):
+    """Ottieni tutti i feature flags per l'admin"""
+    try:
+        flags = admin_service.get_all_feature_flags()
+        return {"success": True, "flags": flags}
+    except Exception as e:
+        logger.error(f"❌ Errore admin feature flags: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore nel recupero dei feature flags"
+        )
+
+
+@app.put("/api/v1/admin/feature-flags/{flag_id}")
+async def update_feature_flag(
+    flag_id: int,
+    update_data: FeatureFlagUpdate,
+    admin_user: User = Depends(require_admin)
+):
+    """Aggiorna un feature flag"""
+    try:
+        success = admin_service.update_feature_flag(flag_id, update_data)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Feature flag non trovato"
+            )
+        
+        # Refresh cache dei feature flags
+        feature_service = get_feature_flags_service()
+        if feature_service:
+            feature_service.refresh_cache()
+        
+        return {"success": True, "message": "Feature flag aggiornato"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore update feature flag: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore nell'aggiornamento del feature flag"
+        )
+
+
+@app.get("/api/v1/admin/users")
+async def get_admin_users(admin_user: User = Depends(require_admin)):
+    """Ottieni tutti gli utenti per l'admin"""
+    try:
+        users = admin_service.get_all_users()
+        return {"success": True, "users": users}
+    except Exception as e:
+        logger.error(f"❌ Errore admin users: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore nel recupero degli utenti"
+        )
+
+
+@app.get("/api/v1/admin/user-overrides")
+async def get_user_overrides(
+    user_id: Optional[int] = None,
+    admin_user: User = Depends(require_admin)
+):
+    """Ottieni gli override degli utenti"""
+    try:
+        overrides = admin_service.get_user_overrides(user_id)
+        return {"success": True, "overrides": overrides}
+    except Exception as e:
+        logger.error(f"❌ Errore user overrides: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore nel recupero degli override"
+        )
+
+
+@app.post("/api/v1/admin/user-overrides")
+async def create_user_override(
+    override_data: UserOverrideCreate,
+    admin_user: User = Depends(require_admin)
+):
+    """Crea un override per un utente"""
+    try:
+        success = admin_service.create_user_override(override_data)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Errore nella creazione dell'override"
+            )
+        
+        # Refresh cache dei feature flags
+        feature_service = get_feature_flags_service()
+        if feature_service:
+            feature_service.refresh_cache()
+        
+        return {"success": True, "message": "Override creato"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore create override: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore nella creazione dell'override"
+        )
+
+
+@app.delete("/api/v1/admin/user-overrides/{override_id}")
+async def delete_user_override(
+    override_id: int,
+    admin_user: User = Depends(require_admin)
+):
+    """Elimina un override utente"""
+    try:
+        success = admin_service.delete_user_override(override_id)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Override non trovato"
+            )
+        
+        # Refresh cache dei feature flags
+        feature_service = get_feature_flags_service()
+        if feature_service:
+            feature_service.refresh_cache()
+        
+        return {"success": True, "message": "Override eliminato"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore delete override: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Errore nell'eliminazione dell'override"
+        )
+
+
+# ============================================================================
+# RATE LIMITING ADMIN ENDPOINTS
+# ============================================================================
+
+@app.get("/api/v1/admin/rate-limits/overview")
+async def admin_get_rate_limit_overview(admin_user: User = Depends(require_admin)):
+    """Ottieni overview generale del rate limiting"""
+    try:
+        stats = rate_limiter.get_attempt_stats("test@example.com", LimitType.LOGIN_ATTEMPTS)
+        return {
+            "total_attempts_24h": stats.get("total_attempts", 0),
+            "total_blocks_active": 1 if stats.get("is_blocked", False) else 0,
+            "top_blocked_ips": [],
+            "top_blocked_emails": [],
+            "limit_configurations": {
+                "login_attempts": {"max_attempts": 5, "window_minutes": 10, "block_duration_minutes": 15},
+                "registration_attempts": {"max_attempts": 3, "window_minutes": 10, "block_duration_minutes": 30},
+                "password_reset": {"max_attempts": 3, "window_minutes": 60, "block_duration_minutes": 60}
+            }
+        }
+    except Exception as e:
+        logger.error(f"❌ Errore overview rate limiting: {e}")
+        raise HTTPException(status_code=500, detail="Errore interno del server")
+
+
+@app.get("/api/v1/admin/rate-limits/blocked")
+async def admin_get_blocked_identifiers(
+    limit_type: Optional[str] = None,
+    admin_user: User = Depends(require_admin)
+):
+    """Ottieni lista identificatori attualmente bloccati"""
+    try:
+        # Implementazione semplificata
+        return []
+    except Exception as e:
+        logger.error(f"❌ Errore blocked identifiers: {e}")
+        raise HTTPException(status_code=500, detail="Errore interno del server")
+
+
+@app.post("/api/v1/admin/rate-limits/unblock")
+async def admin_unblock_identifier(
+    request: dict,
+    admin_user: User = Depends(require_admin)
+):
+    """Sblocca manualmente un identificatore"""
+    try:
+        identifier = request.get("identifier")
+        limit_type_str = request.get("limit_type")
+        
+        if not identifier or not limit_type_str:
+            raise HTTPException(status_code=400, detail="Identifier e limit_type richiesti")
+        
+        limit_type = LimitType(limit_type_str)
+        success = rate_limiter.unblock_identifier(identifier, limit_type)
+        
+        return {
+            "success": success,
+            "message": f"Identificatore {identifier} sbloccato" if success else "Nessun blocco trovato"
+        }
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Tipo di limite non valido")
+    except Exception as e:
+        logger.error(f"❌ Errore sblocco: {e}")
+        raise HTTPException(status_code=500, detail="Errore interno del server")
+
+
+@app.get("/api/v1/admin/rate-limits/stats/{identifier}")
+async def admin_get_rate_limit_stats(
+    identifier: str,
+    limit_type: str,
+    admin_user: User = Depends(require_admin)
+):
+    """Ottieni statistiche rate limiting per identificatore specifico"""
+    try:
+        limit_type_enum = LimitType(limit_type)
+        stats = rate_limiter.get_attempt_stats(identifier, limit_type_enum)
+        return stats
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Tipo di limite non valido")
+    except Exception as e:
+        logger.error(f"❌ Errore statistiche: {e}")
+# ============================================================================
+# TRAINING ENDPOINTS - CUSTOM MODEL TRAINING
+# ============================================================================
+
+def require_pro_or_enterprise(current_user: User = Depends(get_current_user)):
+    """Dependency per verificare che l'utente sia Pro o Enterprise"""
+    if current_user.subscription_tier not in ["pro", "enterprise"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Funzionalità disponibile solo per utenti Pro/Enterprise"
+        )
+    return current_user
+
+
+@app.post("/api/v1/train/upload")
+async def upload_training_dataset(
+    file: UploadFile,
+    description: Optional[str] = None,
+    current_user: User = Depends(require_pro_or_enterprise)
+):
+    """Upload di un dataset per il training di modelli personalizzati"""
+    try:
+        result = await training_service.upload_dataset(
+            file=file,
+            user_id=current_user.id,
+            description=description
+        )
+        
+        logger.info(f"✅ Dataset caricato da utente {current_user.email}: {file.filename}")
+        
+        return {
+            "success": True,
+            "data": result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore upload dataset: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Errore interno del server"
+        )
+
+
+@app.get("/api/v1/train/datasets")
+async def get_user_datasets(
+    current_user: User = Depends(require_pro_or_enterprise)
+):
+    """Ottieni tutti i dataset dell'utente"""
+    try:
+        datasets = training_service.get_user_datasets(current_user.id)
+        
+        return {
+            "success": True,
+            "datasets": datasets,
+            "count": len(datasets)
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Errore recupero dataset: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Errore interno del server"
+        )
+
+
+@app.delete("/api/v1/train/datasets/{dataset_id}")
+async def delete_training_dataset(
+    dataset_id: str,
+    current_user: User = Depends(require_pro_or_enterprise)
+):
+    """Elimina un dataset di training"""
+    try:
+        success = training_service.delete_dataset(dataset_id, current_user.id)
+        
+        if not success:
+            raise HTTPException(
+                status_code=404,
+                detail="Dataset non trovato"
+            )
+        
+        logger.info(f"✅ Dataset eliminato da utente {current_user.email}: {dataset_id}")
+        
+        return {
+            "success": True,
+            "message": "Dataset eliminato con successo"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore eliminazione dataset: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Errore interno del server"
+        )
+
+
+@app.post("/api/v1/train/start")
+async def start_model_training(
+    request: dict,
+    current_user: User = Depends(require_pro_or_enterprise)
+):
+    """Avvia il training di un modello personalizzato"""
+    try:
+        dataset_id = request.get("dataset_id")
+        model_name = request.get("model_name", "Custom Model")
+        
+        if not dataset_id:
+            raise HTTPException(
+                status_code=400,
+                detail="dataset_id richiesto"
+            )
+        
+        # Per ora restituiamo una risposta mock
+        # In una implementazione reale, qui si avvierebbe il processo di training
+        
+        logger.info(f"✅ Training avviato da utente {current_user.email}: {model_name}")
+        
+        return {
+            "success": True,
+            "message": "Training avviato con successo",
+            "training_id": f"train_{dataset_id}_{current_user.id}",
+            "status": "pending",
+            "estimated_time": "30-60 minuti"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Errore avvio training: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Errore interno del server"
+        )
+
+
+@app.get("/api/v1/train/status/{training_id}")
+async def get_training_status(
+    training_id: str,
+    current_user: User = Depends(require_pro_or_enterprise)
+):
+    """Ottieni lo stato del training"""
+    try:
+        # Mock response - in una implementazione reale si controllerebbe il database
+        return {
+            "success": True,
+            "training_id": training_id,
+            "status": "in_progress",
+            "progress": 45,
+            "estimated_remaining": "15 minuti",
+            "logs": [
+                "Inizializzazione dataset completata",
+                "Preprocessing dati in corso...",
+                "Training epoch 1/10 completato"
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Errore stato training: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Errore interno del server"
+        )
+        raise HTTPException(status_code=500, detail="Errore interno del server")

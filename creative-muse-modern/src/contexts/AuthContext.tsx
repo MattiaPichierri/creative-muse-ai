@@ -1,8 +1,14 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 
-interface User {
+export interface User {
   id: string;
   email: string;
   username?: string;
@@ -80,7 +86,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
+  const [subscriptionInfo, setSubscriptionInfo] =
+    useState<SubscriptionInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Carica i dati dal localStorage all'avvio
@@ -88,7 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedToken = localStorage.getItem('auth_token');
     const savedUser = localStorage.getItem('user_data');
 
-    if (savedToken && savedUser) {
+    if (
+      savedToken &&
+      savedUser &&
+      savedUser !== 'undefined' &&
+      savedUser !== 'null'
+    ) {
       try {
         const userData = JSON.parse(savedUser);
         setToken(savedToken);
@@ -100,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     setIsLoading(false);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = (newToken: string, newUser: User) => {
     setToken(newToken);
@@ -123,23 +135,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!currentToken) return;
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/subscription/info', {
-        headers: {
-          'Authorization': `Bearer ${currentToken}`,
-        },
-      });
+      const response = await fetch(
+        'http://localhost:8000/api/v1/subscription/info',
+        {
+          headers: {
+            Authorization: `Bearer ${currentToken}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data: BackendSubscriptionResponse = await response.json();
-        
+
         // Transform backend response to frontend format
         const transformedData: SubscriptionInfo = {
           plan: {
             name: data.tier,
-            display_name: data.tier.charAt(0).toUpperCase() + data.tier.slice(1),
-            price_monthly: data.tier === 'free' ? 0 :
-                          data.tier === 'creator' ? 9.99 :
-                          data.tier === 'pro' ? 29.99 : 99.99
+            display_name:
+              data.tier.charAt(0).toUpperCase() + data.tier.slice(1),
+            price_monthly:
+              data.tier === 'free'
+                ? 0
+                : data.tier === 'creator'
+                  ? 9.99
+                  : data.tier === 'pro'
+                    ? 29.99
+                    : 99.99,
           },
           limits: {
             daily_ideas_limit: data.limits.daily_ideas,
@@ -153,15 +174,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               priority_support: data.features.priority_support,
               api_access: data.features.api_access,
               white_label: data.features.white_label,
-              analytics: data.features.analytics
-            }
+              analytics: data.features.analytics,
+            },
           },
           usage: {
             daily_ideas: data.usage.daily_ideas,
-            monthly_ideas: data.usage.monthly_ideas
-          }
+            monthly_ideas: data.usage.monthly_ideas,
+          },
         };
-        
+
         setSubscriptionInfo(transformedData);
       } else {
         console.error('Errore nel caricamento info sottoscrizione');
@@ -181,11 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshSubscriptionInfo,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

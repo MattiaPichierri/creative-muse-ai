@@ -48,7 +48,11 @@ interface AdvancedSearchProps {
   totalResults: number;
 }
 
-export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSearchProps) {
+export function AdvancedSearch({
+  onSearch,
+  onClear,
+  totalResults,
+}: AdvancedSearchProps) {
   const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
@@ -92,13 +96,11 @@ export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSear
     onClear();
   };
 
-  const hasActiveFilters = Object.values(filters).some(
-    (value, index) => {
-      if (index === 4) return false; // Skip sortBy
-      if (index === 5) return filters.sortOrder !== 'desc'; // Check sortOrder
-      return value !== '';
-    }
-  );
+  const hasActiveFilters = Object.values(filters).some((value, index) => {
+    if (index === 4) return false; // Skip sortBy
+    if (index === 5) return filters.sortOrder !== 'desc'; // Check sortOrder
+    return value !== '';
+  });
 
   return (
     <Card className="mb-6 card-gradient shadow-lg">
@@ -153,7 +155,10 @@ export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSear
         {/* Erweiterte Filter */}
         <motion.div
           initial={false}
-          animate={{ height: isExpanded ? 'auto' : 0, opacity: isExpanded ? 1 : 0 }}
+          animate={{
+            height: isExpanded ? 'auto' : 0,
+            opacity: isExpanded ? 1 : 0,
+          }}
           transition={{ duration: 0.3 }}
           className="overflow-hidden"
         >
@@ -166,7 +171,9 @@ export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSear
               </label>
               <Select
                 value={filters.category}
-                onValueChange={(value: string) => handleFilterChange('category', value)}
+                onValueChange={(value: string) =>
+                  handleFilterChange('category', value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('search.allCategories')} />
@@ -190,7 +197,9 @@ export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSear
               </label>
               <Select
                 value={filters.rating}
-                onValueChange={(value: string) => handleFilterChange('rating', value)}
+                onValueChange={(value: string) =>
+                  handleFilterChange('rating', value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('search.anyRating')} />
@@ -214,7 +223,9 @@ export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSear
               </label>
               <Select
                 value={filters.dateRange}
-                onValueChange={(value: string) => handleFilterChange('dateRange', value)}
+                onValueChange={(value: string) =>
+                  handleFilterChange('dateRange', value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('search.anyTime')} />
@@ -237,7 +248,9 @@ export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSear
               </label>
               <Select
                 value={filters.modelUsed}
-                onValueChange={(value: string) => handleFilterChange('modelUsed', value)}
+                onValueChange={(value: string) =>
+                  handleFilterChange('modelUsed', value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('search.anyModel')} />
@@ -245,8 +258,12 @@ export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSear
                 <SelectContent>
                   <SelectItem value="">{t('search.anyModel')}</SelectItem>
                   <SelectItem value="mock">{t('search.mockModel')}</SelectItem>
-                  <SelectItem value="microsoft-dialoGPT-medium">DialoGPT Medium</SelectItem>
-                  <SelectItem value="microsoft-dialoGPT-large">DialoGPT Large</SelectItem>
+                  <SelectItem value="microsoft-dialoGPT-medium">
+                    DialoGPT Medium
+                  </SelectItem>
+                  <SelectItem value="microsoft-dialoGPT-large">
+                    DialoGPT Large
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -264,16 +281,26 @@ export function AdvancedSearch({ onSearch, onClear, totalResults }: AdvancedSear
               <div className="flex space-x-2">
                 <Select
                   value={filters.sortBy}
-                  onValueChange={(value: string) => handleFilterChange('sortBy', value)}
+                  onValueChange={(value: string) =>
+                    handleFilterChange('sortBy', value)
+                  }
                 >
                   <SelectTrigger className="flex-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="created_at">{t('search.sortDate')}</SelectItem>
-                    <SelectItem value="title">{t('search.sortTitle')}</SelectItem>
-                    <SelectItem value="rating">{t('search.sortRating')}</SelectItem>
-                    <SelectItem value="category">{t('search.sortCategory')}</SelectItem>
+                    <SelectItem value="created_at">
+                      {t('search.sortDate')}
+                    </SelectItem>
+                    <SelectItem value="title">
+                      {t('search.sortTitle')}
+                    </SelectItem>
+                    <SelectItem value="rating">
+                      {t('search.sortRating')}
+                    </SelectItem>
+                    <SelectItem value="category">
+                      {t('search.sortCategory')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <Button

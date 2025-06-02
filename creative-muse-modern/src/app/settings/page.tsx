@@ -3,30 +3,34 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { 
-  User, 
-  Mail, 
-  Shield, 
-  Bell, 
-  Globe, 
-  Palette, 
+import {
+  User,
+  Mail,
+  Shield,
+  Globe,
+  Palette,
   Save,
   ArrowLeft,
   Crown,
-  Key
+  Key,
 } from 'lucide-react';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function SettingsPage() {
   const { user, logout, subscriptionInfo, isLoading } = useAuth();
-  const { t, language } = useLanguage();
+  // const { t, language } = useLanguage(); // Currently not used
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -34,7 +38,7 @@ export default function SettingsPage() {
     first_name: '',
     last_name: '',
     email: '',
-    username: ''
+    username: '',
   });
 
   // Redirect if not authenticated
@@ -51,7 +55,7 @@ export default function SettingsPage() {
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         email: user.email || '',
-        username: user.username || ''
+        username: user.username || '',
       });
     }
   }, [user]);
@@ -74,7 +78,7 @@ export default function SettingsPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -85,9 +89,9 @@ export default function SettingsPage() {
     try {
       // Here you would typically make an API call to update user settings
       // For now, we'll just simulate a save operation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setMessage('Impostazioni salvate con successo!');
-    } catch (error) {
+    } catch {
       setMessage('Errore nel salvare le impostazioni');
     } finally {
       setSaving(false);
@@ -96,11 +100,16 @@ export default function SettingsPage() {
 
   const getPlanColor = (planName: string) => {
     switch (planName?.toLowerCase()) {
-      case 'free': return 'bg-gray-100 text-gray-800';
-      case 'creator': return 'bg-blue-100 text-blue-800';
-      case 'pro': return 'bg-purple-100 text-purple-800';
-      case 'enterprise': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'free':
+        return 'bg-gray-100 text-gray-800';
+      case 'creator':
+        return 'bg-blue-100 text-blue-800';
+      case 'pro':
+        return 'bg-purple-100 text-purple-800';
+      case 'enterprise':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -121,12 +130,16 @@ export default function SettingsPage() {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Impostazioni</h1>
-              <p className="text-gray-600">Gestisci il tuo account e le preferenze</p>
+              <p className="text-gray-600">
+                Gestisci il tuo account e le preferenze
+              </p>
             </div>
           </div>
-          
+
           {subscriptionInfo && (
-            <Badge className={`${getPlanColor(subscriptionInfo.plan.name)} text-sm`}>
+            <Badge
+              className={`${getPlanColor(subscriptionInfo.plan.name)} text-sm`}
+            >
               <Crown className="h-3 w-3 mr-1" />
               {subscriptionInfo.plan.display_name}
             </Badge>
@@ -178,7 +191,7 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label htmlFor="username" className="text-sm font-medium">
                   Username
@@ -193,7 +206,10 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label htmlFor="email" className="text-sm font-medium flex items-center space-x-2">
+                <label
+                  htmlFor="email"
+                  className="text-sm font-medium flex items-center space-x-2"
+                >
                   <Mail className="h-4 w-4" />
                   <span>Email</span>
                 </label>
@@ -207,11 +223,7 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <Button 
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full"
-              >
+              <Button onClick={handleSave} disabled={saving} className="w-full">
                 {saving ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -244,7 +256,9 @@ export default function SettingsPage() {
                   <Key className="h-4 w-4 text-gray-600" />
                   <div>
                     <p className="text-sm font-medium">Password</p>
-                    <p className="text-xs text-gray-500">Ultima modifica: Mai</p>
+                    <p className="text-xs text-gray-500">
+                      Ultima modifica: Mai
+                    </p>
                   </div>
                 </div>
                 <Button variant="outline" size="sm">
@@ -278,9 +292,7 @@ export default function SettingsPage() {
                 <Palette className="h-5 w-5 text-purple-600" />
                 <CardTitle>Preferenze</CardTitle>
               </div>
-              <CardDescription>
-                Personalizza la tua esperienza
-              </CardDescription>
+              <CardDescription>Personalizza la tua esperienza</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -288,7 +300,9 @@ export default function SettingsPage() {
                   <Globe className="h-4 w-4 text-gray-600" />
                   <div>
                     <p className="text-sm font-medium">Lingua</p>
-                    <p className="text-xs text-gray-500">Seleziona la tua lingua preferita</p>
+                    <p className="text-xs text-gray-500">
+                      Seleziona la tua lingua preferita
+                    </p>
                   </div>
                 </div>
                 <LanguageSelector />
@@ -299,7 +313,9 @@ export default function SettingsPage() {
                   <Palette className="h-4 w-4 text-gray-600" />
                   <div>
                     <p className="text-sm font-medium">Tema</p>
-                    <p className="text-xs text-gray-500">Scegli tema chiaro o scuro</p>
+                    <p className="text-xs text-gray-500">
+                      Scegli tema chiaro o scuro
+                    </p>
                   </div>
                 </div>
                 <ThemeToggle />
@@ -327,7 +343,7 @@ export default function SettingsPage() {
                       {subscriptionInfo.plan.display_name}
                     </Badge>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Prezzo:</span>
                     <span className="text-sm">
@@ -336,14 +352,19 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Idee Giornaliere:</span>
+                    <span className="text-sm font-medium">
+                      Idee Giornaliere:
+                    </span>
                     <span className="text-sm">
-                      {subscriptionInfo.usage.daily_ideas}/{subscriptionInfo.limits.daily_ideas_limit === -1 ? '∞' : subscriptionInfo.limits.daily_ideas_limit}
+                      {subscriptionInfo.usage.daily_ideas}/
+                      {subscriptionInfo.limits.daily_ideas_limit === -1
+                        ? '∞'
+                        : subscriptionInfo.limits.daily_ideas_limit}
                     </span>
                   </div>
 
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={() => router.push('/subscription')}
                   >
@@ -351,7 +372,9 @@ export default function SettingsPage() {
                   </Button>
                 </>
               ) : (
-                <p className="text-sm text-gray-500">Caricamento informazioni abbonamento...</p>
+                <p className="text-sm text-gray-500">
+                  Caricamento informazioni abbonamento...
+                </p>
               )}
             </CardContent>
           </Card>
@@ -366,8 +389,8 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={logout}
               className="w-full md:w-auto"
             >

@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import * as React from "react"
+import * as React from 'react';
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils';
 
 const DropdownMenu = React.forwardRef<
   HTMLDivElement,
@@ -26,7 +26,11 @@ const DropdownMenu = React.forwardRef<
   };
 
   return (
-    <div ref={ref} className={cn("relative inline-block", className)} {...props}>
+    <div
+      ref={ref}
+      className={cn('relative inline-block', className)}
+      {...props}
+    >
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
           if (child.type === DropdownMenuTrigger) {
@@ -41,7 +45,7 @@ const DropdownMenu = React.forwardRef<
     </div>
   );
 });
-DropdownMenu.displayName = "DropdownMenu";
+DropdownMenu.displayName = 'DropdownMenu';
 
 const DropdownMenuTrigger = React.forwardRef<
   HTMLButtonElement,
@@ -58,34 +62,30 @@ const DropdownMenuTrigger = React.forwardRef<
   }
 
   return (
-    <button
-      ref={ref}
-      className={cn("outline-none", className)}
-      {...props}
-    >
+    <button ref={ref} className={cn('outline-none', className)} {...props}>
       {children}
     </button>
   );
 });
-DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
+DropdownMenuTrigger.displayName = 'DropdownMenuTrigger';
 
 const DropdownMenuContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
-    align?: "start" | "center" | "end";
+    align?: 'start' | 'center' | 'end';
   }
->(({ className, align = "center", ...props }, ref) => {
+>(({ className, align = 'center', ...props }, ref) => {
   const alignClass = {
-    start: "left-0",
-    center: "left-1/2 transform -translate-x-1/2",
-    end: "right-0",
+    start: 'left-0',
+    center: 'left-1/2 transform -translate-x-1/2',
+    end: 'right-0',
   }[align];
 
   return (
     <div
       ref={ref}
       className={cn(
-        "absolute top-full mt-1 z-50 min-w-[8rem] overflow-hidden rounded-md border bg-white p-1 shadow-md",
+        'absolute top-full mt-1 z-50 min-w-[8rem] overflow-hidden rounded-md border bg-white p-1 shadow-md',
         alignClass,
         className
       )}
@@ -93,7 +93,7 @@ const DropdownMenuContent = React.forwardRef<
     />
   );
 });
-DropdownMenuContent.displayName = "DropdownMenuContent";
+DropdownMenuContent.displayName = 'DropdownMenuContent';
 
 const DropdownMenuItem = React.forwardRef<
   HTMLDivElement,
@@ -106,7 +106,7 @@ const DropdownMenuItem = React.forwardRef<
       ...props,
       ref,
       className: cn(
-        "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100",
+        'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100',
         children.props.className,
         className
       ),
@@ -117,7 +117,7 @@ const DropdownMenuItem = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100",
+        'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-gray-100',
         className
       )}
       {...props}
@@ -126,7 +126,7 @@ const DropdownMenuItem = React.forwardRef<
     </div>
   );
 });
-DropdownMenuItem.displayName = "DropdownMenuItem";
+DropdownMenuItem.displayName = 'DropdownMenuItem';
 
 const DropdownMenuSeparator = React.forwardRef<
   HTMLDivElement,
@@ -134,11 +134,11 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-gray-200", className)}
+    className={cn('-mx-1 my-1 h-px bg-gray-200', className)}
     {...props}
   />
 ));
-DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
+DropdownMenuSeparator.displayName = 'DropdownMenuSeparator';
 
 export {
   DropdownMenu,
@@ -146,4 +146,4 @@ export {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-}
+};

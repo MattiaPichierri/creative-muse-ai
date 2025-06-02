@@ -243,13 +243,20 @@ const templates: Template[] = [
 ];
 
 interface IdeaTemplatesProps {
-  onTemplateSelect: (template: Template, content: Record<string, string>) => void;
+  onTemplateSelect: (
+    template: Template,
+    content: Record<string, string>
+  ) => void;
 }
 
 export function IdeaTemplates({ onTemplateSelect }: IdeaTemplatesProps) {
   const { t } = useLanguage();
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [templateContent, setTemplateContent] = useState<Record<string, string>>({});
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
+  const [templateContent, setTemplateContent] = useState<
+    Record<string, string>
+  >({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleTemplateClick = (template: Template) => {
@@ -259,7 +266,7 @@ export function IdeaTemplates({ onTemplateSelect }: IdeaTemplatesProps) {
   };
 
   const handleContentChange = (sectionName: string, value: string) => {
-    setTemplateContent(prev => ({
+    setTemplateContent((prev) => ({
       ...prev,
       [sectionName]: value,
     }));
@@ -274,8 +281,8 @@ export function IdeaTemplates({ onTemplateSelect }: IdeaTemplatesProps) {
   };
 
   const isFormValid = selectedTemplate?.structure.sections
-    .filter(section => section.required)
-    .every(section => templateContent[section.name]?.trim());
+    .filter((section) => section.required)
+    .every((section) => templateContent[section.name]?.trim());
 
   return (
     <>
@@ -303,7 +310,9 @@ export function IdeaTemplates({ onTemplateSelect }: IdeaTemplatesProps) {
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <div className={`p-2 rounded-lg ${template.color} text-white`}>
+                      <div
+                        className={`p-2 rounded-lg ${template.color} text-white`}
+                      >
                         {template.icon}
                       </div>
                       <Badge variant="outline" className="text-xs">
@@ -313,10 +322,13 @@ export function IdeaTemplates({ onTemplateSelect }: IdeaTemplatesProps) {
                     <CardTitle className="text-base">{template.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-sm text-gray-600">{template.description}</p>
+                    <p className="text-sm text-gray-600">
+                      {template.description}
+                    </p>
                     <div className="mt-3 flex items-center text-xs text-gray-500">
                       <Zap className="h-3 w-3 mr-1" />
-                      {template.structure.sections.length} {t('templates.sections')}
+                      {template.structure.sections.length}{' '}
+                      {t('templates.sections')}
                     </div>
                   </CardContent>
                 </Card>
@@ -334,9 +346,7 @@ export function IdeaTemplates({ onTemplateSelect }: IdeaTemplatesProps) {
               {selectedTemplate?.icon}
               <span>{selectedTemplate?.name}</span>
             </DialogTitle>
-            <DialogDescription>
-              {t('templates.fillSections')}
-            </DialogDescription>
+            <DialogDescription>{t('templates.fillSections')}</DialogDescription>
           </DialogHeader>
 
           {selectedTemplate && (
@@ -352,7 +362,9 @@ export function IdeaTemplates({ onTemplateSelect }: IdeaTemplatesProps) {
                   <Textarea
                     placeholder={section.placeholder}
                     value={templateContent[section.name] || ''}
-                    onChange={(e) => handleContentChange(section.name, e.target.value)}
+                    onChange={(e) =>
+                      handleContentChange(section.name, e.target.value)
+                    }
                     className="min-h-[80px]"
                   />
                 </div>
@@ -361,10 +373,7 @@ export function IdeaTemplates({ onTemplateSelect }: IdeaTemplatesProps) {
           )}
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
             <Button

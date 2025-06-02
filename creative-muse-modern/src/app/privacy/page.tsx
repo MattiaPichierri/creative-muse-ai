@@ -17,10 +17,13 @@ export default function PrivacyPage() {
 
         <div className="bg-white rounded-lg shadow-sm border p-8 space-y-8">
           <section>
-            <h2 className="text-2xl font-bold mb-4">1. Datenerhebung und -verwendung</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              1. Datenerhebung und -verwendung
+            </h2>
             <p className="text-gray-700 mb-4">
-              Creative Muse AI sammelt und verarbeitet personenbezogene Daten nur in dem Umfang, 
-              der für die Bereitstellung unserer Dienste erforderlich ist.
+              Creative Muse AI sammelt und verarbeitet personenbezogene Daten
+              nur in dem Umfang, der für die Bereitstellung unserer Dienste
+              erforderlich ist.
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-2">
               <li>E-Mail-Adresse für Kontenerstellung und Kommunikation</li>
@@ -33,7 +36,8 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-bold mb-4">2. Datensicherheit</h2>
             <p className="text-gray-700 mb-4">
-              Wir implementieren branchenübliche Sicherheitsmaßnahmen zum Schutz Ihrer Daten:
+              Wir implementieren branchenübliche Sicherheitsmaßnahmen zum Schutz
+              Ihrer Daten:
             </p>
             <ul className="list-disc list-inside text-gray-700 space-y-2">
               <li>JWT-Token-basierte Authentifizierung</li>
@@ -72,8 +76,11 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-bold mb-4">5. Kontakt</h2>
             <p className="text-gray-700">
-              Bei Fragen zum Datenschutz kontaktieren Sie uns unter: 
-              <a href="mailto:privacy@creativemuse.ai" className="text-blue-600 hover:underline ml-1">
+              Bei Fragen zum Datenschutz kontaktieren Sie uns unter:
+              <a
+                href="mailto:privacy@creativemuse.ai"
+                className="text-blue-600 hover:underline ml-1"
+              >
                 privacy@creativemuse.ai
               </a>
             </p>

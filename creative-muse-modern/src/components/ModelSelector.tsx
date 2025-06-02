@@ -58,35 +58,48 @@ export function ModelSelector() {
         setError(result.error);
       } else if (result.data) {
         console.log('✅ Modelle geladen:', result.data);
-        
+
         // Prüfe ob result.data ein Array ist oder ein Objekt mit models Feld
         let modelsArray: ModelInfo[] = [];
         if (Array.isArray(result.data)) {
           modelsArray = result.data;
-        } else if (result.data && typeof result.data === 'object' && 'models' in result.data) {
+        } else if (
+          result.data &&
+          typeof result.data === 'object' &&
+          'models' in result.data
+        ) {
           // Backend gibt {models: Array} zurück
           const dataWithModels = result.data as { models: ModelInfo[] };
-          modelsArray = Array.isArray(dataWithModels.models) ? dataWithModels.models : [];
+          modelsArray = Array.isArray(dataWithModels.models)
+            ? dataWithModels.models
+            : [];
         }
-        
+
         console.log('🔍 Modelle Array:', modelsArray);
-        
+
         if (modelsArray.length === 0) {
           console.log('⚠️ Leeres Modelle Array');
           setError(t('models.noModels'));
           setLoading(false);
           return;
         }
-        
+
         setModels(modelsArray);
-        
+
         // Aktualisiere den aktuellen Modellstatus
         const currentModel = modelsArray.find((m: ModelInfo) => {
-          console.log('🔍 Prüfe Modell:', m.key, 'current:', m.current, 'type:', typeof m.current);
+          console.log(
+            '🔍 Prüfe Modell:',
+            m.key,
+            'current:',
+            m.current,
+            'type:',
+            typeof m.current
+          );
           return m.current === true;
         });
         console.log('🎯 Gefundenes aktuelles Modell:', currentModel);
-        
+
         if (currentModel) {
           console.log('✅ Setze aktuelles Modell:', currentModel.key);
           setCurrentModelKey(currentModel.key);
@@ -97,9 +110,14 @@ export function ModelSelector() {
         } else {
           console.log('⚠️ Kein aktuelles Modell gefunden');
           // Fallback: verwende das erste verfügbare Modell
-          const firstAvailable = modelsArray.find((m: ModelInfo) => m.available);
+          const firstAvailable = modelsArray.find(
+            (m: ModelInfo) => m.available
+          );
           if (firstAvailable) {
-            console.log('🔄 Verwende erstes verfügbares Modell als Fallback:', firstAvailable.key);
+            console.log(
+              '🔄 Verwende erstes verfügbares Modell als Fallback:',
+              firstAvailable.key
+            );
             setCurrentModelKey(firstAvailable.key);
             if (typeof window !== 'undefined') {
               localStorage.setItem('selectedModel', firstAvailable.key);
@@ -134,20 +152,20 @@ export function ModelSelector() {
         setError(result.error);
       } else {
         console.log('✅ Model Switch erfolgreich:', result.data);
-        
+
         // Aktualisiere lokalen Status sofort
         setCurrentModelKey(modelKey);
         if (typeof window !== 'undefined') {
           localStorage.setItem('selectedModel', modelKey);
         }
-        
+
         // Aktualisiere Modell-Status in der Liste
-        setModels(prevModels =>
-          prevModels.map(model => ({
+        setModels((prevModels) =>
+          prevModels.map((model) => ({
             ...model,
             current: model.key === modelKey,
             loaded: model.key === modelKey ? true : model.loaded,
-            status: model.key === modelKey ? 'ready' : model.status
+            status: model.key === modelKey ? 'ready' : model.status,
           }))
         );
       }
@@ -175,20 +193,20 @@ export function ModelSelector() {
         setError(result.error);
       } else {
         console.log('✅ Modell erfolgreich deaktiviert');
-        
+
         // Lösche lokalen Status
         setCurrentModelKey(null);
         if (typeof window !== 'undefined') {
           localStorage.removeItem('selectedModel');
         }
-        
+
         // Aktualisiere Modell-Status in der Liste
-        setModels(prevModels =>
-          prevModels.map(model => ({
+        setModels((prevModels) =>
+          prevModels.map((model) => ({
             ...model,
             current: false,
             loaded: false,
-            status: model.available ? 'available' : 'unavailable'
+            status: model.available ? 'available' : 'unavailable',
           }))
         );
       }
@@ -214,9 +232,11 @@ export function ModelSelector() {
     if (isOpen) {
       loadModels();
     }
-  }, [isOpen]);
+  }, [isOpen, loadModels]);
 
-  const currentModel = models.find((m) => m.current) || models.find((m) => m.key === currentModelKey);
+  const currentModel =
+    models.find((m) => m.current) ||
+    models.find((m) => m.key === currentModelKey);
   const availableModels = models.filter((m) => m.available);
   const unavailableModels = models.filter((m) => !m.available);
 
@@ -245,7 +265,9 @@ export function ModelSelector() {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Brain className="h-4 w-4" />
-          {currentModel ? currentModel.key : currentModelKey || t('models.selectModel')}
+          {currentModel
+            ? currentModel.key
+            : currentModelKey || t('models.selectModel')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -254,9 +276,7 @@ export function ModelSelector() {
             <Brain className="h-5 w-5" />
             {t('models.title')}
           </DialogTitle>
-          <DialogDescription>
-            {t('models.description')}
-          </DialogDescription>
+          <DialogDescription>{t('models.description')}</DialogDescription>
         </DialogHeader>
 
         {error && (
@@ -314,7 +334,8 @@ export function ModelSelector() {
                           <div className="flex items-center gap-4">
                             <span className="flex items-center gap-1">
                               <HardDrive className="h-3 w-3" />
-                              {model.size_gb ? model.size_gb.toFixed(1) : '0.0'}GB
+                              {model.size_gb ? model.size_gb.toFixed(1) : '0.0'}
+                              GB
                             </span>
                             {model.requires_token && (
                               <span className="flex items-center gap-1">
@@ -400,7 +421,9 @@ export function ModelSelector() {
                               )}
                             </CardTitle>
                           </div>
-                          <Badge variant="destructive">{t('models.status.unavailable')}</Badge>
+                          <Badge variant="destructive">
+                            {t('models.status.unavailable')}
+                          </Badge>
                         </div>
                         <CardDescription className="text-sm">
                           {model.description}
@@ -411,7 +434,8 @@ export function ModelSelector() {
                           <div className="flex items-center gap-4">
                             <span className="flex items-center gap-1">
                               <HardDrive className="h-3 w-3" />
-                              {model.size_gb ? model.size_gb.toFixed(1) : '0.0'}GB
+                              {model.size_gb ? model.size_gb.toFixed(1) : '0.0'}
+                              GB
                             </span>
                             {model.requires_token && (
                               <span className="flex items-center gap-1">
@@ -440,9 +464,7 @@ export function ModelSelector() {
               <div className="text-center py-8 text-gray-500">
                 <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>{t('models.noModels')}</p>
-                <p className="text-sm">
-                  {t('models.noModelsDescription')}
-                </p>
+                <p className="text-sm">{t('models.noModelsDescription')}</p>
               </div>
             )}
           </div>

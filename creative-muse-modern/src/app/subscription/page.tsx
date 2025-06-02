@@ -38,10 +38,10 @@ export default function SubscriptionPage() {
             Dashboard Sottoscrizione
           </h1>
           <p className="text-gray-600 mt-2">
-            Gestisci il tuo piano e monitora l'utilizzo
+            Gestisci il tuo piano e monitora l&apos;utilizzo
           </p>
         </div>
-        
+
         <SubscriptionDashboard />
       </div>
     </div>

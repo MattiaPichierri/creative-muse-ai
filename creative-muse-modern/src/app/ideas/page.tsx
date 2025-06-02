@@ -65,7 +65,7 @@ export default function IdeasPage() {
       setFilteredIdeas([]);
       return;
     }
-    
+
     let filtered = [...ideas];
 
     // Filtro per ricerca testuale
@@ -141,7 +141,9 @@ export default function IdeasPage() {
   };
 
   // Estrai categorie uniche
-  const categories = Array.from(new Set(Array.isArray(ideas) ? ideas.map((idea) => idea.category) : []));
+  const categories = Array.from(
+    new Set(Array.isArray(ideas) ? ideas.map((idea) => idea.category) : [])
+  );
 
   if (isLoading) {
     return (

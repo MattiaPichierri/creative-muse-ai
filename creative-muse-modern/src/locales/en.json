@@ -1,0 +1,54 @@
+{
+  "featureGate": {
+    "premiumFeature": "Premium Feature",
+    "upgradePrompt": "Upgrade your subscription to access this feature.",
+    "upgrade": "Upgrade"
+  },
+  "features": {
+    "aiModelSelection": {
+      "name": "AI Model Selection",
+      "description": "Choose different AI models for idea generation"
+    },
+    "advancedAnalytics": {
+      "name": "Advanced Analytics",
+      "description": "Access to detailed analytics and usage statistics"
+    },
+    "bulkIdeaGeneration": {
+      "name": "Bulk Idea Generation",
+      "description": "Generate multiple ideas in a single request"
+    },
+    "exportFormats": {
+      "name": "Export Formats",
+      "description": "Export ideas in various formats (PDF, DOCX, etc.)"
+    },
+    "apiAccess": {
+      "name": "API Access",
+      "description": "Access to REST API for external integrations"
+    },
+    "teamCollaboration": {
+      "name": "Team Collaboration",
+      "description": "Share and collaborate on ideas with team members"
+    },
+    "customPrompts": {
+      "name": "Custom Prompts",
+      "description": "Create and save custom prompt templates"
+    },
+    "prioritySupport": {
+      "name": "Priority Support",
+      "description": "Access to priority customer support"
+    }
+  },
+  "subscription": {
+    "tiers": {
+      "free": "Free",
+      "creator": "Creator",
+      "pro": "Pro",
+      "enterprise": "Enterprise"
+    },
+    "upgradeRequired": "Upgrade Required",
+    "currentPlan": "Current Plan",
+    "upgradeTo": "Upgrade to {{tier}}",
+    "features": "Features",
+    "unlimited": "Unlimited"
+  }
+}

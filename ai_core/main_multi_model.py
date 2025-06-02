@@ -2,22 +2,28 @@
 """
 Creative Muse AI - Multi-Model Backend
 FastAPI-basiertes Backend mit Multi-Model-Support
+Erweitert mit: Echtzeit-Streaming, Batch-Processing, Intelligentes Vorladen
 """
 
 import os
 import logging
+import asyncio
 from pathlib import Path
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, AsyncGenerator
 from datetime import datetime
 import uuid
 import sqlite3
+import json
+from concurrent.futures import ThreadPoolExecutor
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from sse_starlette.sse import EventSourceResponse
 
 # Lokale Imports
 from model_manager import ModelManager
@@ -47,10 +53,29 @@ class IdeaRequest(BaseModel):
     model: Optional[str] = None  # Spezifisches Modell wählen
     max_tokens: Optional[int] = None
     temperature: Optional[float] = None
+    stream: Optional[bool] = False  # Echtzeit-Streaming
+
+
+class BatchIdeaRequest(BaseModel):
+    """Request für mehrere Ideen gleichzeitig"""
+    prompts: List[str]
+    category: Optional[str] = "general"
+    creativity_level: Optional[int] = 5
+    language: Optional[str] = "de"
+    models: Optional[List[str]] = None  # Verschiedene Modelle pro Idee
+    max_tokens: Optional[int] = None
+    temperature: Optional[float] = None
+    parallel: Optional[bool] = True  # Parallele Verarbeitung
 
 
 class ModelSwitchRequest(BaseModel):
     model_key: str
+
+
+class ModelPreloadRequest(BaseModel):
+    """Request für intelligentes Vorladen"""
+    model_keys: List[str]
+    priority: Optional[str] = "balanced"  # high, balanced, low
 
 
 class RandomIdeaRequest(BaseModel):
@@ -68,6 +93,26 @@ class IdeaResponse(BaseModel):
     created_at: str
     generation_method: str
     model_used: str
+    generation_time: Optional[float] = None  # Generierungszeit in Sekunden
+
+
+class BatchIdeaResponse(BaseModel):
+    """Response für Batch-Generierung"""
+    ideas: List[IdeaResponse]
+    total_count: int
+    success_count: int
+    failed_count: int
+    total_time: float
+    average_time: float
+
+
+class StreamChunk(BaseModel):
+    """Chunk für Streaming-Response"""
+    type: str  # "start", "chunk", "complete", "error"
+    content: Optional[str] = None
+    idea_id: Optional[str] = None
+    progress: Optional[float] = None
+    error: Optional[str] = None
 
 
 class ModelInfo(BaseModel):
@@ -81,6 +126,7 @@ class ModelInfo(BaseModel):
     loaded: bool
     status: str
     current: bool
+    preload_priority: Optional[int] = 0  # Vorladen-Priorität
 
 
 class Stats(BaseModel):
@@ -89,12 +135,20 @@ class Stats(BaseModel):
     average_rating: float
     recent_activity: int
     model_stats: Dict[str, Any]
+    streaming_stats: Optional[Dict[str, Any]] = None
+    batch_stats: Optional[Dict[str, Any]] = None
 
 
 # Globale Variablen
 # Verwende absoluten Pfad basierend auf dem aktuellen Skript-Verzeichnis
 script_dir = Path(__file__).parent
 db_path = script_dir.parent / "database" / "creative_muse.db"
+
+# Erweiterte globale Variablen für neue Features
+executor = ThreadPoolExecutor(max_workers=4)  # Für parallele Verarbeitung
+preload_queue = asyncio.Queue()  # Queue für intelligentes Vorladen
+streaming_sessions = {}  # Aktive Streaming-Sessions
+model_usage_stats = {}  # Modell-Nutzungsstatistiken für Vorladen
 
 
 @asynccontextmanager
@@ -196,10 +250,12 @@ def init_simple_db():
         return False
 
 
-def create_optimized_prompt(prompt: str, category: str, language: str, creativity_level: int) -> str:
-    """Erstelle optimierten Prompt für verschiedene Modelle"""
+def create_model_specific_prompt(prompt: str, category: str, language: str,
+                                creativity_level: int, model_key: str) -> str:
+    """Erstelle modell-spezifische optimierte Prompts"""
     
-    language_prompts = {
+    # Basis-Prompts pro Sprache
+    base_prompts = {
         "de": {
             "system": "Du bist ein kreativer KI-Assistent für innovative Ideengenerierung.",
             "instruction": f"Generiere eine kreative Idee für '{category}' basierend auf: '{prompt}'. "
@@ -220,8 +276,254 @@ def create_optimized_prompt(prompt: str, category: str, language: str, creativit
         }
     }
     
-    lang_config = language_prompts.get(language, language_prompts["de"])
-    return f"{lang_config['system']}\n\n{lang_config['instruction']}"
+    # Modell-spezifische Anpassungen
+    model_adaptations = {
+        "mistral-7b-instruct-v0.3": {
+            "prefix": "[INST] ",
+            "suffix": " [/INST]",
+            "style": "structured"
+        },
+        "mistral-7b-instruct-v0.2": {
+            "prefix": "[INST] ",
+            "suffix": " [/INST]",
+            "style": "structured"
+        },
+        "microsoft-dialoGPT-medium": {
+            "prefix": "",
+            "suffix": "",
+            "style": "conversational"
+        },
+        "microsoft-dialoGPT-large": {
+            "prefix": "",
+            "suffix": "",
+            "style": "conversational"
+        }
+    }
+    
+    lang_config = base_prompts.get(language, base_prompts["de"])
+    model_config = model_adaptations.get(model_key, {"prefix": "", "suffix": "", "style": "default"})
+    
+    # Erstelle modell-spezifischen Prompt
+    base_prompt = f"{lang_config['system']}\n\n{lang_config['instruction']}"
+    
+    if model_config["style"] == "structured":
+        # Für Mistral-Modelle: Strukturierter Ansatz
+        formatted_prompt = f"{model_config['prefix']}{base_prompt}{model_config['suffix']}"
+    elif model_config["style"] == "conversational":
+        # Für DialoGPT: Konversationeller Ansatz
+        formatted_prompt = f"Human: {base_prompt}\nAssistant:"
+    else:
+        # Standard-Format
+        formatted_prompt = base_prompt
+    
+    return formatted_prompt
+
+
+def create_optimized_prompt(prompt: str, category: str, language: str, creativity_level: int) -> str:
+    """Erstelle optimierten Prompt für verschiedene Modelle (Legacy-Kompatibilität)"""
+    return create_model_specific_prompt(prompt, category, language, creativity_level, "default")
+
+
+async def update_model_usage_stats(model_key: str, generation_time: float):
+    """Aktualisiere Modell-Nutzungsstatistiken für intelligentes Vorladen"""
+    if model_key not in model_usage_stats:
+        model_usage_stats[model_key] = {
+            "usage_count": 0,
+            "total_time": 0.0,
+            "average_time": 0.0,
+            "last_used": datetime.now(),
+            "priority_score": 0.0
+        }
+    
+    stats = model_usage_stats[model_key]
+    stats["usage_count"] += 1
+    stats["total_time"] += generation_time
+    stats["average_time"] = stats["total_time"] / stats["usage_count"]
+    stats["last_used"] = datetime.now()
+    
+    # Berechne Prioritätsscore für intelligentes Vorladen
+    # Basiert auf Nutzungshäufigkeit und Aktualität
+    time_factor = max(0.1, 1.0 - (datetime.now() - stats["last_used"]).total_seconds() / 3600)
+    stats["priority_score"] = stats["usage_count"] * time_factor
+
+
+async def intelligent_preload_models():
+    """Intelligentes Vorladen von Modellen basierend auf Nutzungsstatistiken"""
+    if not model_manager:
+        return
+    
+    # Sortiere Modelle nach Prioritätsscore
+    sorted_models = sorted(
+        model_usage_stats.items(),
+        key=lambda x: x[1]["priority_score"],
+        reverse=True
+    )
+    
+    # Lade die Top 2 Modelle vor (falls nicht bereits geladen)
+    for model_key, stats in sorted_models[:2]:
+        if model_key not in model_manager.models:
+            logger.info(f"🔮 Intelligentes Vorladen: {model_key} (Score: {stats['priority_score']:.2f})")
+            await model_manager.load_model(model_key)
+
+
+async def generate_streaming_idea(prompt: str, category: str, language: str,
+                                creativity_level: int, model_key: Optional[str] = None) -> AsyncGenerator[StreamChunk, None]:
+    """Generiere Idee mit Echtzeit-Streaming"""
+    idea_id = str(uuid.uuid4())
+    start_time = datetime.now()
+    
+    try:
+        # Start-Event senden
+        yield StreamChunk(
+            type="start",
+            idea_id=idea_id,
+            progress=0.0
+        )
+        
+        # Simuliere Streaming-Generierung (in echter Implementierung würde hier das Modell streamen)
+        target_model = model_key or (model_manager.get_current_model() if model_manager else "mock")
+        
+        if target_model and target_model != "mock" and model_manager:
+            # Echte Modell-Generierung
+            formatted_prompt = create_model_specific_prompt(prompt, category, language, creativity_level, target_model)
+            
+            # Simuliere Streaming durch Chunk-weise Ausgabe
+            full_text = model_manager.generate_text(formatted_prompt, model_key=target_model)
+            
+            if full_text:
+                # Teile Text in Chunks auf
+                chunks = [full_text[i:i+50] for i in range(0, len(full_text), 50)]
+                
+                for i, chunk in enumerate(chunks):
+                    progress = (i + 1) / len(chunks)
+                    yield StreamChunk(
+                        type="chunk",
+                        content=chunk,
+                        idea_id=idea_id,
+                        progress=progress
+                    )
+                    await asyncio.sleep(0.1)  # Simuliere Streaming-Delay
+            else:
+                raise Exception("Keine Textgenerierung erhalten")
+        else:
+            # Mock-Streaming
+            mock_text = f"Innovative Idee für {category}: {prompt}. Eine kreative Lösung mit Niveau {creativity_level}."
+            chunks = [mock_text[i:i+20] for i in range(0, len(mock_text), 20)]
+            
+            for i, chunk in enumerate(chunks):
+                progress = (i + 1) / len(chunks)
+                yield StreamChunk(
+                    type="chunk",
+                    content=chunk,
+                    idea_id=idea_id,
+                    progress=progress
+                )
+                await asyncio.sleep(0.1)
+        
+        # Complete-Event senden
+        generation_time = (datetime.now() - start_time).total_seconds()
+        yield StreamChunk(
+            type="complete",
+            idea_id=idea_id,
+            progress=1.0
+        )
+        
+        # Statistiken aktualisieren
+        if target_model and target_model != "mock":
+            await update_model_usage_stats(target_model, generation_time)
+        
+    except Exception as e:
+        logger.error(f"❌ Fehler beim Streaming: {e}")
+        yield StreamChunk(
+            type="error",
+            idea_id=idea_id,
+            error=str(e)
+        )
+
+
+async def generate_batch_ideas(requests: List[Dict[str, Any]], parallel: bool = True) -> BatchIdeaResponse:
+    """Generiere mehrere Ideen gleichzeitig"""
+    start_time = datetime.now()
+    ideas = []
+    failed_count = 0
+    
+    if parallel and len(requests) > 1:
+        # Parallele Verarbeitung
+        tasks = []
+        for req in requests:
+            task = asyncio.create_task(
+                generate_with_model(
+                    req["prompt"],
+                    req["category"],
+                    req["language"],
+                    req["creativity_level"],
+                    req.get("model"),
+                    **req.get("kwargs", {})
+                )
+            )
+            tasks.append(task)
+        
+        # Warte auf alle Tasks
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"❌ Fehler bei Batch-Idee {i}: {result}")
+                failed_count += 1
+            else:
+                idea_id = str(uuid.uuid4())
+                created_at = datetime.now().isoformat()
+                
+                ideas.append(IdeaResponse(
+                    id=idea_id,
+                    title=result["title"],
+                    content=result["content"],
+                    category=requests[i]["category"],
+                    created_at=created_at,
+                    generation_method=result["generation_method"],
+                    model_used=result["model_used"]
+                ))
+    else:
+        # Sequenzielle Verarbeitung
+        for req in requests:
+            try:
+                result = await generate_with_model(
+                    req["prompt"],
+                    req["category"],
+                    req["language"],
+                    req["creativity_level"],
+                    req.get("model"),
+                    **req.get("kwargs", {})
+                )
+                
+                idea_id = str(uuid.uuid4())
+                created_at = datetime.now().isoformat()
+                
+                ideas.append(IdeaResponse(
+                    id=idea_id,
+                    title=result["title"],
+                    content=result["content"],
+                    category=req["category"],
+                    created_at=created_at,
+                    generation_method=result["generation_method"],
+                    model_used=result["model_used"]
+                ))
+            except Exception as e:
+                logger.error(f"❌ Fehler bei Batch-Idee: {e}")
+                failed_count += 1
+    
+    total_time = (datetime.now() - start_time).total_seconds()
+    success_count = len(ideas)
+    average_time = total_time / max(1, success_count)
+    
+    return BatchIdeaResponse(
+        ideas=ideas,
+        total_count=len(requests),
+        success_count=success_count,
+        failed_count=failed_count,
+        total_time=total_time,
+        average_time=average_time
+    )
 
 
 async def generate_with_model(prompt: str, category: str, language: str, 
@@ -346,12 +648,22 @@ async def root():
         "available_models": available_models,
         "endpoints": {
             "generate": "/api/v1/generate",
+            "generate_stream": "/api/v1/generate/stream",
+            "generate_batch": "/api/v1/generate/batch",
             "random": "/api/v1/random",
             "models": "/api/v1/models",
             "switch_model": "/api/v1/models/switch",
+            "preload_models": "/api/v1/models/preload",
+            "model_usage_stats": "/api/v1/models/usage-stats",
             "ideas": "/api/v1/ideas",
             "stats": "/api/v1/stats",
             "health": "/health"
+        },
+        "features": {
+            "streaming": True,
+            "batch_processing": True,
+            "intelligent_preloading": True,
+            "model_specific_prompts": True
         }
     }
 
@@ -402,6 +714,118 @@ async def deactivate_model():
             status_code=400,
             detail="Fehler beim Deaktivieren des Modells"
         )
+
+
+@app.post("/api/v1/models/preload")
+async def preload_models(request: ModelPreloadRequest):
+    """Intelligentes Vorladen von Modellen"""
+    if not model_manager:
+        raise HTTPException(status_code=503, detail="Model Manager nicht verfügbar")
+    
+    results = []
+    for model_key in request.model_keys:
+        try:
+            success = await model_manager.load_model(model_key)
+            results.append({
+                "model": model_key,
+                "success": success,
+                "status": "loaded" if success else "failed"
+            })
+        except Exception as e:
+            results.append({
+                "model": model_key,
+                "success": False,
+                "status": "error",
+                "error": str(e)
+            })
+    
+    return {
+        "message": "Vorladen abgeschlossen",
+        "results": results,
+        "priority": request.priority
+    }
+
+
+@app.get("/api/v1/models/usage-stats")
+async def get_model_usage_stats():
+    """Hole Modell-Nutzungsstatistiken"""
+    return {
+        "usage_stats": model_usage_stats,
+        "intelligent_preload_enabled": True,
+        "preload_recommendations": sorted(
+            model_usage_stats.items(),
+            key=lambda x: x[1]["priority_score"],
+            reverse=True
+        )[:3]
+    }
+
+
+@app.post("/api/v1/generate/stream")
+async def generate_idea_stream(request: IdeaRequest):
+    """Generiere Idee mit Echtzeit-Streaming"""
+    
+    async def event_generator():
+        async for chunk in generate_streaming_idea(
+            request.prompt,
+            request.category,
+            request.language,
+            request.creativity_level,
+            request.model
+        ):
+            yield f"data: {json.dumps(chunk.dict())}\n\n"
+    
+    return EventSourceResponse(event_generator())
+
+
+@app.post("/api/v1/generate/batch", response_model=BatchIdeaResponse)
+async def generate_batch_ideas_endpoint(request: BatchIdeaRequest):
+    """Generiere mehrere Ideen gleichzeitig"""
+    
+    # Konvertiere Request zu internem Format
+    batch_requests = []
+    for i, prompt in enumerate(request.prompts):
+        model_key = None
+        if request.models and i < len(request.models):
+            model_key = request.models[i]
+        
+        batch_requests.append({
+            "prompt": prompt,
+            "category": request.category,
+            "language": request.language,
+            "creativity_level": request.creativity_level,
+            "model": model_key,
+            "kwargs": {
+                "max_tokens": request.max_tokens,
+                "temperature": request.temperature
+            }
+        })
+    
+    # Generiere Batch
+    result = await generate_batch_ideas(batch_requests, request.parallel)
+    
+    # Speichere erfolgreiche Ideen in Datenbank
+    if result.ideas:
+        try:
+            conn = sqlite3.connect(str(db_path))
+            cursor = conn.cursor()
+            
+            for idea in result.ideas:
+                cursor.execute(
+                    """
+                    INSERT INTO simple_ideas
+                    (id, title, content, category, generation_method, model_used, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (idea.id, idea.title, idea.content, idea.category,
+                     idea.generation_method, idea.model_used, idea.created_at)
+                )
+            
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.error(f"❌ Fehler beim Speichern der Batch-Ideen: {e}")
+    
+    return result
 
 
 @app.post("/api/v1/generate", response_model=IdeaResponse)
@@ -531,17 +955,42 @@ async def get_stats():
         )
         recent_activity = cursor.fetchone()[0]
         
-        conn.close()
-        
         # Model-Statistiken
         model_stats = model_manager.get_statistics() if model_manager else {}
+        
+        # Streaming-Statistiken
+        streaming_stats = {
+            "active_sessions": len(streaming_sessions),
+            "total_streaming_requests": sum(
+                stats.get("usage_count", 0) for stats in model_usage_stats.values()
+            ),
+            "average_streaming_time": sum(
+                stats.get("average_time", 0) for stats in model_usage_stats.values()
+            ) / max(1, len(model_usage_stats))
+        }
+        
+        # Batch-Statistiken
+        cursor.execute(
+            "SELECT generation_method, COUNT(*) FROM simple_ideas WHERE generation_method LIKE '%batch%' GROUP BY generation_method"
+        )
+        batch_methods = dict(cursor.fetchall())
+        
+        batch_stats = {
+            "total_batch_requests": sum(batch_methods.values()),
+            "batch_methods": batch_methods,
+            "parallel_processing_enabled": True
+        }
+        
+        conn.close()
         
         return Stats(
             total_ideas=total_ideas,
             categories=categories,
             average_rating=round(avg_rating, 2),
             recent_activity=recent_activity,
-            model_stats=model_stats
+            model_stats=model_stats,
+            streaming_stats=streaming_stats,
+            batch_stats=batch_stats
         )
         
     except Exception as e:

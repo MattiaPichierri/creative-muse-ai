@@ -47,10 +47,10 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
   const loadStats = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await apiService.getStats();
-      
+
       if (result.error) {
         setError(result.error);
       } else if (result.data) {
@@ -61,7 +61,7 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
           creativity_trend: calculateCreativityTrend(result.data),
           peak_hours: ['14:00-16:00', '20:00-22:00'], // Mock data
           favorite_categories: Object.entries(result.data.categories)
-            .sort(([,a], [,b]) => b - a)
+            .sort(([, a], [, b]) => b - a)
             .slice(0, 3)
             .map(([category]) => category),
           weekly_progress: Math.min(100, (result.data.recent_ideas / 7) * 100),
@@ -144,10 +144,25 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
   };
 
   const getProductivityLevel = (score: number) => {
-    if (score >= 80) return { level: 'Excellent', color: 'text-green-600', bg: 'bg-green-100' };
-    if (score >= 60) return { level: 'Good', color: 'text-blue-600', bg: 'bg-blue-100' };
-    if (score >= 40) return { level: 'Average', color: 'text-yellow-600', bg: 'bg-yellow-100' };
-    return { level: 'Needs Improvement', color: 'text-red-600', bg: 'bg-red-100' };
+    if (score >= 80)
+      return {
+        level: 'Excellent',
+        color: 'text-green-600',
+        bg: 'bg-green-100',
+      };
+    if (score >= 60)
+      return { level: 'Good', color: 'text-blue-600', bg: 'bg-blue-100' };
+    if (score >= 40)
+      return {
+        level: 'Average',
+        color: 'text-yellow-600',
+        bg: 'bg-yellow-100',
+      };
+    return {
+      level: 'Needs Improvement',
+      color: 'text-red-600',
+      bg: 'bg-red-100',
+    };
   };
 
   const productivityLevel = getProductivityLevel(stats.productivity_score);
@@ -157,7 +172,9 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{t('stats.advanced')}</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {t('stats.advanced')}
+          </h2>
           <p className="text-gray-600">{t('stats.detailedAnalysis')}</p>
         </div>
         <Button onClick={handleRefresh} variant="outline" size="sm">
@@ -178,11 +195,15 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <Target className="h-5 w-5 text-blue-600" />
-                <Badge className={`${productivityLevel.bg} ${productivityLevel.color}`}>
+                <Badge
+                  className={`${productivityLevel.bg} ${productivityLevel.color}`}
+                >
                   {productivityLevel.level}
                 </Badge>
               </div>
-              <CardTitle className="text-2xl">{stats.productivity_score}%</CardTitle>
+              <CardTitle className="text-2xl">
+                {stats.productivity_score}%
+              </CardTitle>
               <CardDescription>{t('stats.productivityScore')}</CardDescription>
             </CardHeader>
           </Card>
@@ -200,7 +221,9 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
                 <Brain className="h-5 w-5 text-purple-600" />
                 {getTrendIcon(stats.creativity_trend)}
               </div>
-              <CardTitle className="text-lg capitalize">{stats.creativity_trend}</CardTitle>
+              <CardTitle className="text-lg capitalize">
+                {stats.creativity_trend}
+              </CardTitle>
               <CardDescription>{t('stats.creativityTrend')}</CardDescription>
             </CardHeader>
           </Card>
@@ -217,10 +240,14 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
               <div className="flex items-center justify-between">
                 <Calendar className="h-5 w-5 text-green-600" />
                 <div className="text-right">
-                  <div className="text-sm text-gray-500">{stats.recent_ideas}/7</div>
+                  <div className="text-sm text-gray-500">
+                    {stats.recent_ideas}/7
+                  </div>
                 </div>
               </div>
-              <CardTitle className="text-2xl">{Math.round(stats.weekly_progress)}%</CardTitle>
+              <CardTitle className="text-2xl">
+                {Math.round(stats.weekly_progress)}%
+              </CardTitle>
               <CardDescription>{t('stats.weeklyProgress')}</CardDescription>
             </CardHeader>
           </Card>
@@ -249,7 +276,9 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
                   ))}
                 </div>
               </div>
-              <CardTitle className="text-2xl">{stats.average_rating.toFixed(1)}</CardTitle>
+              <CardTitle className="text-2xl">
+                {stats.average_rating.toFixed(1)}
+              </CardTitle>
               <CardDescription>{t('stats.averageRating')}</CardDescription>
             </CardHeader>
           </Card>
@@ -270,12 +299,14 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
                 <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
                 {t('stats.categoryDistribution')}
               </CardTitle>
-              <CardDescription>{t('stats.categoryDescription')}</CardDescription>
+              <CardDescription>
+                {t('stats.categoryDescription')}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {Object.entries(stats.categories)
-                  .sort(([,a], [,b]) => b - a)
+                  .sort(([, a], [, b]) => b - a)
                   .slice(0, 5)
                   .map(([category, count]) => {
                     const percentage = (count / stats.total_ideas) * 100;
@@ -283,7 +314,9 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
                       <div key={category} className="space-y-1">
                         <div className="flex justify-between text-sm">
                           <span className="capitalize">{category}</span>
-                          <span className="text-gray-500">{count} ({percentage.toFixed(1)}%)</span>
+                          <span className="text-gray-500">
+                            {count} ({percentage.toFixed(1)}%)
+                          </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <motion.div
@@ -313,7 +346,9 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
                 <Zap className="h-5 w-5 mr-2 text-yellow-600" />
                 {t('stats.insights')}
               </CardTitle>
-              <CardDescription>{t('stats.insightsDescription')}</CardDescription>
+              <CardDescription>
+                {t('stats.insightsDescription')}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -321,11 +356,17 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
                 <div className="p-3 bg-blue-50 rounded-lg">
                   <div className="flex items-center mb-2">
                     <Clock className="h-4 w-4 text-blue-600 mr-2" />
-                    <span className="font-medium text-blue-900">{t('stats.peakHours')}</span>
+                    <span className="font-medium text-blue-900">
+                      {t('stats.peakHours')}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {stats.peak_hours.map((hour) => (
-                      <Badge key={hour} variant="secondary" className="bg-blue-100 text-blue-700">
+                      <Badge
+                        key={hour}
+                        variant="secondary"
+                        className="bg-blue-100 text-blue-700"
+                      >
                         {hour}
                       </Badge>
                     ))}
@@ -336,11 +377,17 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
                 <div className="p-3 bg-purple-50 rounded-lg">
                   <div className="flex items-center mb-2">
                     <Award className="h-4 w-4 text-purple-600 mr-2" />
-                    <span className="font-medium text-purple-900">{t('stats.favoriteCategories')}</span>
+                    <span className="font-medium text-purple-900">
+                      {t('stats.favoriteCategories')}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {stats.favorite_categories.map((category) => (
-                      <Badge key={category} variant="secondary" className="bg-purple-100 text-purple-700">
+                      <Badge
+                        key={category}
+                        variant="secondary"
+                        className="bg-purple-100 text-purple-700"
+                      >
                         {category}
                       </Badge>
                     ))}
@@ -351,7 +398,9 @@ export function AdvancedStats({ onRefresh }: AdvancedStatsProps) {
                 <div className="p-3 bg-green-50 rounded-lg">
                   <div className="flex items-center mb-2">
                     <Brain className="h-4 w-4 text-green-600 mr-2" />
-                    <span className="font-medium text-green-900">{t('stats.modelPerformance')}</span>
+                    <span className="font-medium text-green-900">
+                      {t('stats.modelPerformance')}
+                    </span>
                   </div>
                   <div className="text-sm text-green-700">
                     {stats.model_stats.current_model ? (

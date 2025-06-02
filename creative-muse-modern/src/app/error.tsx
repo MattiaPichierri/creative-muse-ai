@@ -28,7 +28,8 @@ export default function Error({
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <p className="text-gray-600">
-            Es ist ein unerwarteter Fehler aufgetreten. Bitte versuchen Sie es erneut.
+            Es ist ein unerwarteter Fehler aufgetreten. Bitte versuchen Sie es
+            erneut.
           </p>
           {error.message && (
             <div className="p-3 bg-red-50 rounded-lg text-left">
@@ -36,7 +37,7 @@ export default function Error({
             </div>
           )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button 
+            <Button
               onClick={reset}
               className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
             >

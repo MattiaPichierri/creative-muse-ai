@@ -70,7 +70,7 @@ export default function Home() {
     enableAutoSuggestions: true,
     maxSuggestions: 5,
     preferredTags: [],
-    customPrompts: []
+    customPrompts: [],
   });
 
   // Reindirizza alla landing page se l'utente non è autenticato
@@ -198,13 +198,17 @@ export default function Home() {
     setAdvancedSettings(settings);
   };
 
-  const handlePromptSelect = (prompt: string, category: string, creativityLevel: number) => {
+  const handlePromptSelect = (
+    prompt: string,
+    category: string,
+    creativityLevel: number
+  ) => {
     setCustomPrompt(prompt);
     // Aggiorna le impostazioni per usare la categoria e il livello di creatività selezionati
-    setAdvancedSettings(prev => ({
+    setAdvancedSettings((prev) => ({
       ...prev,
       defaultCategory: category,
-      defaultCreativityLevel: creativityLevel
+      defaultCreativityLevel: creativityLevel,
     }));
   };
 

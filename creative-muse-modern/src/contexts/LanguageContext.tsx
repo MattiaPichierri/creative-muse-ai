@@ -1,6 +1,13 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react';
 
 export type Language = 'it' | 'en' | 'de' | 'fr' | 'es';
 
@@ -156,12 +163,12 @@ const translations = {
       "Genera un nome creativo e memorabile per un'app mobile, inclusa una breve descrizione",
     'prompts.everydayDesc':
       'Identifica un problema quotidiano e sviluppa una soluzione pratica e innovativa',
-    
+
     // New prompt features
     'prompts.predefined': 'Prompt Predefiniti',
     'prompts.selectPrompt': 'Seleziona un Prompt',
     'prompts.allCategories': 'Tutte le Categorie',
-    
+
     // Advanced Prompt Settings
     'advanced.settings': 'Impostazioni Avanzate',
     'advanced.basicSettings': 'Impostazioni Base',
@@ -174,7 +181,7 @@ const translations = {
     'advanced.promptText': 'Testo del Prompt',
     'advanced.saveSettings': 'Salva Impostazioni',
     'advanced.close': 'Chiudi',
-    
+
     // Categories
     'categories.general': 'Generale',
     'categories.business': 'Business',
@@ -186,13 +193,17 @@ const translations = {
     'categories.entertainment': 'Intrattenimento',
 
     // Prompt predefiniti
-    'prompts.1.text': 'Sviluppa una soluzione innovativa per il trasporto sostenibile nelle città',
+    'prompts.1.text':
+      'Sviluppa una soluzione innovativa per il trasporto sostenibile nelle città',
     'prompts.1.tags': 'sostenibilità,trasporto,città,innovazione',
-    'prompts.2.text': 'Progetta un progetto artistico che unisce tecnologia e natura',
+    'prompts.2.text':
+      'Progetta un progetto artistico che unisce tecnologia e natura',
     'prompts.2.tags': 'arte,tecnologia,natura,connessione',
-    'prompts.3.text': 'Crea un modello di business per un\'app che rafforza le comunità locali',
+    'prompts.3.text':
+      "Crea un modello di business per un'app che rafforza le comunità locali",
     'prompts.3.tags': 'app,comunità,locale,business',
-    'prompts.4.text': 'Sviluppa un concetto educativo per la risoluzione creativa dei problemi',
+    'prompts.4.text':
+      'Sviluppa un concetto educativo per la risoluzione creativa dei problemi',
     'prompts.4.tags': 'educazione,creatività,problem-solving,apprendimento',
     'prompts.5.text': 'Progetta un programma di benessere per nomadi digitali',
     'prompts.5.tags': 'benessere,digitale,nomadi,salute',
@@ -208,7 +219,8 @@ const translations = {
     'auth.loginTitle': 'Accedi a Creative Muse',
     'auth.loginSubtitle': 'Inserisci le tue credenziali per accedere',
     'auth.registerTitle': 'Registrati a Creative Muse',
-    'auth.registerSubtitle': 'Crea il tuo account per iniziare a generare idee creative',
+    'auth.registerSubtitle':
+      'Crea il tuo account per iniziare a generare idee creative',
     'auth.loginButton': 'Accedi',
     'auth.registerButton': 'Registrati',
     'auth.loggingIn': 'Accesso in corso...',
@@ -227,7 +239,7 @@ const translations = {
 
     // Subscription
     'subscription.title': 'Dashboard Sottoscrizione',
-    'subscription.subtitle': 'Gestisci il tuo piano e monitora l\'utilizzo',
+    'subscription.subtitle': "Gestisci il tuo piano e monitora l'utilizzo",
     'subscription.loading': 'Caricamento informazioni sottoscrizione...',
     'subscription.plan': 'Piano',
     'subscription.usage': 'Utilizzo',
@@ -254,7 +266,8 @@ const translations = {
     'subscription.apiAccess': 'Accesso API',
     'subscription.analytics': 'Analytics avanzate',
     'subscription.upgradeTitle': 'Aggiorna il tuo piano',
-    'subscription.upgradeDescription': 'Sblocca più funzionalità e aumenta i tuoi limiti',
+    'subscription.upgradeDescription':
+      'Sblocca più funzionalità e aumenta i tuoi limiti',
 
     // Plans
     'plans.free': 'Free',
@@ -384,7 +397,7 @@ const translations = {
     'search.today': 'Oggi',
     'search.thisWeek': 'Questa settimana',
     'search.thisMonth': 'Questo mese',
-    'search.thisYear': 'Quest\'anno',
+    'search.thisYear': "Quest'anno",
     'search.model': 'Modello AI',
     'search.anyModel': 'Qualsiasi modello',
     'search.mockModel': 'Modello Mock',
@@ -432,12 +445,12 @@ const translations = {
       'Generate a creative and memorable name for a mobile app, including a brief description',
     'prompts.everydayDesc':
       'Identify an everyday problem and develop a practical, innovative solution',
-    
+
     // New prompt features
     'prompts.predefined': 'Predefined Prompts',
     'prompts.selectPrompt': 'Select a Prompt',
     'prompts.allCategories': 'All Categories',
-    
+
     // Advanced Prompt Settings
     'advanced.settings': 'Advanced Settings',
     'advanced.basicSettings': 'Basic Settings',
@@ -462,13 +475,17 @@ const translations = {
     'categories.entertainment': 'Entertainment',
 
     // Prompt predefiniti
-    'prompts.1.text': 'Develop an innovative solution for sustainable urban transportation',
+    'prompts.1.text':
+      'Develop an innovative solution for sustainable urban transportation',
     'prompts.1.tags': 'sustainability,transport,cities,innovation',
-    'prompts.2.text': 'Design an art project that connects technology and nature',
+    'prompts.2.text':
+      'Design an art project that connects technology and nature',
     'prompts.2.tags': 'art,technology,nature,connection',
-    'prompts.3.text': 'Create a business model for an app that strengthens local communities',
+    'prompts.3.text':
+      'Create a business model for an app that strengthens local communities',
     'prompts.3.tags': 'app,community,local,business',
-    'prompts.4.text': 'Develop an educational concept for creative problem solving',
+    'prompts.4.text':
+      'Develop an educational concept for creative problem solving',
     'prompts.4.tags': 'education,creativity,problem-solving,learning',
     'prompts.5.text': 'Design a wellness program for digital nomads',
     'prompts.5.tags': 'wellness,digital,nomads,health',
@@ -484,16 +501,20 @@ const translations = {
     'bulk.delete': 'Elimina',
     'bulk.items': 'elementi',
     'bulk.rateTitle': 'Valuta Idee Selezionate',
-    'bulk.rateDescription': 'Assegna una valutazione a tutte le idee selezionate',
+    'bulk.rateDescription':
+      'Assegna una valutazione a tutte le idee selezionate',
     'bulk.deleteTitle': 'Elimina Idee Selezionate',
-    'bulk.deleteDescription': 'Sei sicuro di voler eliminare le idee selezionate?',
+    'bulk.deleteDescription':
+      'Sei sicuro di voler eliminare le idee selezionate?',
     'bulk.confirmDelete': 'Elimina Definitivamente',
 
     // Templates
     'templates.title': 'Modelli di Idee',
-    'templates.description': 'Usa modelli strutturati per organizzare le tue idee',
+    'templates.description':
+      'Usa modelli strutturati per organizzare le tue idee',
     'templates.sections': 'sezioni',
-    'templates.fillSections': 'Compila le sezioni del modello per creare la tua idea',
+    'templates.fillSections':
+      'Compila le sezioni del modello per creare la tua idea',
     'templates.useTemplate': 'Usa Modello',
 
     // Advanced Stats
@@ -505,7 +526,8 @@ const translations = {
     'stats.categoryDistribution': 'Distribuzione Categorie',
     'stats.categoryDescription': 'Come sono distribuite le tue idee',
     'stats.insights': 'Insights e Raccomandazioni',
-    'stats.insightsDescription': 'Analisi personalizzate del tuo comportamento creativo',
+    'stats.insightsDescription':
+      'Analisi personalizzate del tuo comportamento creativo',
     'stats.peakHours': 'Ore di Picco',
     'stats.favoriteCategories': 'Categorie Preferite',
     'stats.modelPerformance': 'Performance Modello',
@@ -525,12 +547,13 @@ const translations = {
     'auth.loginTitle': 'Login to Creative Muse',
     'auth.loginSubtitle': 'Enter your credentials to access',
     'auth.registerTitle': 'Register to Creative Muse',
-    'auth.registerSubtitle': 'Create your account to start generating creative ideas',
+    'auth.registerSubtitle':
+      'Create your account to start generating creative ideas',
     'auth.loginButton': 'Login',
     'auth.registerButton': 'Register',
     'auth.loggingIn': 'Logging in...',
     'auth.registering': 'Registering...',
-    'auth.noAccount': 'Don\'t have an account?',
+    'auth.noAccount': "Don't have an account?",
     'auth.hasAccount': 'Already have an account?',
     'auth.passwordMinLength': 'Minimum 8 characters',
     'auth.passwordMismatch': 'Passwords do not match',
@@ -571,7 +594,8 @@ const translations = {
     'subscription.apiAccess': 'API access',
     'subscription.analytics': 'Advanced analytics',
     'subscription.upgradeTitle': 'Upgrade your plan',
-    'subscription.upgradeDescription': 'Unlock more features and increase your limits',
+    'subscription.upgradeDescription':
+      'Unlock more features and increase your limits',
 
     // Plans
     'plans.free': 'Free',
@@ -732,12 +756,12 @@ const translations = {
       'Generiere einen kreativen und einprägsamen Namen für eine mobile App, inklusive einer kurzen Beschreibung',
     'prompts.everydayDesc':
       'Identifiziere ein alltägliches Problem und entwickle eine praktische, innovative Lösung',
-    
+
     // New prompt features
     'prompts.predefined': 'Vordefinierte Prompts',
     'prompts.selectPrompt': 'Prompt Auswählen',
     'prompts.allCategories': 'Alle Kategorien',
-    
+
     // Advanced Prompt Settings
     'advanced.settings': 'Erweiterte Einstellungen',
     'advanced.basicSettings': 'Grundeinstellungen',
@@ -762,13 +786,17 @@ const translations = {
     'categories.entertainment': 'Unterhaltung',
 
     // Prompt predefiniti
-    'prompts.1.text': 'Entwickle eine innovative Lösung für nachhaltigen Transport in Städten',
+    'prompts.1.text':
+      'Entwickle eine innovative Lösung für nachhaltigen Transport in Städten',
     'prompts.1.tags': 'nachhaltigkeit,transport,städte,innovation',
-    'prompts.2.text': 'Entwirf ein Kunstprojekt, das Technologie und Natur verbindet',
+    'prompts.2.text':
+      'Entwirf ein Kunstprojekt, das Technologie und Natur verbindet',
     'prompts.2.tags': 'kunst,technologie,natur,verbindung',
-    'prompts.3.text': 'Kreiere ein Geschäftsmodell für eine App, die lokale Gemeinschaften stärkt',
+    'prompts.3.text':
+      'Kreiere ein Geschäftsmodell für eine App, die lokale Gemeinschaften stärkt',
     'prompts.3.tags': 'app,gemeinschaft,lokal,geschäft',
-    'prompts.4.text': 'Entwickle ein Bildungskonzept für kreatives Problemlösen',
+    'prompts.4.text':
+      'Entwickle ein Bildungskonzept für kreatives Problemlösen',
     'prompts.4.tags': 'bildung,kreativität,problemlösung,lernen',
     'prompts.5.text': 'Entwirf ein Wellness-Programm für digitale Nomaden',
     'prompts.5.tags': 'wellness,digital,nomaden,gesundheit',
@@ -784,7 +812,8 @@ const translations = {
     'auth.loginTitle': 'Bei Creative Muse anmelden',
     'auth.loginSubtitle': 'Gib deine Anmeldedaten ein',
     'auth.registerTitle': 'Bei Creative Muse registrieren',
-    'auth.registerSubtitle': 'Erstelle dein Konto um kreative Ideen zu generieren',
+    'auth.registerSubtitle':
+      'Erstelle dein Konto um kreative Ideen zu generieren',
     'auth.loginButton': 'Anmelden',
     'auth.registerButton': 'Registrieren',
     'auth.loggingIn': 'Anmeldung läuft...',
@@ -830,7 +859,8 @@ const translations = {
     'subscription.apiAccess': 'API-Zugang',
     'subscription.analytics': 'Erweiterte Analysen',
     'subscription.upgradeTitle': 'Deinen Plan upgraden',
-    'subscription.upgradeDescription': 'Schalte mehr Funktionen frei und erhöhe deine Limits',
+    'subscription.upgradeDescription':
+      'Schalte mehr Funktionen frei und erhöhe deine Limits',
 
     // Plans
     'plans.free': 'Kostenlos',
@@ -847,7 +877,8 @@ const translations = {
 
     // Model Selector
     'models.title': 'KI-Modell Auswahl',
-    'models.description': 'Wählen Sie ein KI-Modell für die Ideengenerierung. Empfohlene Modelle sind mit einem Stern markiert.',
+    'models.description':
+      'Wählen Sie ein KI-Modell für die Ideengenerierung. Empfohlene Modelle sind mit einem Stern markiert.',
     'models.selectModel': 'Modell wählen',
     'models.loading': 'Lade Modelle...',
     'models.noModels': 'Keine Modelle gefunden',
@@ -900,7 +931,8 @@ const translations = {
     'stats.categoryDistribution': 'Kategorienverteilung',
     'stats.categoryDescription': 'Wie deine Ideen verteilt sind',
     'stats.insights': 'Einblicke und Empfehlungen',
-    'stats.insightsDescription': 'Personalisierte Analyse deines kreativen Verhaltens',
+    'stats.insightsDescription':
+      'Personalisierte Analyse deines kreativen Verhaltens',
     'stats.peakHours': 'Spitzenzeiten',
     'stats.favoriteCategories': 'Lieblingskategorien',
     'stats.modelPerformance': 'Modell-Performance',
@@ -922,14 +954,17 @@ const translations = {
     'bulk.rateTitle': 'Ausgewählte Ideen bewerten',
     'bulk.rateDescription': 'Weise allen ausgewählten Ideen eine Bewertung zu',
     'bulk.deleteTitle': 'Ausgewählte Ideen löschen',
-    'bulk.deleteDescription': 'Bist du sicher, dass du die ausgewählten Ideen löschen möchtest?',
+    'bulk.deleteDescription':
+      'Bist du sicher, dass du die ausgewählten Ideen löschen möchtest?',
     'bulk.confirmDelete': 'Endgültig löschen',
 
     // Templates
     'templates.title': 'Ideen-Vorlagen',
-    'templates.description': 'Verwende strukturierte Vorlagen um deine Ideen zu organisieren',
+    'templates.description':
+      'Verwende strukturierte Vorlagen um deine Ideen zu organisieren',
     'templates.sections': 'Abschnitte',
-    'templates.fillSections': 'Fülle die Abschnitte der Vorlage aus um deine Idee zu erstellen',
+    'templates.fillSections':
+      'Fülle die Abschnitte der Vorlage aus um deine Idee zu erstellen',
     'templates.useTemplate': 'Vorlage verwenden',
   },
 
@@ -1078,12 +1113,12 @@ const translations = {
       'Générez un nom créatif et mémorable pour une application mobile, incluant une brève description',
     'prompts.everydayDesc':
       'Identifiez un problème quotidien et développez une solution pratique et innovante',
-    
+
     // New prompt features
     'prompts.predefined': 'Prompts Prédéfinis',
     'prompts.selectPrompt': 'Sélectionner un Prompt',
     'prompts.allCategories': 'Toutes les Catégories',
-    
+
     // Advanced Prompt Settings
     'advanced.settings': 'Paramètres Avancés',
     'advanced.basicSettings': 'Paramètres de Base',
@@ -1108,15 +1143,20 @@ const translations = {
     'categories.entertainment': 'Divertissement',
 
     // Prompt predefiniti
-    'prompts.1.text': 'Développez une solution innovante pour le transport durable urbain',
+    'prompts.1.text':
+      'Développez une solution innovante pour le transport durable urbain',
     'prompts.1.tags': 'durabilité,transport,villes,innovation',
-    'prompts.2.text': 'Concevez un projet artistique qui connecte technologie et nature',
+    'prompts.2.text':
+      'Concevez un projet artistique qui connecte technologie et nature',
     'prompts.2.tags': 'art,technologie,nature,connexion',
-    'prompts.3.text': 'Créez un modèle d\'affaires pour une app qui renforce les communautés locales',
+    'prompts.3.text':
+      "Créez un modèle d'affaires pour une app qui renforce les communautés locales",
     'prompts.3.tags': 'app,communauté,local,business',
-    'prompts.4.text': 'Développez un concept éducatif pour la résolution créative de problèmes',
+    'prompts.4.text':
+      'Développez un concept éducatif pour la résolution créative de problèmes',
     'prompts.4.tags': 'éducation,créativité,résolution-problèmes,apprentissage',
-    'prompts.5.text': 'Concevez un programme de bien-être pour nomades numériques',
+    'prompts.5.text':
+      'Concevez un programme de bien-être pour nomades numériques',
     'prompts.5.tags': 'bien-être,numérique,nomades,santé',
   },
 
@@ -1261,12 +1301,12 @@ const translations = {
       'Genera un nombre creativo y memorable para una aplicación móvil, incluyendo una breve descripción',
     'prompts.everydayDesc':
       'Identifica un problema cotidiano y desarrolla una solución práctica e innovadora',
-    
+
     // New prompt features
     'prompts.predefined': 'Prompts Predefinidos',
     'prompts.selectPrompt': 'Seleccionar un Prompt',
     'prompts.allCategories': 'Todas las Categorías',
-    
+
     // Advanced Prompt Settings
     'advanced.settings': 'Configuración Avanzada',
     'advanced.basicSettings': 'Configuración Básica',
@@ -1291,13 +1331,17 @@ const translations = {
     'categories.entertainment': 'Entretenimiento',
 
     // Prompt predefiniti
-    'prompts.1.text': 'Desarrolla una solución innovadora para transporte sostenible urbano',
+    'prompts.1.text':
+      'Desarrolla una solución innovadora para transporte sostenible urbano',
     'prompts.1.tags': 'sostenibilidad,transporte,ciudades,innovación',
-    'prompts.2.text': 'Diseña un proyecto artístico que conecte tecnología y naturaleza',
+    'prompts.2.text':
+      'Diseña un proyecto artístico que conecte tecnología y naturaleza',
     'prompts.2.tags': 'arte,tecnología,naturaleza,conexión',
-    'prompts.3.text': 'Crea un modelo de negocio para una app que fortalezca comunidades locales',
+    'prompts.3.text':
+      'Crea un modelo de negocio para una app que fortalezca comunidades locales',
     'prompts.3.tags': 'app,comunidad,local,negocio',
-    'prompts.4.text': 'Desarrolla un concepto educativo para resolución creativa de problemas',
+    'prompts.4.text':
+      'Desarrolla un concepto educativo para resolución creativa de problemas',
     'prompts.4.tags': 'educación,creatividad,resolución-problemas,aprendizaje',
     'prompts.5.text': 'Diseña un programa de bienestar para nómadas digitales',
     'prompts.5.tags': 'bienestar,digital,nómadas,salud',
@@ -1334,10 +1378,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const t = useCallback((key: string): string => {
-    const translation = translations[language] as Record<string, string>;
-    return translation[key] || key;
-  }, [language]);
+  const t = useCallback(
+    (key: string): string => {
+      const translation = translations[language] as Record<string, string>;
+      return translation[key] || key;
+    },
+    [language]
+  );
 
   const contextValue = useMemo(
     () => ({
