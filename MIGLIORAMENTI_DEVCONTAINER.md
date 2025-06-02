@@ -42,6 +42,26 @@
 - ✅ **Pacchetti Python** (FastAPI, Black, Pytest)
 - ✅ **Moduli Node.js** installati
 
+#### 5. `.devcontainer/dev-scripts.sh` - Script di Sviluppo Unificato
+**Comandi per architettura unificata:**
+- ✅ **start-backend** - Avvia backend unificato (ai_core/main.py)
+- ✅ **start-frontend** - Avvia frontend Next.js
+- ✅ **start-fullstack** - Avvia stack completo
+- ✅ **stop-all** - Ferma tutti i servizi
+- ✅ **check-code** - Controlli qualità codice
+- ✅ **run-tests** - Esegue suite di test
+- ✅ **show-status** - Mostra stato servizi
+- ✅ **db-shell** - Shell database SQLite
+
+#### 6. `.devcontainer/bashrc_functions.sh` - Funzioni Bash
+**Alias e funzioni di sviluppo:**
+- ✅ **Alias navigazione** (cmai, backend, frontend)
+- ✅ **Alias Git** (gs, ga, gc, gp, gl, gd)
+- ✅ **Alias Python** (py, pip, pytest, black, flake8)
+- ✅ **Alias Node.js** (ni, nr, nd, nb, nt)
+- ✅ **Funzioni utilità** (search, backup, project-info)
+- ✅ **Setup automatico** ambiente di sviluppo
+
 ### 🛠️ Problemi Risolti
 
 #### Problemi Tecnici Corretti:
@@ -74,6 +94,25 @@
 - ✅ **Prettier** per formattazione frontend
 - ✅ **Shellcheck** per script bash
 
+### 🏗️ Supporto Architettura Unificata
+
+#### ✅ Backend Unificato
+- **main.py consolidato** - Tutti i file main_*.py unificati
+- **Router modulari** - Organizzazione per funzionalità
+- **Avvio automatico** - Script start-backend per main.py unificato
+- **Health check** - Endpoint /health per monitoraggio
+
+#### ✅ Frontend Integrato
+- **API client unificato** - TypeScript per comunicazione backend
+- **Componenti aggiornati** - Integrazione con architettura unificata
+- **Avvio coordinato** - Script start-fullstack per stack completo
+
+#### ✅ Workflow di Sviluppo
+- **Comandi unificati** - start-fullstack, check-code, run-tests
+- **Status monitoring** - show-status per architettura completa
+- **Navigazione rapida** - Alias per backend/frontend
+- **Testing integrato** - Test per backend e frontend unificati
+
 ### 📊 Risultati dei Test
 
 ```bash
@@ -93,6 +132,22 @@
 ✅ Pytest installed
 ✅ Node modules installed
 🎉 Basic test completed!
+```
+
+### 🔍 Status Architettura Unificata
+
+```bash
+🔍 Creative Muse AI Status
+================================
+❌ Frontend (Next.js) - Stopped (port 3000)
+❌ Backend API (FastAPI) - Stopped (port 8000)
+❌ SQLite Web UI - Stopped (port 8081)
+
+📁 Project Structure:
+• Backend:  ai_core/main.py (unified)
+• Frontend: creative-muse-modern/
+• Database: database/creative_muse.db
+• Database: Ready
 ```
 
 ### 🔄 Pre-commit Hooks Funzionanti
@@ -159,12 +214,14 @@ pyproject.toml             # Configurazione Python completa
 
 ### 📈 Statistiche Miglioramenti
 
-- **5 file** creati/modificati
-- **709 righe** aggiunte
+- **8 file** creati/modificati
+- **1200+ righe** aggiunte
 - **205 righe** rimosse/migliorate
-- **15+ strumenti** configurati
-- **20+ controlli** automatici attivi
+- **20+ strumenti** configurati
+- **25+ controlli** automatici attivi
+- **15+ comandi** di sviluppo
 - **100% test** passati
+- **Architettura unificata** supportata
 
 ## ✅ Conclusione
 

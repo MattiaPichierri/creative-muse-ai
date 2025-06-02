@@ -397,32 +397,68 @@ EOF
         exit 1
     fi
 
-    # Step 11: Display completion message
+    # Step 11: Setup development scripts and bash functions
+    log_step "Setting up development scripts..."
+
+    # Make development scripts executable
+    chmod +x .devcontainer/dev-scripts.sh
+    chmod +x .devcontainer/bashrc_functions.sh
+
+    # Add bash functions to user's bashrc
+    local bashrc_file="/home/vscode/.bashrc"
+    local functions_source="source /workspace/.devcontainer/bashrc_functions.sh"
+
+    if ! grep -q "bashrc_functions.sh" "$bashrc_file" 2>/dev/null; then
+        {
+            echo ""
+            echo "# Creative Muse AI Development Functions"
+            echo "$functions_source"
+        } >> "$bashrc_file"
+        log_success "Development functions added to bashrc"
+    else
+        log_info "Development functions already configured in bashrc"
+    fi
+
+    # Source the functions for current session
+    source .devcontainer/bashrc_functions.sh
+
+    log_success "Development scripts configured"
+
+    # Step 12: Display completion message
     echo
     echo -e "${GREEN}🎉 =============================================="
     echo "   Setup Complete! Creative Muse AI Ready!"
     echo "===============================================${NC}"
     echo
     echo -e "${CYAN}📋 Quick Start Guide:${NC}"
-    echo "1. Start backend:  ${YELLOW}start-backend${NC}"
-    echo "2. Start frontend: ${YELLOW}start-frontend${NC}"
-    echo "3. Open browser:   ${YELLOW}http://localhost:3000${NC}"
+    echo "1. Start full stack: ${YELLOW}start-fullstack${NC}"
+    echo "2. Start backend:    ${YELLOW}start-backend${NC}"
+    echo "3. Start frontend:   ${YELLOW}start-frontend${NC}"
+    echo "4. Open browser:     ${YELLOW}http://localhost:3000${NC}"
     echo
     echo -e "${CYAN}🛠️  Development Tools:${NC}"
-    echo "• Code quality:    ${YELLOW}check-code${NC}"
-    echo "• Run tests:       ${YELLOW}run-tests${NC}"
-    echo "• Database shell:  ${YELLOW}db-shell${NC}"
-    echo "• DB admin tools:  ${YELLOW}start-db-admin${NC}"
+    echo "• Code quality:      ${YELLOW}check-code${NC}"
+    echo "• Run tests:         ${YELLOW}run-tests${NC}"
+    echo "• Database shell:    ${YELLOW}db-shell${NC}"
+    echo "• DB admin tools:    ${YELLOW}start-db-admin${NC}"
+    echo "• Show status:       ${YELLOW}show-status${NC}"
+    echo "• Project info:      ${YELLOW}project-info${NC}"
+    echo "• Help:              ${YELLOW}dev-help${NC}"
     echo
     echo -e "${CYAN}🌐 Available URLs:${NC}"
-    echo "• Next.js App:     http://localhost:3000"
-    echo "• Backend API:     http://localhost:8000"
-    echo "• API Docs:        http://localhost:8000/docs"
-    echo "• DB Admin:        http://localhost:8080"
-    echo "• SQLite Web:      http://localhost:8081"
-    echo "• phpLiteAdmin:    http://localhost:8082"
+    echo "• Next.js App:       http://localhost:3000"
+    echo "• Backend API:       http://localhost:8000"
+    echo "• API Docs:          http://localhost:8000/docs"
+    echo "• Health Check:      http://localhost:8000/health"
+    echo "• SQLite Web:        http://localhost:8081"
+    echo
+    echo -e "${CYAN}🚀 Architecture:${NC}"
+    echo "• Backend:           ai_core/main.py (unified)"
+    echo "• Frontend:          creative-muse-modern/ (Next.js)"
+    echo "• Database:          database/creative_muse.db (SQLite)"
     echo
     echo -e "${GREEN}🚀 Happy coding! 🎨🤖${NC}"
+    echo -e "${YELLOW}💡 Tip: Run 'project-info' for detailed information${NC}"
 }
 
 # Run main function
