@@ -295,4 +295,4 @@ models/
 temp_offload/
 
 # Hugging Face Cache
-~/.cache/huggingface/
+~/.cache/huggingface/.env.backup.*

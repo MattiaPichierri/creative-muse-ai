@@ -1,217 +1,429 @@
 #!/bin/bash
 
 # Creative Muse AI DevContainer Setup Script
-echo "🎨 Setting up Creative Muse AI Development Environment..."
+# Enhanced version with robust error handling and validation
 
-# Set proper permissions
-chmod +x /workspace/scripts/*.sh 2>/dev/null || true
-chmod +x /workspace/Makefile 2>/dev/null || true
+set -euo pipefail  # Exit on error, undefined vars, pipe failures
 
-# Create necessary directories
-mkdir -p /workspace/logs
-mkdir -p /workspace/data
-mkdir -p /workspace/temp
-mkdir -p /workspace/database
+# Colors for output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly PURPLE='\033[0;35m'
+readonly CYAN='\033[0;36m'
+readonly NC='\033[0m' # No Color
 
-# Set up Python virtual environment (optional, but good practice)
-echo "🐍 Setting up Python environment..."
-cd /workspace
+# Logging functions
+log_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
 
-# Install Python dependencies if requirements.txt exists
-if [ -f "ai_core/requirements.txt" ]; then
-    echo "📦 Installing Python dependencies..."
-    pip install --user -r ai_core/requirements.txt
-fi
+log_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
 
-# Install additional development dependencies
-echo "🔧 Installing development tools..."
-pip install --user \
-    black \
-    flake8 \
-    pylint \
-    mypy \
-    pytest \
-    pytest-cov \
-    ipython \
-    pre-commit \
-    bandit \
-    safety
+log_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
 
-# Set up pre-commit hooks if .pre-commit-config.yaml exists
-if [ -f ".pre-commit-config.yaml" ]; then
-    echo "🪝 Setting up pre-commit hooks..."
-    pre-commit install
-fi
+log_error() {
+    echo -e "${RED}❌ $1${NC}" >&2
+}
 
-# Initialize database if schema exists
-if [ -f "database/schema.sql" ]; then
-    echo "🗄️ Initializing database..."
-    cd /workspace/database
-    if [ ! -f "creative_muse.db" ]; then
-        sqlite3 creative_muse.db < schema.sql
-        echo "✅ Database initialized with schema"
-    else
-        echo "ℹ️ Database already exists"
+log_step() {
+    echo -e "${PURPLE}🔧 $1${NC}"
+}
+
+# Error handling
+cleanup_on_error() {
+    log_error "Setup failed! Cleaning up..."
+    exit 1
+}
+
+trap cleanup_on_error ERR
+
+# Validation functions
+check_command() {
+    if ! command -v "$1" &> /dev/null; then
+        log_error "Required command '$1' not found"
+        return 1
     fi
-    cd /workspace
-else
-    echo "⚠️ Database schema not found, creating minimal database..."
-    mkdir -p /workspace/database
-    cd /workspace/database
-    sqlite3 creative_muse.db "CREATE TABLE IF NOT EXISTS ideas (id INTEGER PRIMARY KEY, content TEXT, category TEXT, rating INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
-    echo "✅ Minimal database created"
-    cd /workspace
-fi
+    return 0
+}
 
-# Create .env file if it doesn't exist
-if [ ! -f ".env" ]; then
-    echo "⚙️ Creating .env file..."
+check_file() {
+    if [[ ! -f "$1" ]]; then
+        log_warning "File '$1' not found"
+        return 1
+    fi
+    return 0
+}
+
+check_directory() {
+    if [[ ! -d "$1" ]]; then
+        log_warning "Directory '$1' not found"
+        return 1
+    fi
+    return 0
+}
+
+# Version checking
+check_python_version() {
+    local required_version="3.11"
+    local current_version
+    current_version=$(python3 --version 2>&1 | cut -d' ' -f2 | cut -d'.' -f1,2)
+
+    if [[ "$(printf '%s\n' "$required_version" "$current_version" | sort -V | head -n1)" != "$required_version" ]]; then
+        log_error "Python $required_version or higher required, found $current_version"
+        return 1
+    fi
+    log_success "Python version $current_version is compatible"
+    return 0
+}
+
+check_node_version() {
+    local required_version="18"
+    local current_version
+    current_version=$(node --version 2>&1 | cut -d'v' -f2 | cut -d'.' -f1)
+
+    if [[ "$current_version" -lt "$required_version" ]]; then
+        log_error "Node.js $required_version or higher required, found $current_version"
+        return 1
+    fi
+    log_success "Node.js version $current_version is compatible"
+    return 0
+}
+
+# Generate secure keys
+generate_secure_key() {
+    local length=${1:-32}
+    openssl rand -hex "$length" 2>/dev/null || python3 -c "import secrets; print(secrets.token_hex($length))"
+}
+
+# Backup existing files
+backup_file() {
+    local file="$1"
+    if [[ -f "$file" ]]; then
+        local backup
+        backup="${file}.backup.$(date +%Y%m%d_%H%M%S)"
+        cp "$file" "$backup"
+        log_info "Backed up $file to $backup"
+    fi
+}
+
+# Main setup function
+main() {
+    echo -e "${CYAN}"
+    echo "🎨 =============================================="
+    echo "   Creative Muse AI Development Environment"
+    echo "   Enhanced Setup Script v2.0"
+    echo "===============================================${NC}"
+    echo
+
+    # Change to workspace directory
+    cd /workspace || {
+        log_error "Cannot change to /workspace directory"
+        exit 1
+    }
+
+    # Step 1: Validate environment
+    log_step "Validating development environment..."
+
+    local validation_failed=false
+
+    if ! check_command "python3"; then validation_failed=true; fi
+    if ! check_command "node"; then validation_failed=true; fi
+    if ! check_command "npm"; then validation_failed=true; fi
+    if ! check_command "git"; then validation_failed=true; fi
+    if ! check_command "sqlite3"; then validation_failed=true; fi
+
+    if [[ "$validation_failed" == "true" ]]; then
+        log_error "Environment validation failed. Please check the devcontainer configuration."
+        exit 1
+    fi
+
+    if ! check_python_version; then validation_failed=true; fi
+    if ! check_node_version; then validation_failed=true; fi
+
+    if [[ "$validation_failed" == "true" ]]; then
+        log_error "Version validation failed."
+        exit 1
+    fi
+
+    log_success "Environment validation completed"
+
+    # Step 2: Set proper permissions
+    log_step "Setting up file permissions..."
+    find /workspace/scripts -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
+    chmod +x /workspace/Makefile 2>/dev/null || true
+    chmod +x /workspace/.devcontainer/*.sh 2>/dev/null || true
+    log_success "File permissions configured"
+
+    # Step 3: Create necessary directories
+    log_step "Creating project directories..."
+    local directories=(
+        "/workspace/logs"
+        "/workspace/data"
+        "/workspace/temp"
+        "/workspace/database"
+        "/workspace/backups"
+        "/workspace/uploads"
+        "/workspace/cache"
+    )
+
+    for dir in "${directories[@]}"; do
+        mkdir -p "$dir"
+        log_info "Created directory: $dir"
+    done
+    log_success "Project directories created"
+
+    # Step 4: Set up Python environment
+    log_step "Setting up Python environment..."
+
+    # Upgrade pip first
+    python3 -m pip install --upgrade pip --quiet
+
+    # Install Python dependencies
+    if check_file "ai_core/requirements.txt"; then
+        log_info "Installing Python dependencies from requirements.txt..."
+        python3 -m pip install --user -r ai_core/requirements.txt --quiet
+        log_success "Python dependencies installed"
+    else
+        log_warning "ai_core/requirements.txt not found, skipping Python dependencies"
+    fi
+
+    # Install additional development tools
+    log_info "Installing Python development tools..."
+    local dev_tools=(
+        "black>=23.11.0"
+        "flake8>=6.1.0"
+        "pylint>=3.0.0"
+        "mypy>=1.7.0"
+        "pytest>=7.4.0"
+        "pytest-cov>=4.1.0"
+        "pytest-asyncio>=0.21.0"
+        "ipython>=8.17.0"
+        "pre-commit>=3.5.0"
+        "bandit>=1.7.5"
+        "safety>=2.3.0"
+        "isort>=5.12.0"
+        "aiohttp>=3.12.0"
+    )
+
+    for tool in "${dev_tools[@]}"; do
+        python3 -m pip install --user "$tool" --quiet
+    done
+    log_success "Python development tools installed"
+
+    # Step 5: Set up pre-commit hooks
+    if check_file ".pre-commit-config.yaml"; then
+        log_step "Setting up pre-commit hooks..."
+        /home/vscode/.local/bin/pre-commit install
+        log_success "Pre-commit hooks installed"
+    fi
+
+    # Step 6: Initialize database
+    log_step "Setting up database..."
+
+    if check_file "database/schema.sql"; then
+        log_info "Initializing database with schema..."
+        cd /workspace/database
+        if [[ ! -f "creative_muse.db" ]]; then
+            sqlite3 creative_muse.db < schema.sql
+            log_success "Database initialized with schema"
+        else
+            log_info "Database already exists, skipping initialization"
+        fi
+        cd /workspace
+    else
+        log_info "Creating minimal database structure..."
+        cd /workspace/database
+        sqlite3 creative_muse.db "
+        CREATE TABLE IF NOT EXISTS ideas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL,
+            category TEXT,
+            rating INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS sessions (
+            id TEXT PRIMARY KEY,
+            user_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        );
+        "
+        log_success "Minimal database structure created"
+        cd /workspace
+    fi
+
+    # Step 7: Create or update .env file
+    log_step "Configuring environment variables..."
+
+    if [[ -f ".env" ]]; then
+        backup_file ".env"
+        log_info "Existing .env file backed up"
+    fi
+
+    # Generate secure keys
+    local secret_key
+    local encryption_key
+    secret_key=$(generate_secure_key 32)
+    encryption_key=$(generate_secure_key 32)
+
     cat > .env << EOF
 # Creative Muse AI Environment Configuration
+# Generated on $(date)
+
+# Environment
 ENVIRONMENT=development
 DEBUG=true
+LOG_LEVEL=INFO
+
+# Database
 DATABASE_URL=sqlite:///database/creative_muse.db
-SECRET_KEY=dev-secret-key-change-in-production
-ENCRYPTION_KEY=dev-encryption-key-32-chars-long
+
+# Security
+SECRET_KEY=${secret_key}
+ENCRYPTION_KEY=${encryption_key}
+
+# API Configuration
 API_HOST=0.0.0.0
 API_PORT=8000
-CORS_ORIGINS=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080"]
-LOG_LEVEL=INFO
-EOF
-    echo "✅ .env file created"
-fi
+API_WORKERS=1
 
-# Set up git configuration for the container
-echo "🔧 Configuring git..."
-git config --global --add safe.directory /workspace
-git config --global init.defaultBranch main
+# CORS Configuration
+CORS_ORIGINS=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080", "http://localhost:8001"]
 
-# Install Node.js dependencies for Next.js app
-if [ -d "creative-muse-modern" ]; then
-    echo "⚛️ Installing Next.js app dependencies..."
-    cd /workspace/creative-muse-modern
-    npm install
-    cd /workspace
-fi
+# Frontend Configuration
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_APP_NAME=Creative Muse AI
 
-# Install Node.js dependencies for legacy React app (if exists)
-if [ -d "creative-muse-react" ]; then
-    echo "⚛️ Installing legacy React app dependencies..."
-    cd /workspace/creative-muse-react
-    npm install
-    cd /workspace
-fi
+# Rate Limiting
+RATE_LIMIT_REQUESTS=100
+RATE_LIMIT_WINDOW=60
 
-# Install Node.js dependencies if package.json exists in root
-if [ -f "package.json" ]; then
-    echo "📦 Installing Node.js dependencies..."
-    npm install
-fi
+# File Upload
+MAX_UPLOAD_SIZE=10485760
+UPLOAD_DIR=/workspace/uploads
 
-# Make scripts executable
-echo "🔧 Setting up executable permissions..."
-find /workspace/scripts -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
-chmod +x /workspace/database/web-admin/start-db-admin.sh 2>/dev/null || true
-chmod +x /workspace/.devcontainer/init-database.sh 2>/dev/null || true
+# Cache Configuration
+CACHE_TTL=3600
+CACHE_DIR=/workspace/cache
 
-# Create useful aliases
-echo "🔗 Setting up aliases..."
-cat >> ~/.bashrc << 'EOF'
-
-# Creative Muse AI Aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-
-# Project specific aliases
-alias start-backend='cd /workspace && python ai_core/main_llm.py'
-alias start-frontend='cd /workspace/creative-muse-modern && npm run dev -- --host 0.0.0.0'
-alias start-frontend-build='cd /workspace/creative-muse-modern && npm run build && npm start -- --host 0.0.0.0'
-alias start-react='cd /workspace/creative-muse-react && npm run dev -- --host 0.0.0.0'
-alias run-tests='cd /workspace && python -m pytest'
-alias run-frontend-tests='cd /workspace/creative-muse-modern && npm test'
-alias check-code='cd /workspace && flake8 ai_core/ && black --check ai_core/'
-alias format-code='cd /workspace && black ai_core/'
-alias format-frontend='cd /workspace/creative-muse-modern && npm run format'
-alias lint-frontend='cd /workspace/creative-muse-modern && npm run lint'
-alias db-shell='sqlite3 /workspace/database/creative_muse.db'
-alias init-database='bash /workspace/.devcontainer/init-database.sh'
-alias start-db-admin='cd /workspace/database/web-admin && ./start-db-admin.sh'
-alias stop-db-admin='cd /workspace/database/web-admin && docker-compose down'
-alias db-admin-status='cd /workspace/database/web-admin && docker-compose ps'
-alias db-admin-logs='cd /workspace/database/web-admin && docker-compose logs -f'
-alias setup-hosts='bash /workspace/.devcontainer/setup-hosts.sh'
-alias traefik-status='docker ps | grep traefik'
-alias restart-traefik='bash /workspace/.devcontainer/restart-traefik.sh'
-
-# Quick navigation
-alias backend='cd /workspace/ai_core'
-alias frontend='cd /workspace/creative-muse-modern'
-alias react='cd /workspace/creative-muse-react'
-alias db='cd /workspace/database'
-alias logs='cd /workspace/logs'
-
-echo "🎨 Creative Muse AI DevContainer ready!"
-echo "💡 Use 'start-backend' to run the API server"
-echo "⚛️ Use 'start-frontend' to run the Next.js development server"
-echo "🏗️ Use 'start-frontend-build' to build and preview Next.js app"
-echo "🧪 Use 'run-tests' to run Python tests"
-echo "⚛️ Use 'run-frontend-tests' to run Next.js tests"
-echo "🔍 Use 'check-code' to check Python code quality"
-echo "✨ Use 'format-frontend' to format Next.js code"
-echo "🔍 Use 'lint-frontend' to lint Next.js code"
-echo "🗄️ Use 'start-db-admin' to start database web admin tools"
-echo "🛑 Use 'stop-db-admin' to stop database admin services"
-echo "📊 Use 'db-admin-status' to check database admin status"
+# Development Tools
+ENABLE_PROFILING=true
+ENABLE_DEBUG_TOOLBAR=true
 EOF
 
-# Source the new aliases
-source ~/.bashrc
+    log_success "Environment configuration created with secure keys"
 
-echo ""
-echo "🎉 Creative Muse AI Development Environment Setup Complete!"
-echo ""
-echo "📋 Quick Start Commands:"
-echo "  start-backend       - Start the FastAPI backend server"
-echo "  start-frontend      - Start the Next.js development server"
-echo "  start-frontend-build- Build and preview Next.js app"
-echo "  start-react         - Start legacy React development server"
-echo "  run-tests           - Run Python test suite"
-echo "  run-frontend-tests  - Run Next.js test suite"
-echo "  check-code          - Check Python code quality"
-echo "  format-code         - Format Python code with black"
-echo "  format-frontend     - Format Next.js code with Prettier"
-echo "  lint-frontend       - Lint Next.js code with ESLint"
-echo "  db-shell            - Open SQLite database shell"
-echo "  start-db-admin      - Start database web admin tools"
-echo "  stop-db-admin       - Stop database admin services"
-echo "  db-admin-status     - Check database admin status"
-echo ""
-echo "🚀 Ready to develop! Happy coding! 🎨🤖"
-echo ""
-echo "💡 WICHTIG: Um das Next.js System zu starten:"
-echo "1. Öffne ein neues Terminal: Ctrl+Shift+\`"
-echo "2. Starte das Backend: start-backend"
-echo "3. Öffne ein weiteres Terminal: Ctrl+Shift+\`"
-echo "4. Starte das Next.js Frontend: start-frontend"
-echo "5. Öffne http://localhost:3000 im Browser"
-echo ""
-echo "🗄️ Database Admin Tools:"
-echo "1. Starte die Database Admin Tools: start-db-admin"
-echo "2. Öffne eine der folgenden URLs:"
-echo "   - Adminer: http://localhost:8080"
-echo "   - SQLite Web: http://localhost:8081"
-echo "   - phpLiteAdmin: http://localhost:8082"
-echo ""
-echo "🌐 Verfügbare URLs im DevContainer:"
-echo "  - Next.js App: http://localhost:3000"
-echo "  - Backend API: http://localhost:8001"
-echo "  - API Docs: http://localhost:8001/docs"
-echo "  - Database Admin (Adminer): http://localhost:8080"
-echo "  - Database Admin (SQLite Web): http://localhost:8081"
-echo "  - Database Admin (phpLiteAdmin): http://localhost:8082"
+    # Step 8: Configure Git
+    log_step "Configuring Git..."
+    git config --global --add safe.directory /workspace
+    git config --global init.defaultBranch main
+    git config --global pull.rebase false
+    log_success "Git configuration completed"
+
+    # Step 9: Install Node.js dependencies
+    log_step "Installing Node.js dependencies..."
+
+    # Install Next.js app dependencies
+    if check_directory "creative-muse-modern"; then
+        log_info "Installing Next.js app dependencies..."
+        cd /workspace/creative-muse-modern
+
+        # Check if package-lock.json exists and is valid
+        if [[ -f "package-lock.json" ]]; then
+            npm ci --silent
+        else
+            npm install --silent
+        fi
+
+        log_success "Next.js dependencies installed"
+        cd /workspace
+    fi
+
+    # Install root package.json dependencies (if exists)
+    if check_file "package.json"; then
+        log_info "Installing root Node.js dependencies..."
+        npm install --silent
+        log_success "Root Node.js dependencies installed"
+    fi
+
+    # Step 10: Final validation
+    log_step "Performing final validation..."
+
+    local validation_errors=0
+
+    # Check if critical files exist
+    if ! check_file ".env"; then
+        log_error ".env file was not created properly"
+        ((validation_errors++))
+    fi
+
+    if ! check_directory "database"; then
+        log_error "Database directory was not created"
+        ((validation_errors++))
+    fi
+
+    # Check if Python packages are installed
+    if ! python3 -c "import fastapi" 2>/dev/null; then
+        log_error "FastAPI not properly installed"
+        ((validation_errors++))
+    fi
+
+    # Check if Node.js dependencies are installed (if Next.js app exists)
+    if check_directory "creative-muse-modern"; then
+        if [[ ! -d "creative-muse-modern/node_modules" ]]; then
+            log_error "Next.js dependencies not properly installed"
+            ((validation_errors++))
+        fi
+    fi
+
+    if [[ $validation_errors -eq 0 ]]; then
+        log_success "Final validation completed successfully"
+    else
+        log_error "Final validation found $validation_errors error(s)"
+        exit 1
+    fi
+
+    # Step 11: Display completion message
+    echo
+    echo -e "${GREEN}🎉 =============================================="
+    echo "   Setup Complete! Creative Muse AI Ready!"
+    echo "===============================================${NC}"
+    echo
+    echo -e "${CYAN}📋 Quick Start Guide:${NC}"
+    echo "1. Start backend:  ${YELLOW}start-backend${NC}"
+    echo "2. Start frontend: ${YELLOW}start-frontend${NC}"
+    echo "3. Open browser:   ${YELLOW}http://localhost:3000${NC}"
+    echo
+    echo -e "${CYAN}🛠️  Development Tools:${NC}"
+    echo "• Code quality:    ${YELLOW}check-code${NC}"
+    echo "• Run tests:       ${YELLOW}run-tests${NC}"
+    echo "• Database shell:  ${YELLOW}db-shell${NC}"
+    echo "• DB admin tools:  ${YELLOW}start-db-admin${NC}"
+    echo
+    echo -e "${CYAN}🌐 Available URLs:${NC}"
+    echo "• Next.js App:     http://localhost:3000"
+    echo "• Backend API:     http://localhost:8000"
+    echo "• API Docs:        http://localhost:8000/docs"
+    echo "• DB Admin:        http://localhost:8080"
+    echo "• SQLite Web:      http://localhost:8081"
+    echo "• phpLiteAdmin:    http://localhost:8082"
+    echo
+    echo -e "${GREEN}🚀 Happy coding! 🎨🤖${NC}"
+}
+
+# Run main function
+main "$@"
